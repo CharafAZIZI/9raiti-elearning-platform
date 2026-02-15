@@ -1,6 +1,4 @@
-﻿using MicroServiceDotNet.Enums;
-
-namespace MicroServiceDotNet.ViewModels
+﻿namespace MicroServiceDotNet.ViewModels
 {
     using System.ComponentModel.DataAnnotations;
 
@@ -10,9 +8,8 @@ namespace MicroServiceDotNet.ViewModels
         [EmailAddress]
         public string email { get; set; }
 
-        [Required]
         [Phone]
-        public string telephone { get; set; }
+        public string? telephone { get; set; }
 
         [Required]
         [MinLength(6)]
@@ -21,14 +18,13 @@ namespace MicroServiceDotNet.ViewModels
         [Required]
         [Compare("mot_de_passe", ErrorMessage = "Les mots de passe ne correspondent pas")]
         public string confirmation_mot_de_passe { get; set; }
-        [Required]
-        public string nom { get; set; }
+
+        public string? nom { get; set; }
+
+        public string? prenom { get; set; }
 
         [Required]
-        public string prenom { get; set; }
-
-        [Required]
-        public Role role { get; set; }
+        public string role { get; set; }
     }
 
 }

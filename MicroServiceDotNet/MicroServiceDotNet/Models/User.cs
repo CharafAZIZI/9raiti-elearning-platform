@@ -1,5 +1,4 @@
-﻿using MicroServiceDotNet.Enums;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MicroServiceDotNet.Models
 {
@@ -12,7 +11,7 @@ namespace MicroServiceDotNet.Models
         public string mot_de_passe { get; set; }
         public string nom { get; set; }
         public string prenom { get; set; }
-        public Role role { get; set; }
+        public string role { get; set; }
         public bool est_actif { get; set; }
         public bool est_valide { get; set; }
         public DateTime DateCreation { get; set; }
