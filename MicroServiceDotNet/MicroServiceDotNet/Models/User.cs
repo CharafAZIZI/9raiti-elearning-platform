@@ -10,5 +10,7 @@ namespace MicroServiceDotNet.Models
         public string mot_de_passe { get; set; }
         public bool est_actif { get; set; }
         public bool est_valide { get; set; }
+        public string role { get; set; }
+
     }
 }

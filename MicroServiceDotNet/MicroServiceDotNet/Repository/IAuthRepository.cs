@@ -2,7 +2,7 @@
 
 namespace MicroServiceDotNet.Repository
 {
-    public interface IUserRepository
+    public interface IAuthRepository
     {
         User GetByEmail(string email);
     }
