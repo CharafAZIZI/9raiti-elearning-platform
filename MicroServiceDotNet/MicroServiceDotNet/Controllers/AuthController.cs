@@ -1,7 +1,10 @@
 ﻿using MicroServiceDotNet.Filters;
-using MicroServiceDotNet.Models;
+using MicroServiceDotNet.Mappers;
 using MicroServiceDotNet.Services;
+using MicroServiceDotNet.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace MicroServiceDotNet.Controllers
 {
@@ -17,42 +20,50 @@ namespace MicroServiceDotNet.Controllers
             _service = service;
             _blacklist = blacklist;
         }
-
         [HttpPost("login")]
-        public IActionResult Login(User user)
+        public IActionResult Login(LoginRequest request)
         {
-            var result = _service.Login(user.email, user.mot_de_passe);
+            var result = _service.Login(request.email, request.mot_de_passe);
 
             if (!result.Success)
             {
                 if (result.IsBlocked)
                     return StatusCode(403, "Votre compte n’est pas encore autorisé.");
 
-                return Unauthorized("Invalid Credentials");
+                return Unauthorized("Identifiants invalides");
             }
 
-            return Ok(new { user.email, Token = result.Token });
+            // On récupère l'utilisateur via le service
+            var user = _service.GetUserByEmail(request.email);
+
+            // Mapping via le mapper séparé
+            var response = AuthMapper.ToLoginResponse(user, result);
+
+            return Ok(response);
         }
 
         [HttpPost("logout")]
-        [Microsoft.AspNetCore.Authorization.Authorize]
+        [Authorize]
         public IActionResult Logout()
         {
-            var token = Request.Headers["Authorization"]
-                .ToString()
-                .Replace("Bearer ", "");
-
+            var token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
             _blacklist.AddToBlacklist(token);
-
             return Ok("Déconnexion réussie");
         }
 
         [HttpGet("secure")]
+<<<<<<< HEAD
         [Microsoft.AspNetCore.Authorization.Authorize]
+=======
+        [Authorize]
+>>>>>>> 05472f79b6e6886a2b54adb3d4ce892c994dae3d
         [ServiceFilter(typeof(TokenBlacklistFilter))]
         public IActionResult SecureEndpoint()
         {
-            return Ok("You are authenticated");
+            var role = User.FindFirst(ClaimTypes.Role)?.Value;
+            var email = User.FindFirst(ClaimTypes.Email)?.Value;
+
+            return Ok($"Vous êtes connecté : {email} - Rôle : {role}");
         }
-    } 
+    }
 }

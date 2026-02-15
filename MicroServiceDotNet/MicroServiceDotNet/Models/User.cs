@@ -14,7 +14,12 @@ namespace MicroServiceDotNet.Models
         public string role { get; set; }
         public bool est_actif { get; set; }
         public bool est_valide { get; set; }
+<<<<<<< HEAD
         public DateTime DateCreation { get; set; }
         public string? PhotoProfil { get; set; }
+=======
+        public string role { get; set; }
+
+>>>>>>> 05472f79b6e6886a2b54adb3d4ce892c994dae3d
     }
 }
