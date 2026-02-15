@@ -47,7 +47,7 @@ namespace MicroServiceDotNet.Controllers
             return Ok("Déconnexion réussie");
         }
 
-    [HttpGet("secure")]
+        [HttpGet("secure")]
         [Microsoft.AspNetCore.Authorization.Authorize]
         [ServiceFilter(typeof(TokenBlacklistFilter))]
         public IActionResult SecureEndpoint()
