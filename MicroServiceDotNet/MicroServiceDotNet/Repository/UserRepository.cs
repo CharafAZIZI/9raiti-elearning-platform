@@ -41,5 +41,11 @@ namespace MicroServiceDotNet.Repository
             _context.SaveChanges();
         }
 
+        public void Update(User user)
+        {
+            _context.Users.Update(user);
+            _context.SaveChanges();
+        }
+
     }
 }

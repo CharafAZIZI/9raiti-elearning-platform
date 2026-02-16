@@ -17,11 +17,13 @@ namespace MicroServiceDotNet.Controllers
     {
         private readonly IUserRepository _repo;
         private readonly IPasswordService _passwordService;
+        private readonly IAdminUserService _service;
 
-        public UserController(IUserRepository repo, IPasswordService passwordService)
+        public UserController(IUserRepository repo, IPasswordService passwordService, IAdminUserService service)
         {
             _repo = repo;
             _passwordService = passwordService;
+            _service = service;
         }
 
         [HttpPost("createUser")]
@@ -79,5 +81,41 @@ namespace MicroServiceDotNet.Controllers
 
             return StatusCode(204);
         }
+
+        [HttpPut("valider/{id}")]
+        public IActionResult ValiderEnseignant(int id)
+        {
+            var user = _service.ValiderEnseignant(id);
+
+            if (user == null)
+                return StatusCode(404);
+
+            return StatusCode(200, user);
+        }
+
+
+        [HttpPut("activer/{id}")]
+        public IActionResult Activer(int id)
+        {
+            var user = _service.ChangerEtatCompte(id, true);
+
+            if (user == null)
+                return StatusCode(404);
+
+            return StatusCode(200, user);
+        }
+
+
+        [HttpPut("suspendre/{id}")]
+        public IActionResult Suspendre(int id)
+        {
+            var user = _service.ChangerEtatCompte(id, false);
+
+            if (user == null)
+                return StatusCode(404);
+
+            return StatusCode(200, user);
+        }
+
     }
 }
