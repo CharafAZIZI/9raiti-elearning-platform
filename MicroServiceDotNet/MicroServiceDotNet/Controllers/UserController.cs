@@ -26,7 +26,7 @@ namespace MicroServiceDotNet.Controllers
             _service = service;
         }
 
-        [HttpPost("createUser")]
+        [HttpPost("create")]
         public IActionResult Create(CreateUserVM vm)    
         {
             if (!ModelState.IsValid)
@@ -106,7 +106,7 @@ namespace MicroServiceDotNet.Controllers
         }
 
 
-        [HttpPut("suspendre/{id}")]
+        [HttpPut("blocker/{id}")]
         public IActionResult Suspendre(int id)
         {
             var user = _service.ChangerEtatCompte(id, false);

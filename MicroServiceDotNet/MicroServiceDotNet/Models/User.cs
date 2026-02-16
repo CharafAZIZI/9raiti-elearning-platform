@@ -12,8 +12,8 @@ namespace MicroServiceDotNet.Models
         public string nom { get; set; }
         public string prenom { get; set; }
         public string role { get; set; }
-        public bool est_actif { get; set; }
-        public bool est_valide { get; set; }
+        public bool est_actif { get; set; } = true;
+        public bool est_valide { get; set; } = false;
         [NotMapped]
         public DateTime DateCreation { get; set; }
         [NotMapped]
