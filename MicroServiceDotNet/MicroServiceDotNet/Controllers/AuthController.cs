@@ -52,11 +52,7 @@ namespace MicroServiceDotNet.Controllers
         }
 
         [HttpGet("secure")]
-<<<<<<< HEAD
-        [Microsoft.AspNetCore.Authorization.Authorize]
-=======
         [Authorize]
->>>>>>> 05472f79b6e6886a2b54adb3d4ce892c994dae3d
         [ServiceFilter(typeof(TokenBlacklistFilter))]
         public IActionResult SecureEndpoint()
         {

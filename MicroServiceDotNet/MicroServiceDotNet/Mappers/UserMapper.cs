@@ -15,6 +15,8 @@ namespace MicroServiceDotNet.Mappers
                 nom = vm.nom,
                 prenom = vm.prenom,
                 role = vm.role,
+                est_actif = vm.est_actif,
+                est_valide = vm.est_valide
             };
         }
 

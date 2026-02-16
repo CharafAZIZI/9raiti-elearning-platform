@@ -25,7 +25,7 @@ namespace MicroServiceDotNet.Controllers
         }
 
         [HttpPost("createUser")]
-        public IActionResult Create(CreateUserVM vm)
+        public IActionResult Create(CreateUserVM vm)    
         {
             if (!ModelState.IsValid)
                 return StatusCode(400,ModelState);

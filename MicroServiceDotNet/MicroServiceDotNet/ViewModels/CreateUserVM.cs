@@ -25,6 +25,10 @@
 
         [Required]
         public string role { get; set; }
+        [Required]
+        public bool est_actif { get; set; }
+        [Required]
+        public bool est_valide { get; set; }
     }
 
 }

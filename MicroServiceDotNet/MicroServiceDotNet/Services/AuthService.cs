@@ -10,10 +10,10 @@ namespace MicroServiceDotNet.Services
 {
     public class AuthService : IAuthService
     {
-        private readonly IAuthRepository _repo;
+        private readonly IUserRepository _repo;
         private readonly IConfiguration _config;
 
-        public AuthService(IAuthRepository repo, IConfiguration config)
+        public AuthService(IUserRepository repo, IConfiguration config)
         {
             _repo = repo;
             _config = config;
@@ -100,14 +100,10 @@ namespace MicroServiceDotNet.Services
                 Expiration = expiration
             };
         }
-<<<<<<< HEAD
-=======
 
         public User GetUserByEmail(string email)
         {
             return _repo.GetByEmail(email);
         }
-
->>>>>>> 05472f79b6e6886a2b54adb3d4ce892c994dae3d
     }
 }

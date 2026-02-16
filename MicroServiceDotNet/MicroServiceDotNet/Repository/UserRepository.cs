@@ -3,11 +3,11 @@ using MicroServiceDotNet.Models;
 
 namespace MicroServiceDotNet.Repository
 {
-    public class AuthRepository : IAuthRepository
+    public class UserRepository : IUserRepository
     {
         private readonly AppDbContext _context;
 
-        public AuthRepository(AppDbContext context)
+        public UserRepository(AppDbContext context)
         {
             _context = context;
         }
@@ -20,6 +20,7 @@ namespace MicroServiceDotNet.Repository
         public User AddUser(User user)
         {
             _context.Users.Add(user);
+            _context.SaveChanges();
             return user;
         }
 
