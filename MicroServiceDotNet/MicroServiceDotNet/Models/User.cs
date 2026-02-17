@@ -23,5 +23,9 @@ namespace MicroServiceDotNet.Models
         [NotMapped]
         public string? PhotoProfil { get; set; }
 
+        public Apprenant? Apprenant { get; set; }
+        public Enseignant? Enseignant { get; set; }
+
+
     }
 }
