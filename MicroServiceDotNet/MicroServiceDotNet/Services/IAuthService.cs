@@ -7,5 +7,6 @@ namespace MicroServiceDotNet.Services
     {
         LoginResult Login(string email, string mot_de_passe);
         User GetUserByEmail(string email);
+        void Inscrire(CreateUserVM InscVM);
     }
 }

@@ -15,5 +15,19 @@ namespace MicroServiceDotNet.Mappers
                 Expiration = result.Expiration
             };
         }
+
+        public static User ToEntity(CreateUserVM InscVM)
+        {
+            return new User
+            {
+                nom = InscVM.nom,
+                prenom = InscVM.prenom,
+                email = InscVM.email,
+                telephone = InscVM.telephone,
+                role = InscVM.role,
+                est_actif = true,
+                DateCreation = DateTime.UtcNow
+            };
+        }
     }
 }

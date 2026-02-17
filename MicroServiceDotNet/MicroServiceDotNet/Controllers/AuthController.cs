@@ -20,8 +20,16 @@ namespace MicroServiceDotNet.Controllers
             _service = service;
             _blacklist = blacklist;
         }
+
+        [HttpPost("inscription")]
+        public IActionResult Inscrire([FromBody] CreateUserVM InscVM)
+        {
+            _service.Inscrire(InscVM);
+            return Ok("Inscription réussie");
+        }
+
         [HttpPost("login")]
-        public IActionResult Login(LoginRequest request)
+        public IActionResult Login([FromBody] LoginRequest request)
         {
             var result = _service.Login(request.email, request.mot_de_passe);
 
@@ -61,5 +69,7 @@ namespace MicroServiceDotNet.Controllers
 
             return Ok($"Vous êtes connecté : {email} - Rôle : {role}");
         }
+
+        
     }
 }
