@@ -30,10 +30,10 @@ public class ProfileController : ControllerBase
 
     [Authorize]
     [HttpPatch("me")]
-    public IActionResult UpdateMyProfile([FromBody] UpdateProfileUserVM dto)
+    public IActionResult UpdateMyProfile([FromBody] UpdateProfileUserVM UpdateVM)
     {
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-        var updatedProfile = _service.UpdateUser(userId, dto);
+        var updatedProfile = _service.UpdateUser(userId, UpdateVM);
         return Ok(updatedProfile);
     }
 

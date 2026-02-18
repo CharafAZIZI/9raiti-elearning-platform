@@ -78,7 +78,7 @@ public class ProfileService : IProfileService
         };
     }
 
-    public object UpdateUser(int userId, UpdateProfileUserVM dto)
+    public object UpdateUser(int userId, UpdateProfileUserVM UpdateVM)
     {
         var user = _context.Users
             .Include(u => u.Apprenant)
@@ -89,23 +89,23 @@ public class ProfileService : IProfileService
             throw new Exception("Utilisateur introuvable");
 
         // Mise à jour des champs standards
-        if (dto.email != null) user.email = dto.email;
-        if (dto.mot_de_passe != null) user.mot_de_passe = dto.mot_de_passe;
-        if (dto.telephone != null) user.telephone = dto.telephone;
-        if (dto.nom != null) user.nom = dto.nom;
-        if (dto.prenom != null) user.prenom = dto.prenom;
+        if (UpdateVM.email != null) user.email = UpdateVM.email;
+        if (UpdateVM.mot_de_passe != null) user.mot_de_passe = UpdateVM.mot_de_passe;
+        if (UpdateVM.telephone != null) user.telephone = UpdateVM.telephone;
+        if (UpdateVM.nom != null) user.nom = UpdateVM.nom;
+        if (UpdateVM.prenom != null) user.prenom = UpdateVM.prenom;
 
         // Mise à jour détails spécifiques
         if (user.role == "APPRENANT" && user.Apprenant != null)
         {
-            if (dto.niveau_scolaire != null) user.Apprenant.niveau_scolaire = dto.niveau_scolaire;
-            if (dto.statut != null) user.Apprenant.statut = dto.statut;
-            if (dto.score.HasValue) user.Apprenant.score = dto.score.Value;
+            if (UpdateVM.niveau_scolaire != null) user.Apprenant.niveau_scolaire = UpdateVM.niveau_scolaire;
+            if (UpdateVM.statut != null) user.Apprenant.statut = UpdateVM.statut;
+            if (UpdateVM.score.HasValue) user.Apprenant.score = UpdateVM.score.Value;
         }
 
         if (user.role == "ENSEIGNANT" && user.Enseignant != null)
         {
-            if (dto.specialite != null) user.Enseignant.specialite = dto.specialite;
+            if (UpdateVM.specialite != null) user.Enseignant.specialite = UpdateVM.specialite;
         }
 
         _context.SaveChanges();
