@@ -21,6 +21,7 @@ namespace MicroServiceDotNet.Controllers
             _blacklist = blacklist;
         }
 
+        // INSCRIPTION
         [HttpPost("inscription")]
         public IActionResult Inscrire([FromBody] CreateUserVM InscVM)
         {
@@ -28,6 +29,7 @@ namespace MicroServiceDotNet.Controllers
             return Ok("Inscription réussie");
         }
 
+        // LOGIN
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginRequest request)
         {
@@ -41,21 +43,24 @@ namespace MicroServiceDotNet.Controllers
                 return Unauthorized("Identifiants invalides");
             }
 
-            // On récupère l'utilisateur via le service
             var user = _service.GetUserByEmail(request.email);
 
-            // Mapping via le mapper séparé
             var response = AuthMapper.ToLoginResponse(user, result);
 
             return Ok(response);
         }
 
+        // LOGOUT
         [HttpPost("logout")]
         [Authorize]
         public IActionResult Logout()
         {
-            var token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var token = Request.Headers["Authorization"]
+                .ToString()
+                .Replace("Bearer ", "");
+
             _blacklist.AddToBlacklist(token);
+
             return Ok("Déconnexion réussie");
         }
 
@@ -71,5 +76,17 @@ namespace MicroServiceDotNet.Controllers
         }
 
         
+        // AJOUT : CONFIRMATION EMAIL
+   
+        //[HttpGet("confirm-email")]
+        //public IActionResult ConfirmEmail(string token)
+        //{
+        //    var result = _service.ConfirmEmail(token);
+
+        //    if (!result)
+        //        return BadRequest("Token invalide ou expiré");
+
+        //    return Ok("Email confirmé avec succès");
+        //}
     }
 }

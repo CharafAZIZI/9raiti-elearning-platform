@@ -10,6 +10,7 @@ namespace MicroServiceDotNet.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int id { get; set; }
         public string? email { get; set; }
+   
         public string? mot_de_passe { get; set; }
         public string? telephone { get; set; }
         public string? nom { get; set; }
@@ -18,6 +19,9 @@ namespace MicroServiceDotNet.Models
 
         public bool est_actif { get; set; } = true;
         public bool est_valide { get; set; } = false;
+        //public bool email_confirme { get; set; } = false;
+        //public string email_token { get; set; }
+
         [NotMapped]
         public DateTime DateCreation { get; set; }
         [NotMapped]

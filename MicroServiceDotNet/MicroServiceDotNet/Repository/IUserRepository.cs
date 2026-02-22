@@ -11,8 +11,7 @@ namespace MicroServiceDotNet.Repository
         void Delete(int id);
         void Update(User user);
 
-        //void Ajouter(User user);
-        //void Save();
-
+   
+       
     }
 }
