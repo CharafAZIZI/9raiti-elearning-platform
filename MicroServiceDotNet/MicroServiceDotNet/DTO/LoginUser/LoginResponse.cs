@@ -1,4 +1,4 @@
-﻿namespace MicroServiceDotNet.ViewModels
+﻿namespace MicroServiceDotNet.DTO.LoginUser
 {
     public class LoginResponse
     {

@@ -1,4 +1,4 @@
-﻿namespace MicroServiceDotNet.Services
+﻿namespace MicroServiceDotNet.Services.TokenBlacklistService
 {
     public class TokenBlacklistService : ITokenBlacklistService
     {

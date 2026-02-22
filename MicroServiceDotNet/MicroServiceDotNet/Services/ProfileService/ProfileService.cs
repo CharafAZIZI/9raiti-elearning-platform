@@ -1,16 +1,19 @@
 ﻿using MicroServiceDotNet.Data;
+using MicroServiceDotNet.DTO.ManageProfileUser;
 using MicroServiceDotNet.Models;
-using MicroServiceDotNet.Services;
-using MicroServiceDotNet.ViewModels;
+using MicroServiceDotNet.Services.PasswordService;
+using MicroServiceDotNet.Services.ProfileService;
 using Microsoft.EntityFrameworkCore;
 
 public class ProfileService : IProfileService
 {
     private readonly AppDbContext _context;
+    private readonly IPasswordService _passwordService;
 
-    public ProfileService(AppDbContext context)
+    public ProfileService(AppDbContext context, IPasswordService passwordService)
     {
         _context = context;
+        _passwordService = passwordService;
     }
 
     public object GetMyProfile(int userId)
@@ -38,7 +41,6 @@ public class ProfileService : IProfileService
                 details = new
                 {
                     user.Apprenant.niveau_scolaire,
-                    user.Apprenant.date_inscription,
                     user.Apprenant.statut,
                     user.Apprenant.score
                 }
@@ -90,7 +92,8 @@ public class ProfileService : IProfileService
 
         // Mise à jour des champs standards
         if (UpdateVM.email != null) user.email = UpdateVM.email;
-        if (UpdateVM.mot_de_passe != null) user.mot_de_passe = UpdateVM.mot_de_passe;
+        if (UpdateVM.mot_de_passe != null)
+            user.mot_de_passe = _passwordService.HashPassword(user, UpdateVM.mot_de_passe);
         if (UpdateVM.telephone != null) user.telephone = UpdateVM.telephone;
         if (UpdateVM.nom != null) user.nom = UpdateVM.nom;
         if (UpdateVM.prenom != null) user.prenom = UpdateVM.prenom;

@@ -46,15 +46,5 @@ namespace MicroServiceDotNet.Repository
             _context.Users.Update(user);
             _context.SaveChanges();
         }
-
-        public void Ajouter(User user)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Save()
-        {
-            throw new NotImplementedException();
-        }
     }
 }

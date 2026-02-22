@@ -1,5 +1,5 @@
-﻿using MicroServiceDotNet.Services;
-using MicroServiceDotNet.ViewModels;
+﻿using MicroServiceDotNet.DTO.ManageProfileUser;
+using MicroServiceDotNet.Services.ProfileService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -16,7 +16,7 @@ public class ProfileController : ControllerBase
         _service = service;
     }
 
-    [HttpGet("me")]
+    [HttpGet]
     public IActionResult GetMyProfile()
     {
         var userId = int.Parse(
@@ -29,7 +29,7 @@ public class ProfileController : ControllerBase
     }
 
     [Authorize]
-    [HttpPatch("me")]
+    [HttpPut]
     public IActionResult UpdateMyProfile([FromBody] UpdateProfileUserVM UpdateVM)
     {
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);

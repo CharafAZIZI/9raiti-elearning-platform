@@ -1,5 +1,6 @@
-﻿using MicroServiceDotNet.Models;
-using MicroServiceDotNet.ViewModels;
+﻿using MicroServiceDotNet.DTO.LoginUser;
+using MicroServiceDotNet.DTO.RegisterUser;
+using MicroServiceDotNet.Models;
 
 namespace MicroServiceDotNet.Mappers
 {
@@ -16,7 +17,7 @@ namespace MicroServiceDotNet.Mappers
             };
         }
 
-        public static User ToEntity(CreateUserVM InscVM)
+        public static User ToEntity(RegisterUserVM InscVM)
         {
             return new User
             {

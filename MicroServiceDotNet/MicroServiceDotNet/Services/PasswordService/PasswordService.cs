@@ -1,7 +1,7 @@
 ﻿using MicroServiceDotNet.Models;
 using Microsoft.AspNetCore.Identity;
 
-namespace MicroServiceDotNet.Services
+namespace MicroServiceDotNet.Services.PasswordService
 {
     public class PasswordService : IPasswordService
     {

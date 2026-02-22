@@ -1,6 +1,6 @@
 ﻿using MicroServiceDotNet.Models;
 
-namespace MicroServiceDotNet.Services
+namespace MicroServiceDotNet.Services.PasswordService
 {
     public interface IPasswordService
     {

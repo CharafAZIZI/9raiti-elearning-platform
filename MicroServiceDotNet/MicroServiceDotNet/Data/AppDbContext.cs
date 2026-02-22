@@ -15,12 +15,14 @@ namespace MicroServiceDotNet.Data
             modelBuilder.Entity<User>()
                 .HasOne(u => u.Apprenant)
                 .WithOne(a => a.User)
-                .HasForeignKey<Apprenant>(a => a.id);
+                .HasForeignKey<Apprenant>(a => a.id)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<User>()
                 .HasOne(u => u.Enseignant)
                 .WithOne(e => e.User)
-                .HasForeignKey<Enseignant>(e => e.id);
+                .HasForeignKey<Enseignant>(e => e.id)
+                .OnDelete(DeleteBehavior.Cascade);
         }
 
     }

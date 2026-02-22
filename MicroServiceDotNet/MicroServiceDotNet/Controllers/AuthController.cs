@@ -1,7 +1,10 @@
-﻿using MicroServiceDotNet.Filters;
+﻿using MicroServiceDotNet.DTO.LoginUser;
+using MicroServiceDotNet.DTO.RegisterUser;
+using MicroServiceDotNet.Filters;
 using MicroServiceDotNet.Mappers;
-using MicroServiceDotNet.Services;
-using MicroServiceDotNet.ViewModels;
+using MicroServiceDotNet.Repository;
+using MicroServiceDotNet.Services.AuthService;
+using MicroServiceDotNet.Services.TokenBlacklistService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -12,19 +15,25 @@ namespace MicroServiceDotNet.Controllers
     [Route("api/auth")]
     public class AuthController : ControllerBase
     {
+        private readonly IUserRepository _repo;
         private readonly IAuthService _service;
         private readonly ITokenBlacklistService _blacklist;
 
-        public AuthController(IAuthService service, ITokenBlacklistService blacklist)
+        public AuthController(IUserRepository repo,IAuthService service, ITokenBlacklistService blacklist)
         {
+            _repo = repo;
             _service = service;
             _blacklist = blacklist;
         }
 
-        [HttpPost("inscription")]
-        public IActionResult Inscrire([FromBody] CreateUserVM InscVM)
+        [HttpPost]
+        public IActionResult Inscrire([FromBody] RegisterUserVM vm)
         {
-            _service.Inscrire(InscVM);
+            var result = _service.Inscrire(vm);
+
+            if (!result.Success)
+                return Conflict(result.Message);
+
             return Ok("Inscription réussie");
         }
 
@@ -42,7 +51,7 @@ namespace MicroServiceDotNet.Controllers
             }
 
             // On récupère l'utilisateur via le service
-            var user = _service.GetUserByEmail(request.email);
+            var user = _repo.GetByEmail(request.email);
 
             // Mapping via le mapper séparé
             var response = AuthMapper.ToLoginResponse(user, result);
@@ -59,7 +68,7 @@ namespace MicroServiceDotNet.Controllers
             return Ok("Déconnexion réussie");
         }
 
-        [HttpGet("secure")]
+        [HttpGet]
         [Authorize]
         [ServiceFilter(typeof(TokenBlacklistFilter))]
         public IActionResult SecureEndpoint()

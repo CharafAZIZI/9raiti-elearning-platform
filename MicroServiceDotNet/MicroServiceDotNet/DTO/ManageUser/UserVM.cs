@@ -1,4 +1,4 @@
-﻿namespace MicroServiceDotNet.ViewModels
+﻿namespace MicroServiceDotNet.DTO.ManageUser
 {
     public class UserVM
     {

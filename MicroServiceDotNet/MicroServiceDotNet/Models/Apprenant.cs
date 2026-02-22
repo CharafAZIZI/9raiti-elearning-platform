@@ -11,7 +11,6 @@ namespace MicroServiceDotNet.Models
         public int id { get; set; }
 
         public string? niveau_scolaire { get; set; }
-        public DateTime? date_inscription { get; set; }
         public string? statut { get; set; }
         public double? score { get; set; }
 

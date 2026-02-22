@@ -1,7 +1,13 @@
 ﻿using MicroServiceDotNet.Data;
 using MicroServiceDotNet.Filters;
 using MicroServiceDotNet.Repository;
-using MicroServiceDotNet.Services;
+using MicroServiceDotNet.Services.AdminUserService;
+using MicroServiceDotNet.Services.AuthService;
+using MicroServiceDotNet.Services.JwtService;
+using MicroServiceDotNet.Services.PasswordService;
+using MicroServiceDotNet.Services.ProfileService;
+using MicroServiceDotNet.Services.TokenBlacklistService;
+using MicroServiceDotNet.Services.UserRoleService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -19,6 +25,8 @@ builder.Services.AddScoped<TokenBlacklistFilter>();
 builder.Services.AddScoped<IPasswordService, PasswordService>();
 builder.Services.AddScoped<IAdminUserService, AdminUserService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
+builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<IUserRoleService, UserRoleService>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

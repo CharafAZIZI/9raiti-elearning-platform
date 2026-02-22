@@ -1,6 +1,6 @@
-﻿using MicroServiceDotNet.ViewModels;
+﻿using MicroServiceDotNet.DTO.ManageProfileUser;
 
-namespace MicroServiceDotNet.Services
+namespace MicroServiceDotNet.Services.ProfileService
 {
     public interface IProfileService
     {
