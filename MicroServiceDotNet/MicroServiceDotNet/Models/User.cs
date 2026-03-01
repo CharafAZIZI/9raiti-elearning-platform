@@ -24,6 +24,9 @@ namespace MicroServiceDotNet.Models
         public Apprenant? Apprenant { get; set; }
         public Enseignant? Enseignant { get; set; }
 
+        public string? provider { get; set; }
+        public string? google_id { get; set; }
+
 
     }
 }

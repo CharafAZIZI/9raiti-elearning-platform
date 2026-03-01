@@ -1,4 +1,5 @@
-﻿using MicroServiceDotNet.DTO.LoginUser;
+﻿using MicroServiceDotNet.DTO.GoogleApi;
+using MicroServiceDotNet.DTO.LoginUser;
 using MicroServiceDotNet.DTO.RegisterUser;
 using MicroServiceDotNet.Filters;
 using MicroServiceDotNet.Mappers;
@@ -19,7 +20,7 @@ namespace MicroServiceDotNet.Controllers
         private readonly IAuthService _service;
         private readonly ITokenBlacklistService _blacklist;
 
-        public AuthController(IUserRepository repo,IAuthService service, ITokenBlacklistService blacklist)
+        public AuthController(IUserRepository repo, IAuthService service, ITokenBlacklistService blacklist)
         {
             _repo = repo;
             _service = service;
@@ -30,10 +31,7 @@ namespace MicroServiceDotNet.Controllers
         public IActionResult Inscrire([FromBody] RegisterUserVM vm)
         {
             var result = _service.Inscrire(vm);
-
-            if (!result.Success)
-                return Conflict(result.Message);
-
+            if (!result.Success) return Conflict(result.Message);
             return Ok("Inscription réussie");
         }
 
@@ -41,22 +39,25 @@ namespace MicroServiceDotNet.Controllers
         public IActionResult Login([FromBody] LoginRequest request)
         {
             var result = _service.Login(request.email, request.mot_de_passe);
-
             if (!result.Success)
             {
-                if (result.IsBlocked)
-                    return StatusCode(403, "Votre compte n’est pas encore autorisé.");
-
+                if (result.IsBlocked) return StatusCode(403, "Compte non autorisé");
                 return Unauthorized("Identifiants invalides");
             }
 
-            // On récupère l'utilisateur via le service
             var user = _repo.GetByEmail(request.email);
-
-            // Mapping via le mapper séparé
             var response = AuthMapper.ToLoginResponse(user, result);
-
             return Ok(response);
+        }
+
+        [HttpPost("google-login")]
+        public IActionResult GoogleLogin([FromBody] GoogleLoginRequest request)
+        {
+            var result = _service.LoginWithGoogle(request.IdToken);
+            if (!result.Success)
+                return BadRequest(result);
+
+            return Ok(result);
         }
 
         [HttpPost("logout")]
@@ -67,18 +68,5 @@ namespace MicroServiceDotNet.Controllers
             _blacklist.AddToBlacklist(token);
             return Ok("Déconnexion réussie");
         }
-
-        [HttpGet]
-        [Authorize]
-        [ServiceFilter(typeof(TokenBlacklistFilter))]
-        public IActionResult SecureEndpoint()
-        {
-            var role = User.FindFirst(ClaimTypes.Role)?.Value;
-            var email = User.FindFirst(ClaimTypes.Email)?.Value;
-
-            return Ok($"Vous êtes connecté : {email} - Rôle : {role}");
-        }
-
-        
     }
 }

@@ -30,5 +30,23 @@ namespace MicroServiceDotNet.Mappers
                 DateCreation = DateTime.UtcNow
             };
         }
+
+        public static User FromGooglePayload(Google.Apis.Auth.GoogleJsonWebSignature.Payload payload)
+        {
+            return new User
+            {
+                nom = payload.GivenName,
+                prenom = payload.FamilyName,
+                email = payload.Email,
+                google_id = payload.Subject,
+                provider = "Google",
+                role = "APPRENANT",
+                est_actif = true,
+                est_valide = true,
+                mot_de_passe = Guid.NewGuid().ToString(),
+                DateCreation = DateTime.UtcNow
+            };
+        }
+
     }
 }
