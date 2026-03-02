@@ -10,8 +10,7 @@ namespace MicroServiceDotNet.Repository
         User GetById(int id);
         void Delete(int id);
         void Update(User user);
+        User GetByConfirmationToken(string token);
 
-   
-       
     }
 }

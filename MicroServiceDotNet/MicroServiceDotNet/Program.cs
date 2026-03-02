@@ -1,7 +1,14 @@
 ﻿using MicroServiceDotNet.Data;
 using MicroServiceDotNet.Filters;
 using MicroServiceDotNet.Repository;
-using MicroServiceDotNet.Services;
+using MicroServiceDotNet.Services.AdminUserService;
+using MicroServiceDotNet.Services.AuthService;
+using MicroServiceDotNet.Services.EmailService;
+using MicroServiceDotNet.Services.JwtService;
+using MicroServiceDotNet.Services.PasswordService;
+using MicroServiceDotNet.Services.ProfileService;
+using MicroServiceDotNet.Services.TokenBlacklistService;
+using MicroServiceDotNet.Services.UserRoleService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -18,10 +25,10 @@ builder.Services.AddSingleton<ITokenBlacklistService, TokenBlacklistService>();
 builder.Services.AddScoped<TokenBlacklistFilter>();
 builder.Services.AddScoped<IPasswordService, PasswordService>();
 builder.Services.AddScoped<IAdminUserService, AdminUserService>();
+builder.Services.AddScoped<IProfileService, ProfileService>();
+builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<IUserRoleService, UserRoleService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
-
-
-
 
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -47,6 +54,7 @@ var app = builder.Build();
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseStaticFiles();
 
 app.MapControllers();
 
@@ -58,38 +66,3 @@ app.Run();
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-//var builder = WebApplication.CreateBuilder(args);
-
-//// Add services to the container.
-
-//builder.Services.AddControllers();
-//// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-//builder.Services.AddOpenApi();
-
-//var app = builder.Build();
-
-//// Configure the HTTP request pipeline.
-//if (app.Environment.IsDevelopment())
-//{
-//    app.MapOpenApi();
-//}
-
-//app.UseHttpsRedirection();
-
-//app.UseAuthorization();
-
-//app.MapControllers();
-
-//app.Run();

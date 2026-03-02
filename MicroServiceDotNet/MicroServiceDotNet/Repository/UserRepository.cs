@@ -47,6 +47,13 @@ namespace MicroServiceDotNet.Repository
             _context.SaveChanges();
         }
 
+        //  AJOUT pour confirmation email
+        public User GetByConfirmationToken(string token)
+        {
+            return _context.Users
+                .FirstOrDefault(u => u.EmailConfirmationToken == token);
+        }
+
         public void Ajouter(User user)
         {
             throw new NotImplementedException();
@@ -56,7 +63,5 @@ namespace MicroServiceDotNet.Repository
         {
             throw new NotImplementedException();
         }
-
-       
     }
 }

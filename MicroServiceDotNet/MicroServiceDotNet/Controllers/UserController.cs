@@ -1,121 +1,103 @@
-﻿using MicroServiceDotNet.Data;
+﻿using MicroServiceDotNet.DTO.ManageUser;
+using MicroServiceDotNet.Filters;
 using MicroServiceDotNet.Mappers;
-using MicroServiceDotNet.Models;
 using MicroServiceDotNet.Repository;
-using MicroServiceDotNet.Services;
-using MicroServiceDotNet.ViewModels;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
+using MicroServiceDotNet.Services.AdminUserService;
+using MicroServiceDotNet.Services.PasswordService;
+using MicroServiceDotNet.Services.UserRoleService;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MicroServiceDotNet.Controllers
 {
     [ApiController]
     [Route("api/users")]
-    [Authorize(Roles = "ADMIN")]
+    [TypeFilter(typeof(RoleFilter), Arguments = new object[] { new string[] { "ADMIN" } })]
     public class UserController : ControllerBase
     {
-        private readonly IUserRepository _repo;
-        private readonly IPasswordService _passwordService;
         private readonly IAdminUserService _service;
 
-        public UserController(IUserRepository repo, IPasswordService passwordService, IAdminUserService service)
+        public UserController(IAdminUserService service)
         {
-            _repo = repo;
-            _passwordService = passwordService;
             _service = service;
         }
 
-        [HttpPost("create")]
-        public IActionResult Create(CreateUserVM vm)    
+        [HttpPost]
+        public IActionResult Create(CreateUserVM vm)
         {
             if (!ModelState.IsValid)
-                return StatusCode(400,ModelState);
+                return BadRequest(ModelState);
 
-            var existingUser = _repo.GetByEmail(vm.email);
-            if (existingUser != null)
-                return StatusCode(409);
-
-            var user = UserMapper.ToModel(vm);
-
-            user.mot_de_passe = _passwordService.HashPassword(user, vm.mot_de_passe);
-
-            var createdUser = _repo.AddUser(user);
-
-            createdUser.mot_de_passe = null;
-
-            return StatusCode(201, createdUser);
+            try
+            {
+                var user = _service.CreateUser(vm);
+                user.mot_de_passe = null;
+                return CreatedAtAction(nameof(GetById), new { id = user.id }, user);
+            }
+            catch (Exception ex)
+            {
+                return Conflict(ex.Message);
+            }
         }
 
-        [HttpGet("getAll")]
+        [HttpGet]
         public IActionResult GetAll()
         {
-            var users = _repo.GetAll();
-
-            if (users == null || users.Count == 0)
-                return StatusCode(404);
-
-            return StatusCode(200, users);
+            var users = _service.GetAll();
+            return Ok(users);
         }
 
-        [HttpGet("getById/{id}")]
+        [HttpGet("{id}")]
         public IActionResult GetById(int id)
         {
-            var user = _repo.GetById(id);
-
+            var user = _service.GetById(id);
             if (user == null)
-                return StatusCode(404);
+                return NotFound();
 
-            return StatusCode(200, user);
+            return Ok(user);
         }
 
-        [HttpDelete("delete/{id}")]
+        [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-            var user = _repo.GetById(id);
-
-            if (user == null)
-                return StatusCode(404);
-
-            _repo.Delete(id);
-
-            return StatusCode(204);
+            try
+            {
+                _service.Delete(id);
+                return NoContent();
+            }
+            catch
+            {
+                return NotFound();
+            }
         }
 
-        [HttpPut("valider/{id}")]
+        [HttpPatch("valider/{id}")]
         public IActionResult ValiderEnseignant(int id)
         {
             var user = _service.ValiderEnseignant(id);
-
             if (user == null)
-                return StatusCode(404);
+                return NotFound();
 
-            return StatusCode(200, user);
+            return Ok(user);
         }
 
-
-        [HttpPut("activer/{id}")]
+        [HttpPatch("activer/{id}")]
         public IActionResult Activer(int id)
         {
             var user = _service.ChangerEtatCompte(id, true);
-
             if (user == null)
-                return StatusCode(404);
+                return NotFound();
 
-            return StatusCode(200, user);
+            return Ok(user);
         }
 
-
-        [HttpPut("blocker/{id}")]
+        [HttpPatch("blocker/{id}")]
         public IActionResult Suspendre(int id)
         {
             var user = _service.ChangerEtatCompte(id, false);
-
             if (user == null)
-                return StatusCode(404);
+                return NotFound();
 
-            return StatusCode(200, user);
+            return Ok(user);
         }
-
     }
 }

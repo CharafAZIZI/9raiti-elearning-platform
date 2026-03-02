@@ -1,7 +1,10 @@
-﻿using MicroServiceDotNet.Filters;
+﻿using MicroServiceDotNet.DTO.LoginUser;
+using MicroServiceDotNet.DTO.RegisterUser;
+using MicroServiceDotNet.Filters;
 using MicroServiceDotNet.Mappers;
-using MicroServiceDotNet.Services;
-using MicroServiceDotNet.ViewModels;
+using MicroServiceDotNet.Repository;
+using MicroServiceDotNet.Services.AuthService;
+using MicroServiceDotNet.Services.TokenBlacklistService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -12,23 +15,30 @@ namespace MicroServiceDotNet.Controllers
     [Route("api/auth")]
     public class AuthController : ControllerBase
     {
+        private readonly IUserRepository _repo;
         private readonly IAuthService _service;
         private readonly ITokenBlacklistService _blacklist;
 
-        public AuthController(IAuthService service, ITokenBlacklistService blacklist)
+        public AuthController(
+            IUserRepository repo,
+            IAuthService service,
+            ITokenBlacklistService blacklist)
         {
+            _repo = repo;
             _service = service;
             _blacklist = blacklist;
         }
-
         // INSCRIPTION
         [HttpPost("inscription")]
-        public IActionResult Inscrire([FromBody] CreateUserVM InscVM)
+        public IActionResult Inscrire([FromBody] RegisterUserVM vm)
         {
-            _service.Inscrire(InscVM);
-            return Ok("Inscription réussie");
-        }
+            var result = _service.Inscrire(vm);
 
+            if (!result.Success)
+                return Conflict(result.Message);
+
+            return Ok("Inscription réussie. Vérifiez votre email.");
+        }
         // LOGIN
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginRequest request)
@@ -43,13 +53,37 @@ namespace MicroServiceDotNet.Controllers
                 return Unauthorized("Identifiants invalides");
             }
 
-            var user = _service.GetUserByEmail(request.email);
+            // On récupère l'utilisateur
+            var user = _repo.GetByEmail(request.email);
+
+            //  AJOUT : Vérification Email
+            if (user != null && !user.EmailConfirmed)
+            {
+                return StatusCode(403, "Veuillez confirmer votre email avant de vous connecter.");
+            }
 
             var response = AuthMapper.ToLoginResponse(user, result);
 
             return Ok(response);
         }
+        // CONFIRMATION EMAIL
+        [HttpGet("confirm-email")]
+        public IActionResult ConfirmEmail(string token)
+        {
+            if (string.IsNullOrEmpty(token))
+                return Redirect("/email-templates/invalide-token.html");
 
+            var user = _repo.GetByConfirmationToken(token);
+
+            if (user == null)
+                return Redirect("/email-templates/invalide-token.html");
+
+            user.EmailConfirmed = true;
+            user.EmailConfirmationToken = null;
+
+            _repo.Update(user);
+            return Redirect("/email-templates/email-confirmed.html");
+        }
         // LOGOUT
         [HttpPost("logout")]
         [Authorize]
@@ -63,8 +97,8 @@ namespace MicroServiceDotNet.Controllers
 
             return Ok("Déconnexion réussie");
         }
-
-        [HttpGet("secure")]
+        // ENDPOINT SECURISE
+        [HttpGet]
         [Authorize]
         [ServiceFilter(typeof(TokenBlacklistFilter))]
         public IActionResult SecureEndpoint()
@@ -74,19 +108,5 @@ namespace MicroServiceDotNet.Controllers
 
             return Ok($"Vous êtes connecté : {email} - Rôle : {role}");
         }
-
-        
-        // AJOUT : CONFIRMATION EMAIL
-   
-        //[HttpGet("confirm-email")]
-        //public IActionResult ConfirmEmail(string token)
-        //{
-        //    var result = _service.ConfirmEmail(token);
-
-        //    if (!result)
-        //        return BadRequest("Token invalide ou expiré");
-
-        //    return Ok("Email confirmé avec succès");
-        //}
     }
 }

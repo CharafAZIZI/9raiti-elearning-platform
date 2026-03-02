@@ -1,4 +1,4 @@
-﻿using MicroServiceDotNet.Services;
+﻿using MicroServiceDotNet.Services.TokenBlacklistService;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 

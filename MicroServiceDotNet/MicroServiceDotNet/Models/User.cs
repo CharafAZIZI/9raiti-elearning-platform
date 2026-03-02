@@ -16,16 +16,18 @@ namespace MicroServiceDotNet.Models
         public string? nom { get; set; }
         public string? prenom { get; set; }
         public string? role { get; set; }
-
         public bool est_actif { get; set; } = true;
         public bool est_valide { get; set; } = false;
-        //public bool email_confirme { get; set; } = false;
-        //public string email_token { get; set; }
+        public bool EmailConfirmed { get; set; } = false;
+        public string? EmailConfirmationToken { get; set; }
 
         [NotMapped]
         public DateTime DateCreation { get; set; }
         [NotMapped]
         public string? PhotoProfil { get; set; }
+        public Apprenant? Apprenant { get; set; }
+        public Enseignant? Enseignant { get; set; }
+
 
     }
 }

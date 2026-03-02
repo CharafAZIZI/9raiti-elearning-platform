@@ -1,5 +1,5 @@
-﻿using MicroServiceDotNet.Models;
-using MicroServiceDotNet.ViewModels;
+﻿using MicroServiceDotNet.DTO.ManageUser;
+using MicroServiceDotNet.Models;
 
 namespace MicroServiceDotNet.Mappers
 {
@@ -10,11 +10,13 @@ namespace MicroServiceDotNet.Mappers
             return new User
             {
                 email = vm.email,
-                telephone = vm.telephone,
                 mot_de_passe = vm.mot_de_passe,
                 nom = vm.nom,
                 prenom = vm.prenom,
-                role = vm.role
+                telephone = vm.telephone,
+                role = vm.role,
+                est_actif = true,
+                est_valide = true
             };
         }
 
