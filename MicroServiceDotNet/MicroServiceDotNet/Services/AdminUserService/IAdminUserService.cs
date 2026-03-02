@@ -1,15 +1,15 @@
 ﻿using MicroServiceDotNet.DTO.ManageUser;
-using MicroServiceDotNet.Models;
+using MicroServiceDotNet.DTO.RegisterUser;
 
 namespace MicroServiceDotNet.Services.AdminUserService
 {
     public interface IAdminUserService
     {
-        User CreateUser(CreateUserVM vm);
-        List<User> GetAll();
-        User GetById(int id);
-        void Delete(int id);
-        User ValiderEnseignant(int id);
-        User ChangerEtatCompte(int id, bool actif);
+        UserVM CreateUser(CreateUserVM vm);
+        List<UserVM> GetAll();
+        UserVM GetById(int id);
+        bool Delete(int id);
+        UserVM ValiderEnseignant(int id);
+        UserVM ChangerEtatCompte(int id, bool actif);
     }
 }

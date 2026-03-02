@@ -1,9 +1,11 @@
 ﻿using MicroServiceDotNet.DTO.LoginUser;
 using MicroServiceDotNet.DTO.RegisterUser;
+using MicroServiceDotNet.DTO.ResetPassword;
 using MicroServiceDotNet.Filters;
 using MicroServiceDotNet.Mappers;
 using MicroServiceDotNet.Repository;
 using MicroServiceDotNet.Services.AuthService;
+using MicroServiceDotNet.Services.PasswordService;
 using MicroServiceDotNet.Services.TokenBlacklistService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -18,12 +20,21 @@ namespace MicroServiceDotNet.Controllers
         private readonly IUserRepository _repo;
         private readonly IAuthService _service;
         private readonly ITokenBlacklistService _blacklist;
+        private readonly IPasswordService _passwordService;
+        private readonly IWebHostEnvironment _env;
 
-        public AuthController(IUserRepository repo,IAuthService service, ITokenBlacklistService blacklist)
+        public AuthController(
+            IUserRepository repo,
+            IAuthService service,
+            ITokenBlacklistService blacklist,
+            IPasswordService passwordService,
+            IWebHostEnvironment env)
         {
             _repo = repo;
             _service = service;
             _blacklist = blacklist;
+            _passwordService = passwordService;
+            _env = env;
         }
 
         [HttpPost]
@@ -79,6 +90,32 @@ namespace MicroServiceDotNet.Controllers
             return Ok($"Vous êtes connecté : {email} - Rôle : {role}");
         }
 
-        
+        [HttpPost("forgot")]
+        public IActionResult ForgotPassword([FromBody] ResetPasswordRequest request)
+        {
+            _passwordService.DemanderReinitialisation(request.Email);
+
+            return Ok("Si l'email existe, un lien de réinitialisation a été envoyé.");
+        }
+
+
+        [HttpPost("reset")]
+        public IActionResult ResetPassword([FromBody] ResetPasswordConfirm vm)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest("Données invalides.");
+
+            if (vm.NewPassword != vm.ConfirmPassword)
+                return BadRequest("Les mots de passe ne correspondent pas.");
+
+            var result = _passwordService.ConfirmerReinitialisation(vm.Token, vm.NewPassword);
+
+            if (!result)
+                return BadRequest(new { message = "Token invalide ou expiré." });
+
+            return Ok(new { message = "Mot de passe réinitialisé avec succès." });
+        }
+
+
     }
 }

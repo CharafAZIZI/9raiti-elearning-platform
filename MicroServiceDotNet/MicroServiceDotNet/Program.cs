@@ -1,11 +1,14 @@
 ﻿using MicroServiceDotNet.Data;
+using MicroServiceDotNet.DTO.ResetPassword;
 using MicroServiceDotNet.Filters;
 using MicroServiceDotNet.Repository;
 using MicroServiceDotNet.Services.AdminUserService;
 using MicroServiceDotNet.Services.AuthService;
+using MicroServiceDotNet.Services.EmailService;
 using MicroServiceDotNet.Services.JwtService;
 using MicroServiceDotNet.Services.PasswordService;
 using MicroServiceDotNet.Services.ProfileService;
+using MicroServiceDotNet.Services.TemplateService;
 using MicroServiceDotNet.Services.TokenBlacklistService;
 using MicroServiceDotNet.Services.UserRoleService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -27,6 +30,11 @@ builder.Services.AddScoped<IAdminUserService, AdminUserService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IUserRoleService, UserRoleService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<ITemplateService, TemplateService>();
+builder.Services.Configure<SmtpSettings>(
+    builder.Configuration.GetSection("SmtpSettings"));
+
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -50,8 +58,8 @@ builder.Services.AddControllers();
 var app = builder.Build();
 
 app.UseAuthentication();
+app.UseStaticFiles();
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();
