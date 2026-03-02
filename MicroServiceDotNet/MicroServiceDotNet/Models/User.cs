@@ -21,8 +21,8 @@ namespace MicroServiceDotNet.Models
         public bool est_valide { get; set; } 
         [NotMapped]
         public DateTime DateCreation { get; set; }
-        [NotMapped]
-        public string? PhotoProfil { get; set; }
+        [Column("photo_profil")]
+        public string? photo_profil { get; set; }
         public string? PasswordResetToken { get; set; }
         public DateTime? PasswordResetTokenExpiry { get; set; }
         public Apprenant? Apprenant { get; set; }

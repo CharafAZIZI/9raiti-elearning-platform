@@ -37,4 +37,17 @@ public class ProfileController : ControllerBase
         return Ok(updatedProfile);
     }
 
+    [HttpPost("update-photo")]
+    public IActionResult UpdatePhoto([FromForm] IFormFile file)
+    {
+        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+
+        var result = _service.UpdatePhoto(userId, file);
+
+        if (!(bool)result.GetType().GetProperty("success").GetValue(result))
+            return BadRequest(result);
+
+        return Ok(result);
+    }
+
 }
