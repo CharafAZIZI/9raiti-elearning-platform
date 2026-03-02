@@ -1,4 +1,5 @@
-﻿using MicroServiceDotNet.DTO.LoginUser;
+﻿using MicroServiceDotNet.DTO.GoogleApi;
+using MicroServiceDotNet.DTO.LoginUser;
 using MicroServiceDotNet.DTO.RegisterUser;
 using MicroServiceDotNet.Filters;
 using MicroServiceDotNet.Mappers;
@@ -19,10 +20,8 @@ namespace MicroServiceDotNet.Controllers
         private readonly IAuthService _service;
         private readonly ITokenBlacklistService _blacklist;
 
-        public AuthController(
-            IUserRepository repo,
-            IAuthService service,
-            ITokenBlacklistService blacklist)
+
+        public AuthController(IUserRepository repo, IAuthService service, ITokenBlacklistService blacklist)
         {
             _repo = repo;
             _service = service;
@@ -34,25 +33,22 @@ namespace MicroServiceDotNet.Controllers
         {
             var result = _service.Inscrire(vm);
 
-            if (!result.Success)
-                return Conflict(result.Message);
+            if (!result.Success) return Conflict(result.Message);
+            return Ok("Inscription réussie verifier votre email");
 
-            return Ok("Inscription réussie. Vérifiez votre email.");
         }
         // LOGIN
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginRequest request)
         {
             var result = _service.Login(request.email, request.mot_de_passe);
-
             if (!result.Success)
             {
-                if (result.IsBlocked)
-                    return StatusCode(403, "Votre compte n’est pas encore autorisé.");
-
+                if (result.IsBlocked) return StatusCode(403, "Compte non autorisé");
                 return Unauthorized("Identifiants invalides");
             }
 
+<<<<<<< HEAD
             // On récupère l'utilisateur
             var user = _repo.GetByEmail(request.email);
 
@@ -62,8 +58,10 @@ namespace MicroServiceDotNet.Controllers
                 return StatusCode(403, "Veuillez confirmer votre email avant de vous connecter.");
             }
 
+=======
+            var user = _repo.GetByEmail(request.email);
+>>>>>>> 0d4fa9da73c6ff7f066946d733aa1662500032dc
             var response = AuthMapper.ToLoginResponse(user, result);
-
             return Ok(response);
         }
         // CONFIRMATION EMAIL
@@ -73,6 +71,7 @@ namespace MicroServiceDotNet.Controllers
             if (string.IsNullOrEmpty(token))
                 return Redirect("/email-templates/invalide-token.html");
 
+<<<<<<< HEAD
             var user = _repo.GetByConfirmationToken(token);
 
             if (user == null)
@@ -85,6 +84,18 @@ namespace MicroServiceDotNet.Controllers
             return Redirect("/email-templates/email-confirmed.html");
         }
         // LOGOUT
+=======
+        [HttpPost("google-login")]
+        public IActionResult GoogleLogin([FromBody] GoogleLoginRequest request)
+        {
+            var result = _service.LoginWithGoogle(request.IdToken);
+            if (!result.Success)
+                return BadRequest(result);
+
+            return Ok(result);
+        }
+
+>>>>>>> 0d4fa9da73c6ff7f066946d733aa1662500032dc
         [HttpPost("logout")]
         [Authorize]
         public IActionResult Logout()
@@ -97,6 +108,7 @@ namespace MicroServiceDotNet.Controllers
 
             return Ok("Déconnexion réussie");
         }
+<<<<<<< HEAD
         // ENDPOINT SECURISE
         [HttpGet]
         [Authorize]
@@ -108,5 +120,7 @@ namespace MicroServiceDotNet.Controllers
 
             return Ok($"Vous êtes connecté : {email} - Rôle : {role}");
         }
+=======
+>>>>>>> 0d4fa9da73c6ff7f066946d733aa1662500032dc
     }
 }

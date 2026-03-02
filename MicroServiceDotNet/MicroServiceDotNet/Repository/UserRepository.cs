@@ -1,4 +1,6 @@
-﻿using MicroServiceDotNet.Data;
+﻿using Google.Apis.Auth;
+using MicroServiceDotNet.Data;
+using MicroServiceDotNet.Mappers;
 using MicroServiceDotNet.Models;
 
 namespace MicroServiceDotNet.Repository
@@ -47,6 +49,7 @@ namespace MicroServiceDotNet.Repository
             _context.SaveChanges();
         }
 
+<<<<<<< HEAD
         //  AJOUT pour confirmation email
         public User GetByConfirmationToken(string token)
         {
@@ -62,6 +65,16 @@ namespace MicroServiceDotNet.Repository
         public void Save()
         {
             throw new NotImplementedException();
+=======
+        public User GetOrCreateFromGooglePayload(GoogleJsonWebSignature.Payload payload)
+        {
+            var user = GetByEmail(payload.Email);
+            if (user != null) return user;
+
+            user = AuthMapper.FromGooglePayload(payload);
+            AddUser(user);
+            return user;
+>>>>>>> 0d4fa9da73c6ff7f066946d733aa1662500032dc
         }
     }
 }
