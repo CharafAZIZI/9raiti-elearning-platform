@@ -1,18 +1,12 @@
 package com.MicroServiceSpring.MicroServiceSpring.Services;
-
-import com.MicroServiceSpring.MicroServiceSpring.Models.Cours;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
+import com.MicroServiceSpring.MicroServiceSpring.DTO.CoursDTO;
 import java.util.List;
 
 public interface CoursService {
 
-    Cours createCours(Cours cours, MultipartFile file) throws IOException;
-
-    List<Cours> getAllCours();
-
-    Cours getCoursById(Long id);
-
-
+    CoursDTO createCours(CoursDTO dto);
+    CoursDTO updateCours(Long id, CoursDTO dto);
+    CoursDTO getCoursById(Long id);
+    List<CoursDTO> getAllCours();
+    void deleteCours(Long id);
 }
