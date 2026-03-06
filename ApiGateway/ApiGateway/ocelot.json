@@ -18,7 +18,7 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
-          "Port": 8080
+          "Port": 8080 
         }
       ],
       "UpstreamPathTemplate": "/api/cours/{everything}",
