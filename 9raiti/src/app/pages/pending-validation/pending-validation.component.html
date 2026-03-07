@@ -1,48 +1,49 @@
-<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;position:relative;background:var(--bg-base);">
-  <div style="position:absolute;inset:0;background:radial-gradient(ellipse at center,var(--brand-bg) 0%,transparent 60%);pointer-events:none;"></div>
+<div class="min-h-screen flex items-center justify-center p-6" style="background:var(--bg);position:relative;">
+  <div class="fixed inset-0 pointer-events-none" style="background:radial-gradient(ellipse at center,rgba(245,158,11,.07) 0%,transparent 60%);"></div>
 
-  <div style="position:relative;z-index:1;max-width:440px;width:100%;text-align:center;" class="animate-slide-up">
-    <div class="card" style="padding:40px 36px;position:relative;">
-      <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--brand),transparent);border-radius:16px 16px 0 0;"></div>
+  <div class="w-full max-w-md relative z-10 animate-slide-up">
+    <div class="glass rounded-3xl p-8 text-center relative overflow-hidden" style="border-color:var(--border-brand);">
+      <div class="absolute top-0 left-0 right-0 h-0.5 rounded-t-3xl" style="background:linear-gradient(90deg,transparent,var(--brand),transparent);"></div>
 
-      <!-- Logo -->
-      <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:28px;">
-        <div style="width:36px;height:36px;border-radius:12px;background:linear-gradient(135deg,var(--brand),#b5720b);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px var(--brand-glow);">📚</div>
-        <span class="font-display" style="font-size:20px;font-weight:700;color:var(--text-primary);">9raiti</span>
+      <div class="flex items-center justify-center gap-3 mb-8">
+        <div class="w-10 h-10 rounded-2xl flex items-center justify-center font-bold text-xl"
+             style="background:linear-gradient(135deg,#F59E0B,#D97706);color:white;font-family:'Syne',sans-serif;">9</div>
+        <span class="font-bold text-xl" style="font-family:'Syne',sans-serif;color:var(--text);">9raiti</span>
       </div>
 
-      <!-- Icon -->
-      <div class="animate-float" style="width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 20px;background:var(--brand-bg);border:2px solid var(--brand-border);">⏳</div>
+      <div class="w-20 h-20 rounded-full flex items-center justify-center text-4xl mx-auto mb-5 animate-float"
+           style="background:var(--brand-dim);border:2px solid var(--border-brand);">⏳</div>
 
-      <h1 class="font-display" style="font-size:22px;font-weight:700;color:var(--text-primary);margin-bottom:10px;">Compte en validation</h1>
-      <p style="font-size:14px;line-height:1.7;color:var(--text-secondary);margin-bottom:24px;">
-        Merci pour votre inscription en tant qu'<span style="color:var(--text-primary);font-weight:600;">enseignant</span> sur 9raiti. Votre dossier est en cours d'examen.
+      <h1 class="text-2xl font-bold mb-3" style="font-family:'Syne',sans-serif;color:var(--text);">Compte en validation</h1>
+      <p class="text-sm leading-relaxed mb-6" style="color:var(--text-2);">
+        Votre inscription en tant qu'<strong style="color:var(--text);">enseignant</strong> a bien été reçue. Notre équipe examine votre dossier.
       </p>
 
       <!-- Steps -->
-      <div style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:20px;text-align:left;">
-        <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--text-muted);margin-bottom:14px;">Processus de validation</p>
-        <div style="display:flex;flex-direction:column;gap:12px;">
-          <div *ngFor="let step of steps" style="display:flex;align-items:center;gap:12px;" [style.opacity]="step.done || step.active ? 1 : 0.4">
-            <div style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;"
-                 [style]="step.done ? 'background:var(--success-color);color:white;'
-                        : step.active ? 'background:var(--brand-bg);border:2px solid var(--brand);color:var(--brand);'
-                        : 'background:var(--bg-elevated);border:1px solid var(--border);color:var(--text-muted);'">
-              <span *ngIf="step.done">✓</span>
-              <div *ngIf="step.active && !step.done" style="width:8px;height:8px;border-radius:50%;background:var(--brand);" class="animate-pulse-soft"></div>
-              <span *ngIf="!step.done && !step.active">{{ step.icon }}</span>
-            </div>
-            <span style="font-size:13px;" [style]="step.done || step.active ? 'color:var(--text-primary);font-weight:500;' : 'color:var(--text-muted);'">{{ step.label }}</span>
-            <span *ngIf="step.active" class="badge badge-warning" style="margin-left:auto;font-size:10px;">En cours</span>
+      <div class="glass rounded-2xl p-5 mb-5 text-left space-y-4">
+        <div *ngFor="let step of steps" class="flex items-center gap-3" [style.opacity]="step.done || step.active ? 1 : 0.4">
+          <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
+               [style]="step.done  ? 'background:var(--green);color:white;'
+                       : step.active ? 'background:var(--brand-dim);border:2px solid var(--brand);color:var(--brand);'
+                       : 'background:var(--surface-2);border:1px solid var(--border);color:var(--text-3);'">
+            <span *ngIf="step.done">✓</span>
+            <div *ngIf="step.active && !step.done" class="w-2.5 h-2.5 rounded-full animate-pulse-brand" style="background:var(--brand);"></div>
+            <span *ngIf="!step.done && !step.active">{{step.icon}}</span>
           </div>
+          <span class="text-sm" [style]="step.done || step.active ? 'color:var(--text);font-weight:500;' : 'color:var(--text-3);'">{{step.label}}</span>
+          <span *ngIf="step.active" class="badge b-brand ml-auto text-xs">En cours</span>
         </div>
       </div>
 
-      <p style="font-size:12px;color:var(--text-muted);margin-bottom:20px;">
-        Délai estimé : <strong style="color:var(--text-secondary);">1 à 2 jours ouvrables</strong>
-      </p>
+      <div class="alert alert-brand mb-5 text-left">
+        <span>⏱️</span>
+        <div>
+          <p class="font-semibold text-sm mb-0.5">Délai estimé</p>
+          <p class="text-xs opacity-85">1 à 2 jours ouvrables · Notification par email</p>
+        </div>
+      </div>
 
-      <button (click)="logout()" class="btn-danger" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;">
+      <button (click)="logout()" class="btn btn-ghost w-full">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
         Se déconnecter
       </button>

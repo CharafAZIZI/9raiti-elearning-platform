@@ -1,93 +1,374 @@
-<div class="page-bg" style="min-height:100vh;">
+<div class="min-h-screen" style="background:var(--bg);">
   <app-navbar></app-navbar>
 
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" style="display:flex;flex-direction:column;gap:24px;">
+  <div class="flex h-[calc(100vh-64px)] overflow-hidden">
 
-    <!-- Banner -->
-    <div class="banner banner-enseignant animate-fade-in">
-      <div class="banner-top-line"></div>
-      <div style="position:absolute;top:-60px;right:-60px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,var(--brand-bg) 0%,transparent 70%);pointer-events:none;"></div>
-      <div style="position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;">
-        <div>
-          <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:3px;color:var(--brand);margin-bottom:8px;">Espace Enseignant</p>
-          <h1 class="font-display" style="font-size:clamp(24px,4vw,36px);font-weight:700;color:var(--text-primary);margin-bottom:8px;">
-            Bienvenue, <span class="text-gold">{{ userName }}</span> 🏫
-          </h1>
-          <p style="font-size:14px;color:var(--text-secondary);">Gérez vos cours et suivez la progression de vos étudiants.</p>
+    <!-- SIDEBAR -->
+    <aside class="hidden md:flex flex-col w-60 flex-shrink-0 overflow-y-auto"
+           style="background:var(--surface);border-right:1px solid var(--border);padding:20px 12px;">
+
+      <div class="p-3 rounded-2xl mb-6" style="background:var(--green-dim);border:1px solid rgba(16,185,129,.2);">
+        <div class="flex items-center gap-3 mb-2">
+          <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-base flex-shrink-0"
+               style="background:linear-gradient(135deg,#10b981,#059669);color:white;font-family:'Syne',sans-serif;">
+            {{ userName.charAt(0) || 'E' }}
+          </div>
+          <div class="min-w-0">
+            <div class="text-sm font-semibold truncate" style="color:var(--text);">{{ userName }}</div>
+            <div class="text-xs" style="color:var(--green);">Enseignant</div>
+          </div>
         </div>
-        <button class="btn-brand" style="display:flex;align-items:center;gap:8px;">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Créer un cours
+        <div class="text-xs" style="color:var(--text-3);">148 étudiants actifs</div>
+      </div>
+
+      <nav class="space-y-1 flex-1">
+        <p class="text-xs font-bold uppercase tracking-widest px-2 mb-2" style="color:var(--text-4);">Espace enseignant</p>
+        <button *ngFor="let item of [
+          {id:'accueil',    icon:'🏠',label:'Tableau de bord'},
+          {id:'cours',      icon:'📖',label:'Gestion cours'},
+          {id:'modules',    icon:'📦',label:'Gestion modules'},
+          {id:'categories', icon:'🏷️',label:'Catégories'},
+          {id:'evaluations',icon:'📝',label:'Gestion évaluations'},
+          {id:'apprenants', icon:'👥',label:'Mes apprenants'},
+          {id:'engagement', icon:'📈',label:'Engagement'}
+        ]" (click)="setSection(item.id)" class="nav-item" [class.active]="activeSection===item.id">
+          <span class="text-base">{{item.icon}}</span><span>{{item.label}}</span>
         </button>
-      </div>
-    </div>
+      </nav>
 
-    <!-- Stats -->
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;">
-      <div *ngFor="let stat of stats; let i = index"
-           class="card card-hover animate-slide-up" [class]="'delay-'+i"
-           style="padding:20px;display:flex;align-items:center;gap:16px;">
-        <div style="width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;" [style]="stat.iconBg">{{ stat.icon }}</div>
-        <div>
-          <div class="font-display" style="font-size:26px;font-weight:700;color:var(--text-primary);">{{ stat.value }}</div>
-          <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">{{ stat.label }}</div>
+      <button (click)="showNewCourseModal=true" class="btn btn-brand w-full mt-4" style="font-size:13px;padding:10px;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nouveau cours
+      </button>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+      <!-- ACCUEIL -->
+      <ng-container *ngIf="activeSection==='accueil'">
+        <div class="relative overflow-hidden rounded-2xl p-6 sm:p-8 animate-fade-in"
+             style="background:linear-gradient(135deg,var(--surface),var(--surface-2));border:1px solid rgba(16,185,129,.25);">
+          <div class="absolute top-0 left-0 right-0 h-0.5 rounded-t-2xl" style="background:linear-gradient(90deg,transparent,var(--green),transparent);"></div>
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <p class="text-xs font-bold uppercase tracking-[3px] mb-2" style="color:var(--green);">Espace Enseignant</p>
+              <h1 class="text-2xl sm:text-3xl font-bold mb-2" style="font-family:'Syne',sans-serif;color:var(--text);">
+                Bonjour, <span style="color:var(--green);">{{ userName }}</span> 🏫
+              </h1>
+              <p class="text-sm" style="color:var(--text-2);">Vous avez <strong style="color:var(--orange);">12 questions</strong> en attente et <strong style="color:var(--brand);">2 évaluations</strong> à corriger.</p>
+            </div>
+            <button (click)="showNewCourseModal=true" class="btn btn-brand self-start sm:self-auto flex-shrink-0">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Créer un cours
+            </button>
+          </div>
         </div>
-      </div>
-    </div>
 
-    <!-- Courses -->
-    <div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
-        <h2 class="font-display" style="font-size:20px;font-weight:600;color:var(--text-primary);">Mes cours</h2>
-        <button style="font-size:14px;font-weight:600;color:var(--brand);background:none;border:none;cursor:pointer;">Voir tout →</button>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px;">
-        <div *ngFor="let course of myCourses; let i = index"
-             class="card card-hover animate-slide-up" [class]="'delay-'+i"
-             style="overflow:hidden;cursor:pointer;">
-          <div style="height:120px;display:flex;align-items:center;justify-content:center;font-size:48px;" [style]="course.thumbBg">{{ course.icon }}</div>
-          <div style="padding:16px;">
-            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:10px;">
-              <h3 style="font-size:14px;font-weight:600;color:var(--text-primary);line-height:1.4;">{{ course.title }}</h3>
-              <!-- <span class="badge" [style]="course.statusStyle">{{ course.status }}</span> -->
-               <span class="badge" [ngClass]="course.statusBadge">{{ course.status }}</span>
+        <!-- Stats -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div *ngFor="let s of stats; let i=index" class="glass glass-hover rounded-2xl p-5 relative overflow-hidden animate-slide-up" [class]="'d-'+i">
+            <div class="stat-accent" [style.background]="s.color"></div>
+            <div class="w-11 h-11 rounded-xl flex items-center justify-center text-xl mb-3" [style.background]="s.dim">{{s.icon}}</div>
+            <div class="text-2xl font-bold mb-0.5" style="font-family:'Syne',sans-serif;color:var(--text);">{{s.value}}</div>
+            <div class="text-xs" style="color:var(--text-3);">{{s.label}}</div>
+          </div>
+        </div>
+
+        <!-- Courses + Activity -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div class="lg:col-span-2 glass rounded-2xl overflow-hidden animate-slide-up d-2">
+            <div class="flex items-center justify-between p-5 pb-0">
+              <h3 class="font-bold" style="font-family:'Syne',sans-serif;color:var(--text);">Mes cours</h3>
+              <button (click)="setSection('cours')" class="text-xs font-semibold" style="color:var(--green);background:none;border:none;cursor:pointer;">Gérer →</button>
             </div>
-            <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-muted);margin-bottom:12px;">
-              <span>👥 {{ course.students }}</span>
-              <span *ngIf="course.rating">⭐ {{ course.rating }}/5</span>
+            <div class="scroll-x mt-4">
+              <table class="tbl">
+                <thead><tr><th>Cours</th><th>Étudiants</th><th>Note</th><th>Statut</th></tr></thead>
+                <tbody>
+                  <tr *ngFor="let c of courses" class="tbl-row">
+                    <td><div class="flex items-center gap-2"><span class="text-base">{{c.icon}}</span><span class="text-sm font-medium" style="color:var(--text);">{{c.title}}</span></div></td>
+                    <td><span class="badge b-blue">{{c.students}}</span></td>
+                    <td><span *ngIf="c.rating>0" class="font-semibold text-sm" style="color:var(--brand);">⭐ {{c.rating}}</span><span *ngIf="c.rating===0" style="color:var(--text-3);">—</span></td>
+                    <td><span class="badge" [class.b-green]="c.status==='Publié'" [class.b-orange]="c.status==='Brouillon'">{{c.status}}</span></td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
-            <div style="display:flex;justify-content:space-between;padding-top:12px;border-top:1px solid var(--border);">
-              <button style="font-size:12px;font-weight:600;color:var(--brand);background:none;border:none;cursor:pointer;">Modifier →</button>
-              <button style="font-size:12px;color:var(--text-muted);background:none;border:none;cursor:pointer;">Statistiques</button>
+          </div>
+
+          <div class="glass rounded-2xl p-5 animate-slide-up d-3">
+            <h3 class="font-bold mb-4" style="font-family:'Syne',sans-serif;color:var(--text);">Activité récente</h3>
+            <div class="space-y-3">
+              <div *ngFor="let act of recentActivities" class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                     [style.background]="act.color+'22'" [style.color]="act.color">{{act.initial}}</div>
+                <div class="min-w-0 flex-1">
+                  <div class="text-xs font-semibold truncate" style="color:var(--text);">{{act.student}}</div>
+                  <div class="text-xs truncate" style="color:var(--text-3);">{{act.action}}</div>
+                </div>
+                <div class="text-xs flex-shrink-0" style="color:var(--text-4);">{{act.date}}</div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </div>
+      </ng-container>
 
-    <!-- Activity -->
-    <div>
-      <h2 class="font-display" style="font-size:20px;font-weight:600;color:var(--text-primary);margin-bottom:20px;">Activité des étudiants</h2>
-      <div class="table-wrap animate-fade-in">
-        <div style="height:2px;background:linear-gradient(90deg,transparent,var(--brand),transparent);"></div>
-        <table>
-          <thead class="table-head"><tr><th>Date</th><th>Étudiant</th><th>Cours</th><th>Action</th></tr></thead>
-          <tbody>
-            <tr *ngFor="let e of recentEnrollments" class="table-row">
-              <td style="color:var(--text-muted);">{{ e.date }}</td>
-              <td>
-                <div style="display:flex;align-items:center;gap:10px;">
-                  <div style="width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;" [style]="e.avatarStyle">{{ e.initial }}</div>
-                  <span style="color:var(--text-primary);font-weight:500;">{{ e.student }}</span>
+      <!-- COURS -->
+      <ng-container *ngIf="activeSection==='cours'">
+        <div class="animate-fade-in space-y-4">
+          <div class="flex items-center justify-between">
+            <h2 class="text-2xl font-bold" style="font-family:'Syne',sans-serif;color:var(--text);">Gestion des cours</h2>
+            <button (click)="showNewCourseModal=true" class="btn btn-brand">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Nouveau cours
+            </button>
+          </div>
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div *ngFor="let c of courses; let i=index" class="glass glass-hover rounded-2xl overflow-hidden animate-slide-up" [class]="'d-'+i">
+              <div class="h-28 flex items-center justify-center text-4xl relative" [style.background]="c.dim">
+                <span class="relative z-10">{{c.icon}}</span>
+                <div class="absolute top-2 right-2"><span class="badge" [class.b-green]="c.status==='Publié'" [class.b-orange]="c.status==='Brouillon'">{{c.status}}</span></div>
+              </div>
+              <div class="p-4 space-y-2">
+                <h4 class="font-semibold text-sm" style="color:var(--text);">{{c.title}}</h4>
+                <p class="text-xs" style="color:var(--text-3);">{{c.category}} · {{c.modules}} modules · {{c.evals}} évaluations</p>
+                <div class="flex justify-between text-xs pt-1">
+                  <span style="color:var(--text-3);">👥 {{c.students}} étudiants</span>
+                  <span *ngIf="c.rating>0" style="color:var(--brand);">⭐ {{c.rating}}</span>
                 </div>
-              </td>
-              <td style="color:var(--text-muted);">{{ e.course }}</td>
-              <td>{{ e.action }}</td>
-            </tr>
-          </tbody>
-        </table>
+                <div class="divider"></div>
+                <div class="flex gap-2">
+                  <button class="btn btn-ghost btn-sm flex-1">✏️ Modifier</button>
+                  <button (click)="setSection('modules')" class="btn btn-ghost btn-sm flex-1">📦 Modules</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- MODULES -->
+      <ng-container *ngIf="activeSection==='modules'">
+        <div class="animate-fade-in space-y-4">
+          <div class="flex items-center justify-between">
+            <h2 class="text-2xl font-bold" style="font-family:'Syne',sans-serif;color:var(--text);">Gestion des modules</h2>
+            <button (click)="showNewModuleModal=true" class="btn btn-brand">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Nouveau module
+            </button>
+          </div>
+          <div class="glass rounded-2xl overflow-hidden">
+            <div class="scroll-x">
+              <table class="tbl">
+                <thead><tr><th>#</th><th>Titre du module</th><th>Cours</th><th>Leçons</th><th>Durée</th><th>Statut</th><th>Actions</th></tr></thead>
+                <tbody>
+                  <tr *ngFor="let m of modules" class="tbl-row">
+                    <td><span class="text-xs font-mono" style="color:var(--text-3);">{{m.order}}</span></td>
+                    <td><span class="text-sm font-medium" style="color:var(--text);">{{m.title}}</span></td>
+                    <td><span class="text-xs" style="color:var(--text-3);">{{m.course}}</span></td>
+                    <td><span class="badge b-blue">{{m.lessons}} leçons</span></td>
+                    <td><span style="color:var(--text-2);font-size:13px;">{{m.duration}}</span></td>
+                    <td><span class="badge" [class.b-green]="m.status==='publié'" [class.b-orange]="m.status==='brouillon'">{{m.status}}</span></td>
+                    <td>
+                      <div class="flex gap-1">
+                        <button class="btn btn-ghost btn-sm">✏️</button>
+                        <button class="btn btn-danger btn-sm">🗑️</button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- CATEGORIES -->
+      <ng-container *ngIf="activeSection==='categories'">
+        <div class="animate-fade-in space-y-4">
+          <h2 class="text-2xl font-bold" style="font-family:'Syne',sans-serif;color:var(--text);">Gestion des catégories</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div *ngFor="let cat of categories; let i=index" class="glass glass-hover rounded-2xl p-5 animate-slide-up" [class]="'d-'+i">
+              <div class="flex items-center gap-3 mb-4">
+                <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl" [style.background]="cat.color+'22'">{{cat.icon}}</div>
+                <div>
+                  <h4 class="font-bold text-sm" style="color:var(--text);">{{cat.name}}</h4>
+                  <p class="text-xs" style="color:var(--text-3);">{{cat.courses}} cours · {{cat.apprenants}} apprenants</p>
+                </div>
+              </div>
+              <div class="flex gap-2">
+                <button class="btn btn-ghost btn-sm flex-1">✏️ Modifier</button>
+                <button class="btn btn-danger btn-sm">🗑️</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- EVALUATIONS -->
+      <ng-container *ngIf="activeSection==='evaluations'">
+        <div class="animate-fade-in space-y-4">
+          <div class="flex items-center justify-between">
+            <h2 class="text-2xl font-bold" style="font-family:'Syne',sans-serif;color:var(--text);">Gestion des évaluations</h2>
+            <button class="btn btn-brand">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Nouvelle évaluation
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div *ngFor="let ev of evaluations; let i=index" class="glass glass-hover rounded-2xl p-5 animate-slide-up" [class]="'d-'+i">
+              <div class="flex items-start gap-3 mb-3">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
+                     [style.background]="ev.type==='quiz'?'var(--brand-dim)':'var(--blue-dim)'">
+                  {{ev.type==='quiz'?'📝':'📋'}}
+                </div>
+                <div class="flex-1 min-w-0">
+                  <h4 class="font-semibold text-sm truncate" style="color:var(--text);">{{ev.title}}</h4>
+                  <p class="text-xs mt-0.5" style="color:var(--text-3);">{{ev.course}}</p>
+                </div>
+              </div>
+
+              <div *ngIf="ev.iaGenerated" class="flex items-center gap-1.5 mb-3 px-2 py-1.5 rounded-lg" style="background:var(--purple-dim);border:1px solid rgba(139,92,246,.2);">
+                <span class="text-xs">🤖</span>
+                <span class="text-xs" style="color:var(--purple);">Généré par IA automatiquement</span>
+              </div>
+
+              <div class="grid grid-cols-2 gap-2 mb-4 text-xs">
+                <div class="p-2 rounded-lg" style="background:var(--surface-2);">
+                  <div style="color:var(--text-3);">Date limite</div>
+                  <div class="font-semibold" style="color:var(--text);">{{ev.dueDate}}</div>
+                </div>
+                <div class="p-2 rounded-lg" style="background:var(--surface-2);">
+                  <div style="color:var(--text-3);">Soumissions</div>
+                  <div class="font-semibold" style="color:var(--text);">{{ev.submissions}}/{{ev.total}}</div>
+                </div>
+                <div class="p-2 rounded-lg col-span-2" style="background:var(--surface-2);">
+                  <div style="color:var(--text-3);">Moyenne classe</div>
+                  <div class="font-semibold" [style.color]="ev.avgScore>0?'var(--green)':'var(--text-3)'">
+                    {{ev.avgScore>0 ? ev.avgScore+'/20' : 'Aucune soumission'}}
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex gap-2">
+                <button class="btn btn-ghost btn-sm flex-1">✏️ Modifier</button>
+                <button class="btn btn-success btn-sm flex-1">📊 Résultats</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- APPRENANTS -->
+      <ng-container *ngIf="activeSection==='apprenants'">
+        <div class="animate-fade-in space-y-4">
+          <div class="flex items-center justify-between">
+            <h2 class="text-2xl font-bold" style="font-family:'Syne',sans-serif;color:var(--text);">Consulter la liste des apprenants</h2>
+            <span class="badge b-blue">{{apprenants.length}} apprenants</span>
+          </div>
+          <div class="glass rounded-2xl overflow-hidden">
+            <div class="scroll-x">
+              <table class="tbl">
+                <thead><tr><th>Apprenant</th><th>Cours</th><th>Progression</th><th>Score</th><th>Dernière activité</th><th>Engagement</th><th>Actions</th></tr></thead>
+                <tbody>
+                  <tr *ngFor="let a of apprenants" class="tbl-row">
+                    <td>
+                      <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                             style="background:var(--brand-dim);color:var(--brand);">{{a.name.charAt(0)}}</div>
+                        <div>
+                          <div class="text-sm font-medium" style="color:var(--text);">{{a.name}}</div>
+                          <div class="text-xs" style="color:var(--text-3);">{{a.email}}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td><span class="text-xs" style="color:var(--text-2);">{{a.course}}</span></td>
+                    <td>
+                      <div class="flex items-center gap-2" style="min-width:100px;">
+                        <div class="prog-track flex-1"><div class="prog-fill" [style.width]="a.progress+'%'" style="background:var(--brand);"></div></div>
+                        <span class="text-xs font-semibold" style="color:var(--brand);">{{a.progress}}%</span>
+                      </div>
+                    </td>
+                    <td><span class="font-semibold text-sm" [style.color]="a.score>=15?'var(--green)':a.score>=10?'var(--brand)':'var(--red)'">{{a.score}}/20</span></td>
+                    <td><span class="text-xs" style="color:var(--text-3);">{{a.lastActivity}}</span></td>
+                    <td><span class="badge" [class]="getEngagementClass(a.engagement)">{{a.engagement}}</span></td>
+                    <td>
+                      <button (click)="setSection('engagement')" class="btn btn-ghost btn-sm">📈 Détails</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- ENGAGEMENT -->
+      <ng-container *ngIf="activeSection==='engagement'">
+        <div class="animate-fade-in space-y-4">
+          <h2 class="text-2xl font-bold" style="font-family:'Syne',sans-serif;color:var(--text);">Suivre l'engagement des apprenants</h2>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div *ngFor="let a of apprenants; let i=index" class="glass glass-hover rounded-2xl p-5 animate-slide-up" [class]="'d-'+i">
+              <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold" style="background:var(--brand-dim);color:var(--brand);">{{a.name.charAt(0)}}</div>
+                  <div>
+                    <div class="font-semibold text-sm" style="color:var(--text);">{{a.name}}</div>
+                    <div class="text-xs" style="color:var(--text-3);">{{a.course}}</div>
+                  </div>
+                </div>
+                <span class="badge" [class]="getEngagementClass(a.engagement)">{{a.engagement}}</span>
+              </div>
+              <div class="grid grid-cols-3 gap-2 text-center mb-3">
+                <div class="p-2 rounded-xl" style="background:var(--surface-2);">
+                  <div class="font-bold text-sm" style="color:var(--text);">{{a.sessions}}</div>
+                  <div class="text-xs" style="color:var(--text-3);">Sessions</div>
+                </div>
+                <div class="p-2 rounded-xl" style="background:var(--surface-2);">
+                  <div class="font-bold text-sm" style="color:var(--text);">{{a.progress}}%</div>
+                  <div class="text-xs" style="color:var(--text-3);">Progression</div>
+                </div>
+                <div class="p-2 rounded-xl" style="background:var(--surface-2);">
+                  <div class="font-bold text-sm" [style.color]="a.score>=15?'var(--green)':'var(--brand)'">{{a.score}}</div>
+                  <div class="text-xs" style="color:var(--text-3);">Score /20</div>
+                </div>
+              </div>
+              <div class="prog-track"><div class="prog-fill" [style.width]="a.progress+'%'" [style.background]="getEngagementColor(a.engagement)"></div></div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+    </main>
+  </div>
+
+  <!-- Modal Nouveau Cours -->
+  <div *ngIf="showNewCourseModal" class="overlay" (click)="showNewCourseModal=false">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h3 class="font-bold text-lg mb-4" style="font-family:'Syne',sans-serif;color:var(--text);">Créer un nouveau cours</h3>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-semibold mb-1.5" style="color:var(--text-2);">Titre du cours</label>
+          <input [(ngModel)]="newCourseTitle" type="text" placeholder="ex: Introduction à la physique quantique" class="inp"/>
+        </div>
+        <div>
+          <label class="block text-sm font-semibold mb-1.5" style="color:var(--text-2);">Catégorie</label>
+          <select [(ngModel)]="newCourseCategory" class="inp" style="cursor:pointer;">
+            <option value="">Choisir une catégorie</option>
+            <option *ngFor="let cat of categories" [value]="cat.name">{{cat.icon}} {{cat.name}}</option>
+          </select>
+        </div>
+        <div class="alert alert-brand">
+          <span>🤖</span>
+          <div><p class="text-xs font-semibold mb-0.5">Génération IA disponible</p><p class="text-xs opacity-85">L'IA peut générer automatiquement le plan du cours et les premières évaluations.</p></div>
+        </div>
+      </div>
+      <div class="flex gap-3 mt-5">
+        <button (click)="showNewCourseModal=false" class="btn btn-ghost flex-1">Annuler</button>
+        <button (click)="showNewCourseModal=false" class="btn btn-brand flex-1">Créer le cours</button>
       </div>
     </div>
-
   </div>
 </div>
