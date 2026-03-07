@@ -1,4 +1,7 @@
 package com.MicroServiceSpring.MicroServiceSpring.Models;
 
-public class StatutCours {
+public enum StatutCours {
+    BROUILLON,
+    PUBLIE,
+    ARCHIVE
 }

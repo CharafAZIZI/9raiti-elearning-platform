@@ -22,7 +22,6 @@ namespace MicroServiceDotNet.Services.AuthService
             }
             catch (Exception ex)
             {
-                // logger ou relancer une exception custom
                 throw new Exception("Token Google invalide", ex);
             }
         }

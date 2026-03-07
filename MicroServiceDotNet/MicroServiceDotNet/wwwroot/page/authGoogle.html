@@ -8,7 +8,7 @@
 <body>
   <h2>Test Login Google pour ton API</h2>
 
-  <!-- Bouton Google -->
+ 
   <div id="g_id_signin"></div>
   <pre id="result"></pre>
 
@@ -16,11 +16,11 @@
     function handleCredentialResponse(response) {
       const idToken = response.credential;
 
-      // Envoi du token à ton API
+ 
       fetch('http://localhost:5184/api/auth/google-login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ IdToken: idToken }) // exactement "IdToken"
+        body: JSON.stringify({ IdToken: idToken }) 
       })
       .then(res => res.json())
       .then(data => {
@@ -32,7 +32,7 @@
 
     window.onload = () => {
       google.accounts.id.initialize({
-        client_id: "212429201182-nau1rp4g1f8kjcvibfv3e6cb8mhpobua.apps.googleusercontent.com",  // Remplace par ton ClientId exact
+        client_id: "212429201182-nau1rp4g1f8kjcvibfv3e6cb8mhpobua.apps.googleusercontent.com",
         callback: handleCredentialResponse
       });
 
@@ -41,7 +41,7 @@
         { theme: "outline", size: "large" }
       );
 
-      google.accounts.id.prompt(); // affiche le popup de connexion
+      google.accounts.id.prompt(); 
     };
   </script>
 </body>

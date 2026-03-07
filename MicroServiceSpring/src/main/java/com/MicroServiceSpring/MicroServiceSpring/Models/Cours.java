@@ -9,7 +9,7 @@ import org.hibernate.annotations.CreationTimestamp;
 @Entity
 @Table(name = "cours")
 @Getter
-@Setter // Lombok génère tous les getters et setters
+@Setter
 public class Cours {
 
     @Id
@@ -17,14 +17,17 @@ public class Cours {
     @Column(name = "id_cours")
     private Long idCours;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 150)
     private String titre;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 1000)
     private String description;
 
     @Enumerated(EnumType.STRING)
     private Niveau niveau;
+
+    @Enumerated(EnumType.STRING)
+    private StatutCours statut;
 
     @CreationTimestamp
     @Column(name = "date_creation", updatable = false)
@@ -32,10 +35,12 @@ public class Cours {
 
     private Integer nombreInscrits;
 
+    private Integer dureeMinutes;
+
     @Column(name = "file_path")
     private String filePath;
 
     @ManyToOne
-    @JoinColumn(name = "module_id") // Clé étrangère
+    @JoinColumn(name = "module_id")
     private Module module;
 }
