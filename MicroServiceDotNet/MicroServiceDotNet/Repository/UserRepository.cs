@@ -49,23 +49,6 @@ namespace MicroServiceDotNet.Repository
             _context.SaveChanges();
         }
 
-<<<<<<< HEAD
-        //  AJOUT pour confirmation email
-        public User GetByConfirmationToken(string token)
-        {
-            return _context.Users
-                .FirstOrDefault(u => u.EmailConfirmationToken == token);
-        }
-
-        public void Ajouter(User user)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Save()
-        {
-            throw new NotImplementedException();
-=======
         public User GetOrCreateFromGooglePayload(GoogleJsonWebSignature.Payload payload)
         {
             var user = GetByEmail(payload.Email);
@@ -74,7 +57,6 @@ namespace MicroServiceDotNet.Repository
             user = AuthMapper.FromGooglePayload(payload);
             AddUser(user);
             return user;
->>>>>>> 0d4fa9da73c6ff7f066946d733aa1662500032dc
         }
     }
 }

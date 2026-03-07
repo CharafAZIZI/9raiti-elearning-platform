@@ -3,7 +3,6 @@ using MicroServiceDotNet.Filters;
 using MicroServiceDotNet.Repository;
 using MicroServiceDotNet.Services.AdminUserService;
 using MicroServiceDotNet.Services.AuthService;
-using MicroServiceDotNet.Services.EmailService;
 using MicroServiceDotNet.Services.JwtService;
 using MicroServiceDotNet.Services.PasswordService;
 using MicroServiceDotNet.Services.ProfileService;
@@ -29,8 +28,6 @@ builder.Services.AddScoped<IAdminUserService, AdminUserService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IUserRoleService, UserRoleService>();
-builder.Services.AddScoped<IEmailService, EmailService>();
-
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -67,19 +64,7 @@ app.UseStaticFiles();
 app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseStaticFiles();
 
 app.MapControllers();
 
-<<<<<<< HEAD
 app.Run();
-
-
-
-
-
-
-
-=======
-app.Run();
->>>>>>> 0d4fa9da73c6ff7f066946d733aa1662500032dc

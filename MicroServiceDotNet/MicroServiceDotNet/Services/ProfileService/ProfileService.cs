@@ -115,5 +115,4 @@ public class ProfileService : IProfileService
 
         return GetMyProfile(userId);
     }
-
 }

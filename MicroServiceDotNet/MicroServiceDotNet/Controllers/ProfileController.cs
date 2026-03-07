@@ -37,5 +37,4 @@ public class ProfileController : ControllerBase
         return Ok(updatedProfile);
     }
 
-
 }
