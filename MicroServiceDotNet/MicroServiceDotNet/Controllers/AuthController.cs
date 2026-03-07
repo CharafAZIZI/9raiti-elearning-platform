@@ -20,21 +20,24 @@ namespace MicroServiceDotNet.Controllers
         private readonly IAuthService _service;
         private readonly ITokenBlacklistService _blacklist;
 
+
         public AuthController(IUserRepository repo, IAuthService service, ITokenBlacklistService blacklist)
         {
             _repo = repo;
             _service = service;
             _blacklist = blacklist;
         }
-
-        [HttpPost]
+        // INSCRIPTION
+        [HttpPost("inscription")]
         public IActionResult Inscrire([FromBody] RegisterUserVM vm)
         {
             var result = _service.Inscrire(vm);
-            if (!result.Success) return Conflict(result.Message);
-            return Ok("Inscription réussie");
-        }
 
+            if (!result.Success) return Conflict(result.Message);
+            return Ok("Inscription réussie verifier votre email");
+
+        }
+        // LOGIN
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginRequest request)
         {
@@ -45,11 +48,43 @@ namespace MicroServiceDotNet.Controllers
                 return Unauthorized("Identifiants invalides");
             }
 
+<<<<<<< HEAD
+            // On récupère l'utilisateur
             var user = _repo.GetByEmail(request.email);
+
+            //  AJOUT : Vérification Email
+            if (user != null && !user.EmailConfirmed)
+            {
+                return StatusCode(403, "Veuillez confirmer votre email avant de vous connecter.");
+            }
+
+=======
+            var user = _repo.GetByEmail(request.email);
+>>>>>>> 0d4fa9da73c6ff7f066946d733aa1662500032dc
             var response = AuthMapper.ToLoginResponse(user, result);
             return Ok(response);
         }
+        // CONFIRMATION EMAIL
+        [HttpGet("confirm-email")]
+        public IActionResult ConfirmEmail(string token)
+        {
+            if (string.IsNullOrEmpty(token))
+                return Redirect("/email-templates/invalide-token.html");
 
+<<<<<<< HEAD
+            var user = _repo.GetByConfirmationToken(token);
+
+            if (user == null)
+                return Redirect("/email-templates/invalide-token.html");
+
+            user.EmailConfirmed = true;
+            user.EmailConfirmationToken = null;
+
+            _repo.Update(user);
+            return Redirect("/email-templates/email-confirmed.html");
+        }
+        // LOGOUT
+=======
         [HttpPost("google-login")]
         public IActionResult GoogleLogin([FromBody] GoogleLoginRequest request)
         {
@@ -60,13 +95,32 @@ namespace MicroServiceDotNet.Controllers
             return Ok(result);
         }
 
+>>>>>>> 0d4fa9da73c6ff7f066946d733aa1662500032dc
         [HttpPost("logout")]
         [Authorize]
         public IActionResult Logout()
         {
-            var token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var token = Request.Headers["Authorization"]
+                .ToString()
+                .Replace("Bearer ", "");
+
             _blacklist.AddToBlacklist(token);
+
             return Ok("Déconnexion réussie");
         }
+<<<<<<< HEAD
+        // ENDPOINT SECURISE
+        [HttpGet]
+        [Authorize]
+        [ServiceFilter(typeof(TokenBlacklistFilter))]
+        public IActionResult SecureEndpoint()
+        {
+            var role = User.FindFirst(ClaimTypes.Role)?.Value;
+            var email = User.FindFirst(ClaimTypes.Email)?.Value;
+
+            return Ok($"Vous êtes connecté : {email} - Rôle : {role}");
+        }
+=======
+>>>>>>> 0d4fa9da73c6ff7f066946d733aa1662500032dc
     }
 }
