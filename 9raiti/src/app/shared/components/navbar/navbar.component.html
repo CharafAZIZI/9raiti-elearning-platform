@@ -1,0 +1,71 @@
+<nav class="navbar flex items-center justify-between px-4 lg:px-8">
+
+  <!-- Brand -->
+  <div class="flex items-center gap-3">
+    <div class="w-9 h-9 rounded-xl flex items-center justify-center text-base font-bold flex-shrink-0"
+         style="background:linear-gradient(135deg,#F59E0B,#D97706);box-shadow:0 4px 16px rgba(245,158,11,.35);color:white;font-family:'Syne',sans-serif;">
+      9
+    </div>
+    <span class="text-lg font-bold tracking-tight" style="color:var(--text);font-family:'Syne',sans-serif;">9raiti</span>
+    <span *ngIf="role==='admin'" class="badge b-purple text-xs">Admin</span>
+  </div>
+
+  <!-- Right -->
+  <div class="flex items-center gap-2 sm:gap-3">
+
+    <!-- Theme -->
+    <div class="flex items-center gap-2">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           [style.opacity]="isDark?'0.3':'1'" [style.color]="isDark?'var(--text-3)':'var(--brand)'">
+        <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+        <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+      </svg>
+      <button class="toggle" [class.on]="isDark" (click)="toggleTheme()" aria-label="Toggle theme"></button>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           [style.opacity]="isDark?'1':'0.3'" [style.color]="isDark?'var(--brand)':'var(--text-3)'">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </svg>
+    </div>
+
+    <div class="divider-v h-7 hidden sm:block"></div>
+
+    <!-- Notifications bell -->
+    <button class="hidden sm:flex w-9 h-9 items-center justify-center rounded-xl transition-all"
+            style="background:var(--bg-3);border:1px solid var(--border);color:var(--text-2);"
+            onmouseover="this.style.borderColor='var(--border-brand)';this.style.color='var(--brand)'"
+            onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-2)'"
+            title="Notifications">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    </button>
+
+    <!-- User chip -->
+    <button (click)="navigateToProfile()"
+            class="hidden sm:flex items-center gap-2.5 rounded-xl px-3 py-1.5 transition-all"
+            style="border:1px solid var(--border);"
+            onmouseover="this.style.borderColor='var(--border-brand)';this.style.background='var(--brand-dim)'"
+            onmouseout="this.style.borderColor='var(--border)';this.style.background='transparent'">
+      <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
+           style="background:linear-gradient(135deg,#F59E0B,#D97706);color:white;font-family:'Syne',sans-serif;">
+        {{ initials }}
+      </div>
+      <div class="leading-tight text-left">
+        <div class="text-sm font-semibold" style="color:var(--text);max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ displayName }}</div>
+        <div class="text-xs" style="color:var(--text-3);">{{ role }}</div>
+      </div>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text-3);"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+
+    <!-- Mobile avatar -->
+    <button (click)="navigateToProfile()" class="sm:hidden w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
+            style="background:linear-gradient(135deg,#F59E0B,#D97706);color:white;">{{ initials }}</button>
+
+    <!-- Logout -->
+    <button (click)="logout()" [disabled]="logoutLoading" class="btn btn-ghost flex items-center gap-1.5" style="padding:8px 14px;font-size:13px;">
+      <svg *ngIf="!logoutLoading" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+      <svg *ngIf="logoutLoading" class="animate-spin-slow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
+      <span class="hidden sm:inline">Déconnexion</span>
+    </button>
+  </div>
+</nav>

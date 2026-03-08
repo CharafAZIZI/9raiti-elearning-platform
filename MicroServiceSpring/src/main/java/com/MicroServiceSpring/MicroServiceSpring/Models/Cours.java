@@ -1,10 +1,15 @@
 package com.MicroServiceSpring.MicroServiceSpring.Models;
+
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
 @Table(name = "cours")
+@Getter
+@Setter
 public class Cours {
 
     @Id
@@ -12,14 +17,17 @@ public class Cours {
     @Column(name = "id_cours")
     private Long idCours;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 150)
     private String titre;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 1000)
     private String description;
 
     @Enumerated(EnumType.STRING)
     private Niveau niveau;
+
+    @Enumerated(EnumType.STRING)
+    private StatutCours statut;
 
     @CreationTimestamp
     @Column(name = "date_creation", updatable = false)
@@ -27,69 +35,12 @@ public class Cours {
 
     private Integer nombreInscrits;
 
+    private Integer dureeMinutes;
+
     @Column(name = "file_path")
     private String filePath;
 
-    // ===== GETTERS =====
-
-    public Long getIdCours() {
-        return idCours;
-    }
-
-    public String getTitre() {
-        return titre;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public Niveau getNiveau() {
-        return niveau;
-    }
-
-
-    public LocalDateTime getDateCreation() {
-        return dateCreation;
-    }
-
-    public Integer getNombreInscrits() {
-        return nombreInscrits;
-    }
-
-    public String getFilePath() {
-        return filePath;
-    }
-
-    // ===== SETTERS =====
-
-    public void setIdCours(Long idCours) {
-        this.idCours = idCours;
-    }
-
-    public void setTitre(String titre) {
-        this.titre = titre;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public void setNiveau(Niveau niveau) {
-        this.niveau = niveau;
-    }
-
-
-    public void setDateCreation(LocalDateTime dateCreation) {
-        this.dateCreation = dateCreation;
-    }
-
-
-    public void setNombreInscrits(Integer nombreInscrits) {
-        this.nombreInscrits = nombreInscrits;
-    }
-
-    public void setFilePath(String filePath) {
-        this.filePath = filePath;
-    }
+    @ManyToOne
+    @JoinColumn(name = "module_id")
+    private Module module;
 }

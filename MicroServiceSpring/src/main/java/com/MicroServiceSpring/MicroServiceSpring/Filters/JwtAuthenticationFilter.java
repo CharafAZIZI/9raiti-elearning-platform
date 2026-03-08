@@ -6,6 +6,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,6 +18,7 @@ import java.util.Collections;
 
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
+    private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
     private final String jwtSecret;
 
     public JwtAuthenticationFilter(String jwtSecret) {
@@ -29,12 +32,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String header = request.getHeader("Authorization");
 
-        System.out.println("=== JWT Filter Debug ===");
-        System.out.println("Request URI: " + request.getRequestURI());
-        System.out.println("Authorization Header: " + header);
-
         if (header != null && header.startsWith("Bearer ")) {
-            String token = header.substring(7); // supprime "Bearer "
+            String token = header.substring(7);
 
             try {
                 Claims claims = Jwts.parserBuilder()
@@ -43,22 +42,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         .parseClaimsJws(token)
                         .getBody();
 
-                System.out.println("Claims JWT: " + claims);
-
-                // Lecture du claim email (.NET ClaimTypes.Email)
                 String email = claims.get("email", String.class);
                 if (email == null) {
                     email = claims.get("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress", String.class);
                 }
 
-                // Lecture du claim role (.NET ClaimTypes.Role)
                 String role = claims.get("role", String.class);
                 if (role == null) {
                     role = claims.get("http://schemas.microsoft.com/ws/2008/06/identity/claims/role", String.class);
                 }
-
-                System.out.println("Email extrait: " + email);
-                System.out.println("Rôle extrait: " + role);
 
                 if (email != null && role != null) {
                     UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
@@ -67,18 +59,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()))
                     );
                     SecurityContextHolder.getContext().setAuthentication(auth);
-                    System.out.println("Authentication set for user: " + email + " with role: " + role.toUpperCase());
+                    logger.info("User authenticated: {} with role {}", email, role.toUpperCase());
                 } else {
-                    System.out.println("JWT incomplet ou rôle manquant, accès refusé.");
+                    logger.warn("JWT invalide: email ou role manquant");
+                    response.setContentType("application/json");
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.getWriter().write("{\"error\":\"JWT invalide: email ou role manquant\"}");
+                    return;
                 }
 
             } catch (Exception e) {
-                System.out.println("Erreur JWT: " + e.getMessage());
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token invalide");
+                logger.error("JWT error: {}", e.getMessage());
+                response.setContentType("application/json");
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("{\"error\":\"Token invalide\"}");
                 return;
             }
-        } else {
-            System.out.println("Header Authorization manquant ou mal formé.");
         }
 
         filterChain.doFilter(request, response);
