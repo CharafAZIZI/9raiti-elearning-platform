@@ -1,4 +1,5 @@
-﻿using MicroServiceDotNet.Models;
+﻿using Google.Apis.Auth;
+using MicroServiceDotNet.Models;
 
 namespace MicroServiceDotNet.Repository
 {
@@ -10,5 +11,7 @@ namespace MicroServiceDotNet.Repository
         User GetById(int id);
         void Delete(int id);
         void Update(User user);
+        User GetByConfirmationToken(string token);
+        User GetOrCreateFromGooglePayload(GoogleJsonWebSignature.Payload payload);
     }
 }

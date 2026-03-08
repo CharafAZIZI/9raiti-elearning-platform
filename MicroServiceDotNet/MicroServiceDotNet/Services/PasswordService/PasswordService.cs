@@ -10,10 +10,10 @@ namespace MicroServiceDotNet.Services.PasswordService
     {
         private readonly PasswordHasher<User> _hasher;
         private readonly AppDbContext _context;
-        private readonly IEmailService _emailService;
+        private readonly IResetService _emailService;
         private readonly ITemplateService _templateService;
 
-        public PasswordService(AppDbContext context, IEmailService emailService, ITemplateService templateService)
+        public PasswordService(AppDbContext context, IResetService emailService, ITemplateService templateService)
         {
             _hasher = new PasswordHasher<User>();
             _context = context;

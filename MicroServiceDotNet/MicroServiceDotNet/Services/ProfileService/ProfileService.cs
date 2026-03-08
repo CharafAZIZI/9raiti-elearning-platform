@@ -1,6 +1,5 @@
 ﻿using MicroServiceDotNet.Data;
 using MicroServiceDotNet.DTO.ManageProfileUser;
-using MicroServiceDotNet.Models;
 using MicroServiceDotNet.Services.PasswordService;
 using MicroServiceDotNet.Services.ProfileService;
 using Microsoft.EntityFrameworkCore;
@@ -138,7 +137,6 @@ public class ProfileService : IProfileService
             };
         }
 
-        // Validation extension
         var allowedExtensions = new[] { ".jpg", ".jpeg", ".png" };
         var extension = Path.GetExtension(file.FileName).ToLower();
 
@@ -151,7 +149,6 @@ public class ProfileService : IProfileService
             };
         }
 
-        // Validation taille (2MB max)
         if (file.Length > 2 * 1024 * 1024)
         {
             return new
@@ -166,7 +163,6 @@ public class ProfileService : IProfileService
         if (!Directory.Exists(uploadsFolder))
             Directory.CreateDirectory(uploadsFolder);
 
-        // Supprimer ancienne photo si existe
         if (!string.IsNullOrEmpty(user.photo_profil))
         {
             var oldPath = Path.Combine(uploadsFolder, user.photo_profil);

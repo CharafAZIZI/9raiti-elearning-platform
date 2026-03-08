@@ -6,11 +6,11 @@ using MimeKit;
 
 namespace MicroServiceDotNet.Services.EmailService
 {
-    public class EmailService : IEmailService
+    public class ResetService : IResetService
     {
         private readonly SmtpSettings _smtp;
 
-        public EmailService(IOptions<SmtpSettings> smtpOptions)
+        public ResetService(IOptions<SmtpSettings> smtpOptions)
         {
             _smtp = smtpOptions.Value;
         }

@@ -1,4 +1,5 @@
-﻿using MicroServiceDotNet.DTO.LoginUser;
+﻿using MicroServiceDotNet.DTO.GoogleApi;
+using MicroServiceDotNet.DTO.LoginUser;
 using MicroServiceDotNet.DTO.RegisterUser;
 using MicroServiceDotNet.DTO.ResetPassword;
 using MicroServiceDotNet.Filters;
@@ -23,12 +24,8 @@ namespace MicroServiceDotNet.Controllers
         private readonly IPasswordService _passwordService;
         private readonly IWebHostEnvironment _env;
 
-        public AuthController(
-            IUserRepository repo,
-            IAuthService service,
-            ITokenBlacklistService blacklist,
-            IPasswordService passwordService,
-            IWebHostEnvironment env)
+
+        public AuthController(IUserRepository repo, IAuthService service, ITokenBlacklistService blacklist , IPasswordService passwordService , IWebHostEnvironment env)
         {
             _repo = repo;
             _service = service;
@@ -37,45 +34,74 @@ namespace MicroServiceDotNet.Controllers
             _env = env;
         }
 
-        [HttpPost]
+        [HttpPost("inscription")]
         public IActionResult Inscrire([FromBody] RegisterUserVM vm)
         {
             var result = _service.Inscrire(vm);
 
-            if (!result.Success)
-                return Conflict(result.Message);
+            if (!result.Success) return Conflict(result.Message);
+            return Ok("Inscription réussie verifier votre email");
 
-            return Ok("Inscription réussie");
         }
 
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginRequest request)
         {
             var result = _service.Login(request.email, request.mot_de_passe);
-
             if (!result.Success)
             {
-                if (result.IsBlocked)
-                    return StatusCode(403, "Votre compte n’est pas encore autorisé.");
-
+                if (result.IsBlocked) return StatusCode(403, "Compte non autorisé");
                 return Unauthorized("Identifiants invalides");
             }
 
-            // On récupère l'utilisateur via le service
             var user = _repo.GetByEmail(request.email);
 
-            // Mapping via le mapper séparé
+            if (user != null && !user.EmailConfirmed)
+            {
+                return StatusCode(403, "Veuillez confirmer votre email avant de vous connecter.");
+            }
             var response = AuthMapper.ToLoginResponse(user, result);
-
             return Ok(response);
+        }
+
+        [HttpGet("confirm-email")]
+        public IActionResult ConfirmEmail(string token)
+        {
+            if (string.IsNullOrEmpty(token))
+                return Redirect("/email-templates/invalide-token.html");
+
+            var user = _repo.GetByConfirmationToken(token);
+
+            if (user == null)
+                return Redirect("/email-templates/invalide-token.html");
+
+            user.EmailConfirmed = true;
+            user.EmailConfirmationToken = null;
+
+            _repo.Update(user);
+            return Redirect("/email-templates/email-confirmed.html");
+        }
+
+        [HttpPost("google-login")]
+        public IActionResult GoogleLogin([FromBody] GoogleLoginRequest request)
+        {
+            var result = _service.LoginWithGoogle(request.IdToken);
+            if (!result.Success)
+                return BadRequest(result);
+
+            return Ok(result);
         }
 
         [HttpPost("logout")]
         [Authorize]
         public IActionResult Logout()
         {
-            var token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var token = Request.Headers["Authorization"]
+                .ToString()
+                .Replace("Bearer ", "");
+
             _blacklist.AddToBlacklist(token);
+
             return Ok("Déconnexion réussie");
         }
 
@@ -89,6 +115,7 @@ namespace MicroServiceDotNet.Controllers
 
             return Ok($"Vous êtes connecté : {email} - Rôle : {role}");
         }
+
 
         [HttpPost("forgot")]
         public IActionResult ForgotPassword([FromBody] ResetPasswordRequest request)
@@ -115,7 +142,5 @@ namespace MicroServiceDotNet.Controllers
 
             return Ok(new { message = "Mot de passe réinitialisé avec succès." });
         }
-
-
     }
 }
