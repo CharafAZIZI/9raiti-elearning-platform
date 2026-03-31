@@ -47,7 +47,7 @@ public class AuthService : IAuthService
 
         var token = Guid.NewGuid().ToString();
 
-        user.EmailConfirmed = false;
+        //user.EmailConfirmed = false;
         user.EmailConfirmationToken = token;
 
         _repo.AddUser(user);

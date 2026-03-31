@@ -37,5 +37,23 @@ export const routes: Routes = [
     path: 'en-attente',
     loadComponent: () => import('./pages/pending-validation/pending-validation.component').then(m => m.PendingValidationComponent)
   },
+
+  // ── Catalogue (apprenant) ─────────────────────────────────
+  {
+    path: 'categories',
+    canActivate: [authGuard, roleGuard('apprenant')],
+    loadComponent: () => import('./pages/categories/categories.component').then(m => m.CategoriesComponent)
+  },
+  {
+    path: 'modules',
+    canActivate: [authGuard, roleGuard('apprenant')],
+    loadComponent: () => import('./pages/modules/modules.component').then(m => m.ModulesComponent)
+  },
+  {
+    path: 'cours',
+    canActivate: [authGuard, roleGuard('apprenant')],
+    loadComponent: () => import('./pages/cours/cours.component').then(m => m.CoursComponent)
+  },
+
   { path: '**', redirectTo: 'login' }
 ];

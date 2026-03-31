@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { TokenService } from '../../core/services/token.service';
 
 @Component({
   selector: 'app-dashboard-apprenant', standalone: true,
-  imports: [CommonModule, NavbarComponent],
+  imports: [CommonModule, NavbarComponent, RouterModule],
   templateUrl: './dashboard-apprenant.component.html',
   styleUrls: ['./dashboard-apprenant.component.css']
 })

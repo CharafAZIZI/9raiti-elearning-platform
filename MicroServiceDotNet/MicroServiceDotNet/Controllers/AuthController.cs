@@ -34,7 +34,7 @@ namespace MicroServiceDotNet.Controllers
             _env = env;
         }
 
-        [HttpPost("inscription")]
+        [HttpPost]
         public IActionResult Inscrire([FromBody] RegisterUserVM vm)
         {
             var result = _service.Inscrire(vm);

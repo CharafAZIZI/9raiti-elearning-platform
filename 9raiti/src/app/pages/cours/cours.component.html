@@ -1,0 +1,130 @@
+<div class="min-h-screen" style="background:var(--bg);">
+  <app-navbar></app-navbar>
+
+  <div class="px-4 sm:px-6 lg:px-8 py-8 max-w-7xl mx-auto">
+
+    <!-- En-tête -->
+    <div class="mb-8 animate-fade-in">
+      <div class="flex items-center gap-3 mb-1">
+        <a routerLink="/modules"
+           style="color:var(--brand);text-decoration:none;font-size:13px;font-weight:600;">
+          ← Modules
+        </a>
+      </div>
+      <div class="flex items-start justify-between flex-wrap gap-3">
+        <div>
+          <h1 class="text-3xl font-bold" style="font-family:'Syne',sans-serif;color:var(--text);">
+            Catalogue de cours
+            <span *ngIf="moduleNom" class="text-xl font-normal" style="color:var(--text-3);">
+              — {{ moduleNom }}
+            </span>
+          </h1>
+          <p class="text-sm mt-1" style="color:var(--text-3);">
+            Consultez tous les cours disponibles sur la plateforme
+          </p>
+        </div>
+        <span *ngIf="!loading && !errorMsg" class="badge b-blue self-start">
+          {{ cours.length }} cours
+        </span>
+      </div>
+    </div>
+
+    <!-- Chargement -->
+    <div *ngIf="loading" class="flex flex-col items-center justify-center py-24 gap-4">
+      <div class="loader"></div>
+      <p style="color:var(--text-3);">Chargement des cours…</p>
+    </div>
+
+    <!-- Erreur -->
+    <div *ngIf="!loading && errorMsg"
+         class="rounded-2xl p-6 flex items-center gap-4"
+         style="background:var(--red-dim,#fee2e2);border:1px solid var(--red,#ef4444);">
+      <span style="font-size:24px;">⚠️</span>
+      <div>
+        <p class="font-semibold" style="color:var(--text);">Erreur de chargement</p>
+        <p class="text-sm mt-0.5" style="color:var(--text-3);">{{ errorMsg }}</p>
+      </div>
+    </div>
+
+    <!-- Aucun cours -->
+    <div *ngIf="!loading && !errorMsg && cours.length === 0"
+         class="flex flex-col items-center justify-center py-24 gap-3">
+      <span style="font-size:48px;">📚</span>
+      <p class="text-lg font-semibold" style="color:var(--text);">Aucun cours disponible</p>
+      <p class="text-sm" style="color:var(--text-3);">Les cours apparaîtront ici une fois ajoutés.</p>
+    </div>
+
+    <!-- Grille des cours -->
+    <div *ngIf="!loading && !errorMsg && cours.length > 0"
+         class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+
+      <div *ngFor="let c of cours; let i = index"
+           class="glass glass-hover rounded-2xl overflow-hidden animate-slide-up"
+           [class]="'d-' + (i % 4)">
+
+        <!-- Bannière -->
+        <div class="h-28 flex items-center justify-center text-4xl relative"
+             [style.background]="getColor(i).dim">
+          <div class="absolute inset-0 opacity-10"
+               style="background:linear-gradient(135deg,transparent,rgba(0,0,0,.4));"></div>
+          <span class="relative z-10">📖</span>
+
+          <!-- Badge statut -->
+          <div class="absolute top-3 right-3">
+            <span class="badge text-xs"
+                  [style.background]="getStatut(c.statut).bg"
+                  [style.border-color]="getStatut(c.statut).border"
+                  [style.color]="getStatut(c.statut).color">
+              {{ getStatut(c.statut).label }}
+            </span>
+          </div>
+
+          <!-- Badge niveau -->
+          <div class="absolute top-3 left-3">
+            <span *ngIf="c.niveau" class="badge text-xs"
+                  style="background:rgba(0,0,0,.35);border-color:transparent;color:white;">
+              <!-- {{ niveauLabels[c.niveau] ?? c.niveau }} -->
+            </span>
+          </div>
+
+          <div class="absolute bottom-0 left-0 right-0 h-0.5"
+               [style.background]="getColor(i).color"></div>
+        </div>
+
+        <!-- Contenu -->
+        <div class="p-4">
+          <h3 class="font-bold text-sm mb-1"
+              style="font-family:'Syne',sans-serif;color:var(--text);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">
+            {{ c.titre }}
+          </h3>
+          <p class="text-xs leading-relaxed mb-3"
+             style="color:var(--text-3);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">
+            {{ c.description }}
+          </p>
+
+          <!-- Métadonnées -->
+          <div class="grid grid-cols-2 gap-2 mb-4">
+            <div class="flex items-center gap-1.5 p-2 rounded-lg" style="background:var(--surface-2);">
+              <span style="font-size:14px;">⏱️</span>
+              <span class="text-xs" style="color:var(--text-3);">{{ formatDuree(c.dureeMinutes) }}</span>
+            </div>
+            <div class="flex items-center gap-1.5 p-2 rounded-lg" style="background:var(--surface-2);">
+              <span style="font-size:14px;">👥</span>
+              <span class="text-xs" style="color:var(--text-3);">{{ c.nombreInscrits ?? 0 }} inscrits</span>
+            </div>
+            <div class="flex items-center gap-1.5 p-2 rounded-lg col-span-2" style="background:var(--surface-2);">
+              <span style="font-size:14px;">📅</span>
+              <span class="text-xs" style="color:var(--text-3);">Créé le {{ formatDate(c.dateCreation) }}</span>
+            </div>
+          </div>
+
+          <!-- Action -->
+          <button class="btn btn-brand btn-sm w-full">
+            S'inscrire à ce cours
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
