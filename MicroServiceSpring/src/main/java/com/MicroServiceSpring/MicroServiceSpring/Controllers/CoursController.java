@@ -1,4 +1,5 @@
 package com.MicroServiceSpring.MicroServiceSpring.Controllers;
+
 import com.MicroServiceSpring.MicroServiceSpring.DTO.CoursDTO;
 import com.MicroServiceSpring.MicroServiceSpring.Services.CoursService;
 import com.MicroServiceSpring.MicroServiceSpring.Services.Minio.MinioService;
@@ -9,7 +10,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
 import java.util.List;
 
@@ -36,6 +36,18 @@ public class CoursController {
         return ResponseEntity.ok(coursService.getCoursById(id));
     }
 
+    // ✅ NOUVEAU — Angular appelle GET /api/cours/module/{moduleId}
+    @GetMapping("/module/{moduleId}")
+    public ResponseEntity<List<CoursDTO>> getByModuleId(@PathVariable Long moduleId) {
+        return ResponseEntity.ok(coursService.getCoursByModuleId(moduleId));
+    }
+
+    // ✅ NOUVEAU — Angular appelle GET /api/cours/publies
+    @GetMapping("/publies")
+    public ResponseEntity<List<CoursDTO>> getPublies() {
+        return ResponseEntity.ok(coursService.getCoursPublies());
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<CoursDTO> update(@PathVariable Long id,
                                            @Valid @RequestBody CoursDTO dto) {
@@ -52,22 +64,17 @@ public class CoursController {
     public ResponseEntity<String> uploadFile(@PathVariable Long id,
                                              @RequestParam("file") MultipartFile file) throws IOException {
         String fileName = minioService.uploadFile(file);
-
         CoursDTO cours = coursService.getCoursById(id);
         cours.setFilePath(fileName);
         coursService.updateCours(id, cours);
-
         return ResponseEntity.ok("Fichier uploadé avec succès : " + fileName);
     }
 
-    // Download PDF pour Postman / Angular
     @GetMapping("/{id}/download")
     public ResponseEntity<byte[]> downloadFile(@PathVariable Long id,
                                                @RequestParam(defaultValue = "attachment") String mode) throws IOException {
         CoursDTO cours = coursService.getCoursById(id);
-
         byte[] data = minioService.downloadFile(cours.getFilePath());
-
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, mode + "; filename=\"" + cours.getFilePath() + "\"")
                 .contentType(MediaType.APPLICATION_PDF)

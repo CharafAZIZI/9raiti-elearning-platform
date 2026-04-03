@@ -10,4 +10,7 @@ public interface ModuleService {
     ModuleDTO getModuleById(Long id);
     List<ModuleDTO> getAllModules();
     void deleteModule(Long id);
+
+    // filtrer par catégorie
+    List<ModuleDTO> getModulesByCategorieId(Long categorieId);
 }
