@@ -27,7 +27,10 @@ public class Module {
     @Column(nullable = false)
     private boolean actif;
 
-    // Relation Module -> Cours
+    @ManyToOne
+    @JoinColumn(name = "categorie_id")
+    private Categories categorie;
+
     @OneToMany(mappedBy = "module", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Cours> cours;
 }

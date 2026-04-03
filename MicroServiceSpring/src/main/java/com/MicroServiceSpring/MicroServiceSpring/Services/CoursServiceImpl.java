@@ -1,4 +1,5 @@
 package com.MicroServiceSpring.MicroServiceSpring.Services;
+
 import com.MicroServiceSpring.MicroServiceSpring.DTO.CoursDTO;
 import com.MicroServiceSpring.MicroServiceSpring.Mappers.CoursMapper;
 import com.MicroServiceSpring.MicroServiceSpring.Models.Cours;
@@ -19,32 +20,24 @@ public class CoursServiceImpl implements CoursService {
 
     @Override
     public CoursDTO createCours(CoursDTO dto) {
-
         Module module = moduleRepository.findById(dto.getModuleId())
                 .orElseThrow(() -> new RuntimeException("Module introuvable"));
-
         Cours cours = coursMapper.toEntity(dto, module);
-
         return coursMapper.toDTO(coursRepository.save(cours));
     }
 
     @Override
     public CoursDTO updateCours(Long id, CoursDTO dto) {
-
         Cours cours = coursRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Cours introuvable"));
-
         Module module = moduleRepository.findById(dto.getModuleId())
                 .orElseThrow(() -> new RuntimeException("Module introuvable"));
-
         coursMapper.updateEntityFromDTO(dto, cours, module);
-
         return coursMapper.toDTO(coursRepository.save(cours));
     }
 
     @Override
     public CoursDTO getCoursById(Long id) {
-
         return coursRepository.findById(id)
                 .map(coursMapper::toDTO)
                 .orElseThrow(() -> new RuntimeException("Cours introuvable"));
@@ -52,7 +45,6 @@ public class CoursServiceImpl implements CoursService {
 
     @Override
     public List<CoursDTO> getAllCours() {
-
         return coursRepository.findAll()
                 .stream()
                 .map(coursMapper::toDTO)
@@ -65,5 +57,23 @@ public class CoursServiceImpl implements CoursService {
             throw new RuntimeException("Cours introuvable");
         }
         coursRepository.deleteById(id);
+    }
+
+    // cours filtrés par module
+    @Override
+    public List<CoursDTO> getCoursByModuleId(Long moduleId) {
+        return coursRepository.findByModuleId(moduleId)
+                .stream()
+                .map(coursMapper::toDTO)
+                .toList();
+    }
+
+    // uniquement les cours publiés
+    @Override
+    public List<CoursDTO> getCoursPublies() {
+        return coursRepository.findByStatut("PUBLIE")
+                .stream()
+                .map(coursMapper::toDTO)
+                .toList();
     }
 }

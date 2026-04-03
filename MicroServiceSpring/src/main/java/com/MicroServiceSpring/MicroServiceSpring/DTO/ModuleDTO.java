@@ -20,5 +20,8 @@ public class ModuleDTO {
 
     private boolean actif;
 
+    // ✅ AJOUTÉ : champ manquant — sans ça, categorieId est toujours null
+    private Long categorieId;
+
     private List<CoursDTO> cours;
 }
