@@ -52,8 +52,7 @@ namespace MicroServiceDotNet.Services.PasswordService
 
             _context.SaveChanges();
 
-            var resetLink = $"https://localhost:7167/reset-password.html?token={rawToken}";
-
+            string resetLink = $"http://localhost:4200/reinitialiser-mot-de-passe?token={rawToken}";
             var body = _templateService.GetResetPasswordEmail(resetLink);
 
             _emailService.EnvoyerEmail(user.email,

@@ -1,0 +1,49 @@
+services:
+
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: elearningpfa-db-1
+    environment:
+      SA_PASSWORD: "Strong!Pass123"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql-data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S 127.0.0.1 -U sa -P Strong!Pass123 -C -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 20s
+
+  microservice-dotnet:
+    build: ./MicroServiceDotNet/MicroServiceDotNet
+    container_name: microservice-dotnet
+    ports:
+      - "5184:5184"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ConnectionStrings__DefaultConnection: "Server=db;Database=GestionUtilisateurs;User Id=sa;Password=Strong!Pass123;"
+
+  api-gateway:
+    build: ./ApiGateway/ApiGateway
+    container_name: api-gateway
+    ports:
+      - "5000:9000"
+    depends_on:
+      microservice-dotnet:
+        condition: service_started
+
+  frontend:
+    build: ./9raiti
+    container_name: frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      - api-gateway
+
+volumes:
+  mssql-data:
