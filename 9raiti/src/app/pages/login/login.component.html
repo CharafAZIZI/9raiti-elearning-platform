@@ -110,6 +110,15 @@
             <ng-container *ngIf="mot_de_passe?.errors?.['required']">Requis.</ng-container>
             <ng-container *ngIf="mot_de_passe?.errors?.['minlength']">Min. 6 caractères.</ng-container>
           </p>
+
+          <!-- Lien mot de passe oublié -->
+          <div class="flex justify-end mt-2">
+            <a routerLink="/mot-de-passe-oublie"
+               class="text-xs font-semibold"
+               style="color:var(--brand);text-decoration:none;">
+              Mot de passe oublié ?
+            </a>
+          </div>
         </div>
 
         <button type="submit" [disabled]="loading" class="btn btn-brand w-full" style="padding:13px;font-size:14.5px;">

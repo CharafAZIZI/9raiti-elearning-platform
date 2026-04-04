@@ -1,4 +1,5 @@
 package com.MicroServiceSpring.MicroServiceSpring.Filters;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import jakarta.servlet.FilterChain;
@@ -41,41 +42,50 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         .parseClaimsJws(token)
                         .getBody();
 
+                // Support des claims standards et Microsoft
                 String email = claims.get("email", String.class);
                 if (email == null) {
-                    email = claims.get("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress", String.class);
+                    email = claims.get(
+                        "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress",
+                        String.class);
                 }
 
                 String role = claims.get("role", String.class);
                 if (role == null) {
-                    role = claims.get("http://schemas.microsoft.com/ws/2008/06/identity/claims/role", String.class);
+                    role = claims.get(
+                        "http://schemas.microsoft.com/ws/2008/06/identity/claims/role",
+                        String.class);
                 }
 
                 if (email != null && role != null) {
-                    UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                    UsernamePasswordAuthenticationToken auth =
+                        new UsernamePasswordAuthenticationToken(
                             email,
                             null,
-                            Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()))
-                    );
+                            Collections.singletonList(
+                                new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()))
+                        );
                     SecurityContextHolder.getContext().setAuthentication(auth);
-                    logger.info("User authenticated: {} with role {}", email, role.toUpperCase());
+                    logger.info("Utilisateur authentifié : {} | rôle : {}", email, role.toUpperCase());
                 } else {
-                    logger.warn("JWT invalide: email ou role manquant");
-                    response.setContentType("application/json");
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    response.getWriter().write("{\"error\":\"JWT invalide: email ou role manquant\"}");
+                    logger.warn("JWT invalide : email ou role manquant");
+                    sendUnauthorized(response, "JWT invalide : email ou role manquant");
                     return;
                 }
 
             } catch (Exception e) {
-                logger.error("JWT error: {}", e.getMessage());
-                response.setContentType("application/json");
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.getWriter().write("{\"error\":\"Token invalide\"}");
+                logger.error("Erreur JWT : {}", e.getMessage());
+                sendUnauthorized(response, "Token invalide ou expiré");
                 return;
             }
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private void sendUnauthorized(HttpServletResponse response, String message) throws IOException {
+        response.setContentType("application/json");
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.getWriter().write("{\"erreur\":\"" + message + "\"}");
     }
 }

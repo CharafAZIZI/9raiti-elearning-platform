@@ -6,10 +6,12 @@ import com.MicroServiceSpring.MicroServiceSpring.Services.Minio.MinioService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -23,7 +25,8 @@ public class CoursController {
 
     @PostMapping
     public ResponseEntity<CoursDTO> create(@Valid @RequestBody CoursDTO dto) {
-        return ResponseEntity.ok(coursService.createCours(dto));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(coursService.createCours(dto));
     }
 
     @GetMapping
@@ -36,13 +39,11 @@ public class CoursController {
         return ResponseEntity.ok(coursService.getCoursById(id));
     }
 
-    // ✅ NOUVEAU — Angular appelle GET /api/cours/module/{moduleId}
     @GetMapping("/module/{moduleId}")
     public ResponseEntity<List<CoursDTO>> getByModuleId(@PathVariable Long moduleId) {
         return ResponseEntity.ok(coursService.getCoursByModuleId(moduleId));
     }
 
-    // ✅ NOUVEAU — Angular appelle GET /api/cours/publies
     @GetMapping("/publies")
     public ResponseEntity<List<CoursDTO>> getPublies() {
         return ResponseEntity.ok(coursService.getCoursPublies());
@@ -60,24 +61,46 @@ public class CoursController {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * Upload d'un fichier vers MinIO et sauvegarde du filePath dans le cours.
+     * CORRECTION : utilise updateFilePath() pour ne pas écraser moduleId et autres champs.
+     */
     @PostMapping("/{id}/upload")
     public ResponseEntity<String> uploadFile(@PathVariable Long id,
                                              @RequestParam("file") MultipartFile file) throws IOException {
         String fileName = minioService.uploadFile(file);
-        CoursDTO cours = coursService.getCoursById(id);
-        cours.setFilePath(fileName);
-        coursService.updateCours(id, cours);
+        coursService.updateFilePath(id, fileName);
         return ResponseEntity.ok("Fichier uploadé avec succès : " + fileName);
     }
 
+    /**
+     * Téléchargement ou prévisualisation d'un fichier depuis MinIO.
+     * CORRECTION : content-type déduit du nom de fichier, pas forcément PDF.
+     * mode = "attachment" (téléchargement) ou "inline" (prévisualisation)
+     */
     @GetMapping("/{id}/download")
-    public ResponseEntity<byte[]> downloadFile(@PathVariable Long id,
-                                               @RequestParam(defaultValue = "attachment") String mode) throws IOException {
+    public ResponseEntity<byte[]> downloadFile(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "attachment") String mode) throws IOException {
+
         CoursDTO cours = coursService.getCoursById(id);
-        byte[] data = minioService.downloadFile(cours.getFilePath());
+        String filePath = cours.getFilePath();
+
+        if (filePath == null || filePath.isBlank()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        byte[] data = minioService.downloadFile(filePath);
+
+        // Déterminer le content-type selon l'extension
+        MediaType mediaType = filePath.toLowerCase().endsWith(".pdf")
+                ? MediaType.APPLICATION_PDF
+                : MediaType.APPLICATION_OCTET_STREAM;
+
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, mode + "; filename=\"" + cours.getFilePath() + "\"")
-                .contentType(MediaType.APPLICATION_PDF)
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        mode + "; filename=\"" + filePath + "\"")
+                .contentType(mediaType)
                 .body(data);
     }
 }

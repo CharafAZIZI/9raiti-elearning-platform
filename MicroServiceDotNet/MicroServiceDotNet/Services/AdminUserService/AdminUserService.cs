@@ -3,6 +3,8 @@ using MicroServiceDotNet.Mappers;
 using MicroServiceDotNet.Repository;
 using MicroServiceDotNet.Services.PasswordService;
 using MicroServiceDotNet.Services.UserRoleService;
+using MicroServiceDotNet.Services.ValidateEmailService;
+
 
 namespace MicroServiceDotNet.Services.AdminUserService
 {
@@ -11,15 +13,18 @@ namespace MicroServiceDotNet.Services.AdminUserService
         private readonly IUserRepository _repo;
         private readonly IPasswordService _passwordService;
         private readonly IUserRoleService _role;
+        private readonly IEmailService _emailService;
 
         public AdminUserService(
             IUserRepository repo,
             IPasswordService passwordService,
-            IUserRoleService role)
+            IUserRoleService role,
+            IEmailService emailService)
         {
             _repo = repo;
             _passwordService = passwordService;
             _role = role;
+            _emailService = emailService;
         }
 
         public UserVM CreateUser(CreateUserVM vm)
@@ -85,6 +90,14 @@ namespace MicroServiceDotNet.Services.AdminUserService
                 return null;
 
             user.est_valide = true;
+
+            if (user.role?.ToLower() == "enseignant" && user.est_valide)
+            {
+                _emailService.SendEmailEnseignantValide(
+                    user.email,
+                    $"{user.prenom} {user.nom}"
+                );
+            }
 
             _repo.Update(user);
 

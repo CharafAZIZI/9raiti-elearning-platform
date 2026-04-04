@@ -1,23 +1,50 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { CatalogueService } from '../../core/services/catalogue.service';
-import { CoursDTO } from '../../models/cours.model';
+import { CoursDTO, Niveau } from '../../models/cours.model';
+
+type Vue = 'grille' | 'liste';
 
 @Component({
   selector: 'app-cours',
   standalone: true,
-  imports: [CommonModule, NavbarComponent, RouterModule],
+  imports: [CommonModule, NavbarComponent, RouterModule, FormsModule],
   templateUrl: './cours.component.html',
   styleUrls: ['./cours.component.css']
 })
 export class CoursComponent implements OnInit {
 
   cours: CoursDTO[] = [];
+  filtered: CoursDTO[] = [];
   loading = true;
   errorMsg = '';
+
+  searchQuery = '';
+  niveauFiltre: Niveau | 'tous' = 'tous';
+  vue: Vue = 'grille';
+
+  moduleId: number | null = null;
   moduleNom = '';
+
+  niveaux: { value: Niveau | 'tous'; label: string; icon: string }[] = [
+    { value: 'tous',          label: 'Tous',          icon: '📚' },
+    { value: 'DEBUTANT',      label: 'Débutant',      icon: '🟢' },
+    { value: 'INTERMEDIAIRE', label: 'Intermédiaire', icon: '🟡' },
+    { value: 'AVANCE',        label: 'Avancé',        icon: '🔴' },
+  ];
+
+  niveauColors: Record<string, string> = {
+    DEBUTANT: 'var(--green)', INTERMEDIAIRE: 'var(--orange)', AVANCE: 'var(--red)'
+  };
+
+  statutStyle: Record<string, { bg: string; border: string; color: string; label: string }> = {
+    PUBLIE:    { bg: 'var(--green-dim)',  border: 'var(--green)',  color: 'var(--green)',  label: '🟢 Publié'    },
+    BROUILLON: { bg: 'var(--blue-dim)',   border: 'var(--blue)',   color: 'var(--blue)',   label: '📝 Brouillon' },
+    ARCHIVE:   { bg: 'var(--surface-2)', border: 'var(--border)', color: 'var(--text-3)', label: '📦 Archivé'   },
+  };
 
   private colors = [
     { color: 'var(--blue)',   dim: 'var(--blue-dim)'   },
@@ -27,69 +54,62 @@ export class CoursComponent implements OnInit {
     { color: 'var(--purple)', dim: 'var(--purple-dim)' },
   ];
 
-  niveauLabels: Record<string, string> = {
-    DEBUTANT: '🟢 Débutant',
-    INTERMEDIAIRE: '🟡 Intermédiaire',
-    AVANCE: '🔴 Avancé'
-  };
-
-  niveauColors: Record<string, string> = {
-    DEBUTANT: 'var(--green)',
-    INTERMEDIAIRE: 'var(--orange)',
-    AVANCE: 'var(--red,#ef4444)'
-  };
-
-  statutColors: Record<string, {bg: string; border: string; color: string}> = {
-    PUBLIE:    { bg: 'var(--green-dim)',  border: 'var(--green)',        color: 'var(--green)'        },
-    BROUILLON: { bg: 'var(--blue-dim)',   border: 'var(--blue)',         color: 'var(--blue)'         },
-    ARCHIVE:   { bg: 'var(--surface-2)', border: 'var(--border)',        color: 'var(--text-3)'       },
-  };
-
-  constructor(
-    private catalogueService: CatalogueService,
-    private route: ActivatedRoute
-  ) {}
+  constructor(private catalogueService: CatalogueService, private route: ActivatedRoute) {}
 
   ngOnInit(): void {
+    const id = this.route.snapshot.queryParamMap.get('moduleId');
+    this.moduleId = id ? +id : null;
     this.moduleNom = this.route.snapshot.queryParamMap.get('moduleNom') || '';
 
-    this.catalogueService.getAllCours().subscribe({
+    const obs$ = this.moduleId
+      ? this.catalogueService.getCoursByModule(this.moduleId)
+      : this.catalogueService.getAllCours();
+
+    obs$.subscribe({
       next: (data) => {
         this.cours = data;
+        this.applyFilters();
         this.loading = false;
       },
-      error: (err) => {
-        this.errorMsg = 'Impossible de charger les cours. Vérifiez votre connexion.';
+      error: () => {
+        this.errorMsg = 'Impossible de charger les cours.';
         this.loading = false;
-        console.error(err);
       }
     });
   }
 
-  getColor(index: number) {
-    return this.colors[index % this.colors.length];
+  applyFilters(): void {
+    let result = [...this.cours];
+    if (this.niveauFiltre !== 'tous')
+      result = result.filter(c => c.niveau === this.niveauFiltre);
+    const q = this.searchQuery.toLowerCase().trim();
+    if (q) result = result.filter(c =>
+      c.titre.toLowerCase().includes(q) ||
+      c.description.toLowerCase().includes(q));
+    this.filtered = result;
   }
 
-  formatDuree(minutes?: number): string {
-    if (!minutes) return '—';
-    if (minutes < 60) return `${minutes} min`;
-    const h = Math.floor(minutes / 60);
-    const m = minutes % 60;
-    return m > 0 ? `${h}h ${m}min` : `${h}h`;
+  setNiveau(n: Niveau | 'tous'): void { this.niveauFiltre = n; this.applyFilters(); }
+  onSearch(): void { this.applyFilters(); }
+  clearSearch(): void { this.searchQuery = ''; this.applyFilters(); }
+  setVue(v: Vue): void { this.vue = v; }
+
+  countByNiveau(n: Niveau): number { return this.cours.filter(c => c.niveau === n).length; }
+
+  getColor(i: number) { return this.colors[i % this.colors.length]; }
+
+  getStatut(statut?: string) {
+    return this.statutStyle[statut ?? ''] ?? this.statutStyle['ARCHIVE'];
   }
 
-  formatDate(date?: string): string {
-    if (!date) return '—';
-    return new Date(date).toLocaleDateString('fr-FR', {
-      day: '2-digit', month: 'short', year: 'numeric'
-    });
+  formatDuree(min?: number): string {
+    if (!min) return '—';
+    const h = Math.floor(min / 60), m = min % 60;
+    return h > 0 ? (m > 0 ? `${h}h ${m}min` : `${h}h`) : `${min} min`;
   }
 
-  getStatut(statut?: string): {bg: string; border: string; color: string; label: string} {
-    const map: Record<string, string> = {
-      PUBLIE: 'Publié', BROUILLON: 'Brouillon', ARCHIVE: 'Archivé'
-    };
-    const style = this.statutColors[statut ?? ''] ?? this.statutColors['ARCHIVE'];
-    return { ...style, label: map[statut ?? ''] ?? statut ?? '—' };
+  formatDate(d?: string): string {
+    if (!d) return '—';
+    return new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
   }
 }

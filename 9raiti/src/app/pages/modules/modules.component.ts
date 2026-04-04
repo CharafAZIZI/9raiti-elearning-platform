@@ -1,25 +1,31 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { CatalogueService } from '../../core/services/catalogue.service';
 import { ModuleDTO } from '../../models/module.model';
 
+type Filtre = 'tous' | 'actif' | 'inactif';
+
 @Component({
   selector: 'app-modules',
   standalone: true,
-  imports: [CommonModule, NavbarComponent, RouterModule],
+  imports: [CommonModule, NavbarComponent, RouterModule, FormsModule],
   templateUrl: './modules.component.html',
   styleUrls: ['./modules.component.css']
 })
 export class ModulesComponent implements OnInit {
 
   modules: ModuleDTO[] = [];
-  filteredModules: ModuleDTO[] = [];
+  filtered: ModuleDTO[] = [];
   loading = true;
   errorMsg = '';
 
-  // Filtre optionnel par catégorie (via queryParams, si votre API le supporte)
+  searchQuery = '';
+  filtre: Filtre = 'tous';
+
+  categorieId: number | null = null;
   categorieNom = '';
 
   private colors = [
@@ -30,29 +36,48 @@ export class ModulesComponent implements OnInit {
     { color: 'var(--purple)', dim: 'var(--purple-dim)' },
   ];
 
-  constructor(
-    private catalogueService: CatalogueService,
-    private route: ActivatedRoute
-  ) {}
+  constructor(private catalogueService: CatalogueService, private route: ActivatedRoute) {}
 
   ngOnInit(): void {
+    const id = this.route.snapshot.queryParamMap.get('categorieId');
+    this.categorieId = id ? +id : null;
     this.categorieNom = this.route.snapshot.queryParamMap.get('categorieNom') || '';
 
-    this.catalogueService.getAllModules().subscribe({
+    const obs$ = this.categorieId
+      ? this.catalogueService.getModulesByCategorie(this.categorieId)
+      : this.catalogueService.getAllModules();
+
+    obs$.subscribe({
       next: (data) => {
         this.modules = data;
-        this.filteredModules = data;
+        this.applyFilters();
         this.loading = false;
       },
-      error: (err) => {
-        this.errorMsg = 'Impossible de charger les modules. Vérifiez votre connexion.';
+      error: () => {
+        this.errorMsg = 'Impossible de charger les modules.';
         this.loading = false;
-        console.error(err);
       }
     });
   }
 
-  getColor(index: number) {
-    return this.colors[index % this.colors.length];
+  applyFilters(): void {
+    let result = [...this.modules];
+    if (this.filtre === 'actif')   result = result.filter(m => m.actif);
+    if (this.filtre === 'inactif') result = result.filter(m => !m.actif);
+    const q = this.searchQuery.toLowerCase().trim();
+    if (q) result = result.filter(m =>
+      m.nom.toLowerCase().includes(q) ||
+      m.description.toLowerCase().includes(q) ||
+      m.code.toLowerCase().includes(q));
+    this.filtered = result;
   }
+
+  setFiltre(f: Filtre): void { this.filtre = f; this.applyFilters(); }
+  onSearch(): void { this.applyFilters(); }
+  clearSearch(): void { this.searchQuery = ''; this.applyFilters(); }
+
+  get actifCount()   { return this.modules.filter(m => m.actif).length; }
+  get inactifCount() { return this.modules.filter(m => !m.actif).length; }
+
+  getColor(i: number) { return this.colors[i % this.colors.length]; }
 }

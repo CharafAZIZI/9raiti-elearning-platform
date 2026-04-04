@@ -19,7 +19,7 @@ export interface UpdateProfileUserVM {
   specialite?:                string;
 }
 
-// ─── Réponse de GetMyProfile ──────────────────────────────────────────────────
+// ─── Réponse de GetMyProfile ─────────────────────────────────────────────────
 export interface ProfileResponse {
   id:         number;
   email:      string;

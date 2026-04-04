@@ -1,15 +1,18 @@
 package com.MicroServiceSpring.MicroServiceSpring.Models;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "cours")
 @Getter
 @Setter
+@NoArgsConstructor
 public class Cours {
 
     @Id
@@ -26,7 +29,9 @@ public class Cours {
     @Enumerated(EnumType.STRING)
     private Niveau niveau;
 
+    // CORRECTION : StatutCours est un enum — ne pas le stocker/comparer comme String
     @Enumerated(EnumType.STRING)
+    @Column(name = "statut")
     private StatutCours statut;
 
     @CreationTimestamp
@@ -40,7 +45,7 @@ public class Cours {
     @Column(name = "file_path")
     private String filePath;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "module_id")
     private Module module;
 }

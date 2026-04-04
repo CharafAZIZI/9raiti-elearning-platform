@@ -1,115 +1,104 @@
-# 9raiti — Interface Angular 17
+# 9raiti — Projet Angular Fusionné (v4 + v5)
 
-Plateforme d'apprentissage en ligne connectée au microservice .NET d'authentification.
-
----
-
-## 🚀 Installation et démarrage
-
-```bash
-# 1. Aller dans le dossier du projet
-cd 9raiti
-
-# 2. Installer les dépendances
-npm install
-
-# 3. Lancer le serveur de développement
-ng serve --open
-# L'app sera disponible sur http://localhost:4200
-```
+Application Angular 17 (Standalone Components) pour une plateforme d'e-learning multi-rôles (Apprenant, Enseignant, Admin).
 
 ---
 
-## 📁 Structure du projet
+## Architecture
 
 ```
 src/
 ├── app/
 │   ├── core/
-│   │   ├── services/
-│   │   │   ├── auth.service.ts        ← Appels API (login, register, logout, Google)
-│   │   │   └── token.service.ts       ← Gestion JWT dans localStorage
-│   │   ├── guards/
-│   │   │   └── auth.guard.ts          ← authGuard, roleGuard, guestGuard
-│   │   └── interceptors/
-│   │       └── jwt.interceptor.ts     ← Ajoute Bearer token automatiquement
-│   ├── models/
-│   │   ├── login.model.ts             ← LoginRequest, LoginResponse, LoginResult
-│   │   └── register.model.ts          ← RegisterUserVM
+│   │   ├── guards/         # authGuard, roleGuard, guestGuard
+│   │   ├── interceptors/   # jwtInterceptor (attach token + 401 → logout auto)
+│   │   └── services/       # auth, catalogue, profile, admin-user, token, theme, user-state
+│   ├── models/             # CategorieDTO, ModuleDTO, CoursDTO, LoginRequest/Response, RegisterUserVM
 │   ├── pages/
-│   │   ├── login/                     ← Page de connexion + Google Login
-│   │   ├── register/                  ← Inscription avec choix de rôle
-│   │   ├── dashboard-apprenant/       ← Tableau de bord apprenant
-│   │   ├── dashboard-enseignant/      ← Tableau de bord enseignant
-│   │   └── pending-validation/        ← Page d'attente (enseignant non validé)
-│   ├── shared/components/navbar/      ← Barre de navigation avec déconnexion
-│   ├── app.routes.ts                  ← Routes protégées par rôle
-│   └── app.config.ts                  ← Config HTTP + interceptors
-└── environments/
-    └── environment.ts                 ← apiUrl = http://localhost:5000/api
+│   │   ├── login/
+│   │   ├── register/
+│   │   ├── pending-validation/
+│   │   ├── dashboard-admin/        # Gestion utilisateurs (CRUD réel via API .NET)
+│   │   ├── dashboard-apprenant/    # Tableau de bord apprenant
+│   │   ├── dashboard-enseignant/   # CRUD Catégories / Modules / Cours (API Spring Boot)
+│   │   ├── categories/             # Catalogue catégories (lecture)
+│   │   ├── modules/                # Catalogue modules (lecture)
+│   │   └── cours/                  # Catalogue cours (lecture + PDF viewer)
+│   ├── shared/
+│   │   └── components/navbar/      # Navbar réactive (thème, user state, logout)
+│   └── ...
+├── environments/
+│   └── environment.ts              # apiUrl (.NET 5000) + springApiUrl (Spring Boot 8080)
+└── styles.css                      # Variables CSS globales (dark/light mode)
 ```
 
 ---
 
-## 🔗 Connexion à l'API
+## Backends requis
 
-Tous les appels passent par l'API Gateway sur **port 5000** :
-
-| Action | Méthode | Endpoint |
-|--------|---------|----------|
-| Inscription | POST | `http://localhost:5000/api/auth` |
-| Connexion | POST | `http://localhost:5000/api/auth/login` |
-| Connexion Google | POST | `http://localhost:5000/api/auth/google-login` |
-| Déconnexion | POST | `http://localhost:5000/api/auth/logout` |
+| Backend | Port | Routes couvertes |
+|---------|------|-----------------|
+| API .NET (Gateway) | 5000 | `/api/auth/*`, `/api/profile`, `/api/users/*` |
+| API Spring Boot | 8080 | `/api/categories/*`, `/api/modules/*`, `/api/cours/*` |
 
 ---
 
-## 🔐 Logique des rôles
+## Installation et démarrage
 
-### Inscription (`/register`)
-- L'utilisateur choisit entre **Apprenant** ou **Enseignant**
-- Si **Apprenant** → inscription directe, redirection vers `/login`
-- Si **Enseignant** → message d'avertissement visible + après inscription → message de succès expliquant la validation
+```bash
+# 1. Installer les dépendances
+npm install
 
-### Connexion (`/login`)
-- Succès → redirection automatique selon le rôle :
-  - `apprenant` → `/dashboard-apprenant`
-  - `enseignant` → `/dashboard-enseignant`
-- Erreur 401 → "Email ou mot de passe incorrect"
-- Erreur 403 → "Compte en attente de validation"
-
-### Guards
-- `authGuard` : protège toutes les routes dashboard
-- `roleGuard('apprenant')` : seuls les apprenants accèdent à `/dashboard-apprenant`
-- `roleGuard('enseignant')` : seuls les enseignants accèdent à `/dashboard-enseignant`
-- `guestGuard` : empêche l'accès à login/register si déjà connecté
-
----
-
-## ⚠️ Configuration CORS
-
-Vérifiez que votre .NET Program.cs autorise `http://localhost:4200` :
-
-```csharp
-policy.WithOrigins("http://localhost:4200", "http://localhost:5184")
-      .AllowAnyHeader()
-      .AllowAnyMethod();
+# 2. Démarrer en développement (proxy vers les deux backends)
+npm start
+# ou
+ng serve --proxy-config proxy.conf.json
 ```
 
----
-
-## 🎨 Design
-
-- **Polices** : Lora (titres) + Source Sans 3 (corps)
-- **Couleurs** : Bleu académique `#1a5f7a` + Ambre `#e8a020`
-- **Responsive** : Panel gauche masqué sur mobile
-- Importez les styles depuis `src/styles.css` dans chaque composant
+Le proxy Angular est configuré dans `proxy.conf.json` :
+- `/api/*` → `http://localhost:5000` (API .NET)
+- `/spring-api/*` → `http://localhost:8080/api/*` (Spring Boot)
 
 ---
 
-## 📌 Notes importantes
+## Ce qui a été fusionné (v4 → v5)
 
-1. Le JWT est stocké dans `localStorage` sous la clé `auth_token`
-2. L'interceptor `jwt.interceptor.ts` ajoute automatiquement `Authorization: Bearer <token>` à chaque requête HTTP
-3. La page `/en-attente` est accessible après inscription en tant qu'enseignant (optionnel selon votre logique backend)
-4. Pour le Google Login, le `ClientId` est déjà configuré dans `login.component.ts`
+| Élément | Source | Raison |
+|---------|--------|--------|
+| `CatalogueService` | v4 + v5 | CRUD complet (v4) + cache `shareReplay` + gestion erreurs (v5) |
+| `dashboard-enseignant` | v4 | CRUD API réel (catégories / modules / cours / upload PDF) |
+| `jwt.interceptor` | v5 | Gestion automatique 401 → déconnexion |
+| `environment.ts` | Fusionné | Double URL : `.NET` (5000) + `Spring Boot` (8080) |
+| `proxy.conf.json` | Fusionné | Double proxy : `/api` + `/spring-api` |
+| Toutes les autres pages | v5 | Version la plus récente |
+
+---
+
+## Rôles et redirections
+
+| Rôle | Route après login |
+|------|------------------|
+| `apprenant` | `/dashboard-apprenant` |
+| `enseignant` | `/dashboard-enseignant` |
+| `admin` | `/dashboard-admin` |
+| Enseignant non validé | `/en-attente` |
+
+---
+
+## Fonctionnalités
+
+- **Authentification** : Login/Register + Google OAuth2
+- **Gestion des thèmes** : Dark / Light (persisté dans localStorage)
+- **Admin** : Gestion complète des utilisateurs (valider, activer, suspendre, supprimer)
+- **Enseignant** : CRUD Catégories, Modules, Cours + upload PDF
+- **Apprenant** : Navigation catalogue (catégories → modules → cours) + lecture PDF
+- **Sécurité** : JWT interceptor, guards par rôle, expiration token
+
+---
+
+## Commandes utiles
+
+```bash
+npm start          # Démarrage développement
+npm run build      # Build production
+```

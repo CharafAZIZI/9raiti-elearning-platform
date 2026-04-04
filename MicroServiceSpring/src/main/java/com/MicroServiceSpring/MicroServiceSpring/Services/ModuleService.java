@@ -1,6 +1,7 @@
 package com.MicroServiceSpring.MicroServiceSpring.Services;
 
 import com.MicroServiceSpring.MicroServiceSpring.DTO.ModuleDTO;
+
 import java.util.List;
 
 public interface ModuleService {
@@ -11,6 +12,5 @@ public interface ModuleService {
     List<ModuleDTO> getAllModules();
     void deleteModule(Long id);
 
-    // filtrer par catégorie
     List<ModuleDTO> getModulesByCategorieId(Long categorieId);
 }

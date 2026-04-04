@@ -5,71 +5,119 @@
 
     <!-- En-tête -->
     <div class="mb-8 animate-fade-in">
-      <div class="flex items-center gap-3 mb-1">
-        <a routerLink="/modules"
-           style="color:var(--brand);text-decoration:none;font-size:13px;font-weight:600;">
-          ← Modules
-        </a>
-      </div>
-      <div class="flex items-start justify-between flex-wrap gap-3">
+      <a routerLink="/modules"
+         style="color:var(--brand);text-decoration:none;font-size:13px;font-weight:600;">
+        ← Modules
+      </a>
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-2">
         <div>
           <h1 class="text-3xl font-bold" style="font-family:'Syne',sans-serif;color:var(--text);">
             Catalogue de cours
-            <span *ngIf="moduleNom" class="text-xl font-normal" style="color:var(--text-3);">
+            <span *ngIf="moduleNom" class="text-lg font-normal" style="color:var(--text-3);">
               — {{ moduleNom }}
             </span>
           </h1>
           <p class="text-sm mt-1" style="color:var(--text-3);">
-            Consultez tous les cours disponibles sur la plateforme
+            {{ filtered.length }} cours affiché(s) sur {{ cours.length }}
           </p>
         </div>
-        <span *ngIf="!loading && !errorMsg" class="badge b-blue self-start">
-          {{ cours.length }} cours
-        </span>
+
+        <!-- Toggle vue grille / liste -->
+        <div class="flex gap-1 p-1 rounded-xl self-start sm:self-auto"
+             style="background:var(--surface-2);border:1px solid var(--border);">
+          <button (click)="setVue('grille')" class="btn btn-sm"
+                  [class.btn-brand]="vue==='grille'" [class.btn-ghost]="vue!=='grille'"
+                  style="border:none!important;">
+            ⊞ Grille
+          </button>
+          <button (click)="setVue('liste')" class="btn btn-sm"
+                  [class.btn-brand]="vue==='liste'" [class.btn-ghost]="vue!=='liste'"
+                  style="border:none!important;">
+            ☰ Liste
+          </button>
+        </div>
+      </div>
+
+      <!-- Recherche -->
+      <div class="relative mt-4 max-w-md">
+        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-base pointer-events-none">🔍</span>
+        <input type="text" class="inp" style="padding-left:40px;padding-right:36px;"
+               placeholder="Rechercher un cours…"
+               [(ngModel)]="searchQuery" (ngModelChange)="onSearch()" />
+        <button *ngIf="searchQuery" (click)="clearSearch()"
+                class="absolute right-3 top-1/2 -translate-y-1/2"
+                style="background:none;border:none;cursor:pointer;color:var(--text-3);">✕</button>
+      </div>
+
+      <!-- Filtres niveau -->
+      <div class="flex flex-wrap gap-2 mt-3">
+        <button *ngFor="let n of niveaux"
+                (click)="setNiveau(n.value)"
+                class="btn btn-sm"
+                [class.btn-brand]="niveauFiltre===n.value"
+                [class.btn-ghost]="niveauFiltre!==n.value">
+          {{ n.icon }} {{ n.label }}
+          <span *ngIf="n.value !== 'tous'" class="ml-1 opacity-70">
+            ({{ countByNiveau(n.value) }})
+          </span>
+        </button>
       </div>
     </div>
 
-    <!-- Chargement -->
-    <div *ngIf="loading" class="flex flex-col items-center justify-center py-24 gap-4">
-      <div class="loader"></div>
-      <p style="color:var(--text-3);">Chargement des cours…</p>
+    <!-- Skeleton -->
+    <div *ngIf="loading" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+      <div *ngFor="let s of [1,2,3,4,5,6]" class="glass rounded-2xl overflow-hidden">
+        <div class="skeleton h-28"></div>
+        <div class="p-4 space-y-3">
+          <div class="skeleton h-4 w-3/4 rounded-lg"></div>
+          <div class="skeleton h-3 w-full rounded-lg"></div>
+          <div class="skeleton h-3 w-2/3 rounded-lg"></div>
+          <div class="grid grid-cols-2 gap-2">
+            <div class="skeleton h-10 rounded-lg"></div>
+            <div class="skeleton h-10 rounded-lg"></div>
+          </div>
+          <div class="skeleton h-9 rounded-xl"></div>
+        </div>
+      </div>
     </div>
 
     <!-- Erreur -->
-    <div *ngIf="!loading && errorMsg"
-         class="rounded-2xl p-6 flex items-center gap-4"
-         style="background:var(--red-dim,#fee2e2);border:1px solid var(--red,#ef4444);">
-      <span style="font-size:24px;">⚠️</span>
+    <div *ngIf="!loading && errorMsg" class="alert alert-red rounded-2xl animate-fade-in">
+      <span style="font-size:20px;">⚠️</span>
       <div>
-        <p class="font-semibold" style="color:var(--text);">Erreur de chargement</p>
-        <p class="text-sm mt-0.5" style="color:var(--text-3);">{{ errorMsg }}</p>
+        <p class="font-semibold">Erreur de chargement</p>
+        <p class="text-sm mt-0.5">{{ errorMsg }}</p>
       </div>
     </div>
 
-    <!-- Aucun cours -->
-    <div *ngIf="!loading && !errorMsg && cours.length === 0"
-         class="flex flex-col items-center justify-center py-24 gap-3">
+    <!-- Vide -->
+    <div *ngIf="!loading && !errorMsg && filtered.length === 0"
+         class="flex flex-col items-center justify-center py-20 gap-3 animate-fade-in">
       <span style="font-size:48px;">📚</span>
-      <p class="text-lg font-semibold" style="color:var(--text);">Aucun cours disponible</p>
-      <p class="text-sm" style="color:var(--text-3);">Les cours apparaîtront ici une fois ajoutés.</p>
+      <p class="font-semibold" style="color:var(--text);">
+        {{ searchQuery ? 'Aucun résultat pour "' + searchQuery + '"' : 'Aucun cours disponible' }}
+      </p>
+      <button *ngIf="searchQuery || niveauFiltre!=='tous'"
+              (click)="clearSearch(); setNiveau('tous')"
+              class="btn btn-ghost btn-sm">Réinitialiser les filtres</button>
     </div>
 
-    <!-- Grille des cours -->
-    <div *ngIf="!loading && !errorMsg && cours.length > 0"
+    <!-- ══ VUE GRILLE ══════════════════════════════════════════ -->
+    <div *ngIf="!loading && !errorMsg && filtered.length > 0 && vue==='grille'"
          class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
 
-      <div *ngFor="let c of cours; let i = index"
-           class="glass glass-hover rounded-2xl overflow-hidden animate-slide-up"
-           [class]="'d-' + (i % 4)">
+      <div *ngFor="let c of filtered; let i = index"
+           class="glass glass-hover rounded-2xl overflow-hidden animate-slide-up flex flex-col"
+           [class]="'d-' + (i % 5)">
 
         <!-- Bannière -->
         <div class="h-28 flex items-center justify-center text-4xl relative"
              [style.background]="getColor(i).dim">
           <div class="absolute inset-0 opacity-10"
-               style="background:linear-gradient(135deg,transparent,rgba(0,0,0,.4));"></div>
+               style="background:linear-gradient(135deg,transparent,rgba(0,0,0,.5));"></div>
           <span class="relative z-10">📖</span>
 
-          <!-- Badge statut -->
+          <!-- Statut top-right -->
           <div class="absolute top-3 right-3">
             <span class="badge text-xs"
                   [style.background]="getStatut(c.statut).bg"
@@ -79,11 +127,12 @@
             </span>
           </div>
 
-          <!-- Badge niveau -->
-          <div class="absolute top-3 left-3">
-            <span *ngIf="c.niveau" class="badge text-xs"
-                  style="background:rgba(0,0,0,.35);border-color:transparent;color:white;">
-              <!-- {{ niveauLabels[c.niveau] ?? c.niveau }} -->
+          <!-- Niveau top-left -->
+          <div *ngIf="c.niveau" class="absolute top-3 left-3">
+            <span class="badge text-xs"
+                  style="background:rgba(0,0,0,.45);border-color:transparent;color:white;">
+              {{ c.niveau === 'DEBUTANT' ? '🟢 Débutant'
+               : c.niveau === 'INTERMEDIAIRE' ? '🟡 Intermédiaire' : '🔴 Avancé' }}
             </span>
           </div>
 
@@ -92,39 +141,111 @@
         </div>
 
         <!-- Contenu -->
-        <div class="p-4">
-          <h3 class="font-bold text-sm mb-1"
-              style="font-family:'Syne',sans-serif;color:var(--text);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">
+        <div class="p-4 flex flex-col flex-1">
+          <h3 class="font-bold text-sm mb-1 clamp-2"
+              style="font-family:'Syne',sans-serif;color:var(--text);">
             {{ c.titre }}
           </h3>
-          <p class="text-xs leading-relaxed mb-3"
-             style="color:var(--text-3);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">
+          <p class="text-xs leading-relaxed mb-4 clamp-2" style="color:var(--text-3);">
             {{ c.description }}
           </p>
 
           <!-- Métadonnées -->
-          <div class="grid grid-cols-2 gap-2 mb-4">
-            <div class="flex items-center gap-1.5 p-2 rounded-lg" style="background:var(--surface-2);">
-              <span style="font-size:14px;">⏱️</span>
+          <div class="grid grid-cols-2 gap-2 mb-4 mt-auto">
+            <div class="flex items-center gap-1.5 p-2 rounded-lg"
+                 style="background:var(--surface-2);border:1px solid var(--border);">
+              <span>⏱️</span>
               <span class="text-xs" style="color:var(--text-3);">{{ formatDuree(c.dureeMinutes) }}</span>
             </div>
-            <div class="flex items-center gap-1.5 p-2 rounded-lg" style="background:var(--surface-2);">
-              <span style="font-size:14px;">👥</span>
+            <div class="flex items-center gap-1.5 p-2 rounded-lg"
+                 style="background:var(--surface-2);border:1px solid var(--border);">
+              <span>👥</span>
               <span class="text-xs" style="color:var(--text-3);">{{ c.nombreInscrits ?? 0 }} inscrits</span>
             </div>
-            <div class="flex items-center gap-1.5 p-2 rounded-lg col-span-2" style="background:var(--surface-2);">
-              <span style="font-size:14px;">📅</span>
+            <div class="col-span-2 flex items-center gap-1.5 p-2 rounded-lg"
+                 style="background:var(--surface-2);border:1px solid var(--border);">
+              <span>📅</span>
               <span class="text-xs" style="color:var(--text-3);">Créé le {{ formatDate(c.dateCreation) }}</span>
             </div>
           </div>
 
-          <!-- Action -->
           <button class="btn btn-brand btn-sm w-full">
             S'inscrire à ce cours
           </button>
         </div>
       </div>
-
     </div>
+
+    <!-- ══ VUE LISTE ════════════════════════════════════════════ -->
+    <div *ngIf="!loading && !errorMsg && filtered.length > 0 && vue==='liste'"
+         class="glass rounded-2xl overflow-hidden animate-fade-in">
+      <div class="scroll-x">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>Cours</th>
+              <th>Niveau</th>
+              <th>Statut</th>
+              <th>Durée</th>
+              <th>Inscrits</th>
+              <th>Créé le</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let c of filtered; let i = index" class="tbl-row animate-slide-up"
+                [class]="'d-' + (i % 5)">
+
+              <td style="max-width:280px;">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-xl flex items-center justify-center text-base flex-shrink-0"
+                       [style.background]="getColor(i).dim">📖</div>
+                  <div>
+                    <p class="text-sm font-semibold clamp-2" style="color:var(--text);">{{ c.titre }}</p>
+                    <p class="text-xs clamp-2 mt-0.5" style="color:var(--text-3);">{{ c.description }}</p>
+                  </div>
+                </div>
+              </td>
+
+              <td>
+                <span *ngIf="c.niveau" class="badge text-xs"
+                      [style.background]="c.niveau==='DEBUTANT' ? 'var(--green-dim)' : c.niveau==='INTERMEDIAIRE' ? 'var(--orange-dim)' : 'var(--red-dim)'"
+                      [style.border-color]="niveauColors[c.niveau]"
+                      [style.color]="niveauColors[c.niveau]">
+                  {{ c.niveau === 'DEBUTANT' ? '🟢 Débutant' : c.niveau === 'INTERMEDIAIRE' ? '🟡 Intermédiaire' : '🔴 Avancé' }}
+                </span>
+                <span *ngIf="!c.niveau" style="color:var(--text-4);">—</span>
+              </td>
+
+              <td>
+                <span class="badge text-xs"
+                      [style.background]="getStatut(c.statut).bg"
+                      [style.border-color]="getStatut(c.statut).border"
+                      [style.color]="getStatut(c.statut).color">
+                  {{ getStatut(c.statut).label }}
+                </span>
+              </td>
+
+              <td>
+                <span class="badge b-blue text-xs">{{ formatDuree(c.dureeMinutes) }}</span>
+              </td>
+
+              <td>
+                <span style="color:var(--text-2);">{{ c.nombreInscrits ?? 0 }}</span>
+              </td>
+
+              <td>
+                <span style="color:var(--text-3);font-size:12px;">{{ formatDate(c.dateCreation) }}</span>
+              </td>
+
+              <td>
+                <button class="btn btn-brand btn-sm">S'inscrire</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
   </div>
 </div>

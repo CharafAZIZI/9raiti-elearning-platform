@@ -8,7 +8,7 @@ public class CategoriesDTO {
 
     private Long id;
 
-    @NotBlank
+    @NotBlank(message = "Le nom est obligatoire")
     private String nom;
 
     private String description;

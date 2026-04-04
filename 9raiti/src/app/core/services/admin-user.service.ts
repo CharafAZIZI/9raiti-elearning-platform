@@ -4,20 +4,21 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 export interface User {
-  id: number;
-  nom: string;
-  prenom: string;
-  email: string;
-  telephone?: string;
-  role: string;
-  est_valide: boolean;
-  est_actif: boolean;
+  id:           number;
+  nom:          string;
+  prenom:       string;
+  email:        string;
+  telephone?:   string;
+  role:         string;
+  est_valide:   boolean;
+  est_actif:    boolean;
   mot_de_passe?: string;
 }
 
 @Injectable({ providedIn: 'root' })
 export class AdminUserService {
-  private apiUrl = `${environment.apiUrl}/users`;
+
+  private readonly apiUrl = `${environment.apiUrl}/users`;
 
   constructor(private http: HttpClient) {}
 

@@ -4,8 +4,10 @@ import com.MicroServiceSpring.MicroServiceSpring.DTO.ModuleDTO;
 import com.MicroServiceSpring.MicroServiceSpring.Services.ModuleService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
@@ -17,7 +19,8 @@ public class ModuleController {
 
     @PostMapping
     public ResponseEntity<ModuleDTO> create(@Valid @RequestBody ModuleDTO dto) {
-        return ResponseEntity.ok(moduleService.createModule(dto));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(moduleService.createModule(dto));
     }
 
     @GetMapping
@@ -30,7 +33,6 @@ public class ModuleController {
         return ResponseEntity.ok(moduleService.getModuleById(id));
     }
 
-    // ✅ NOUVEAU — Angular appelle GET /api/modules/categorie/{categorieId}
     @GetMapping("/categorie/{categorieId}")
     public ResponseEntity<List<ModuleDTO>> getByCategorieId(@PathVariable Long categorieId) {
         return ResponseEntity.ok(moduleService.getModulesByCategorieId(categorieId));

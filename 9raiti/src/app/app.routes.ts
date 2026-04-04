@@ -2,7 +2,10 @@ import { Routes } from '@angular/router';
 import { authGuard, roleGuard, guestGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'login', pathMatch: 'full' },
+  {
+    path: '',
+    loadComponent: () => import('./pages/home/home.component').then(m => m.HomeComponent)
+  },
   {
     path: 'login',
     canActivate: [guestGuard],
@@ -12,6 +15,18 @@ export const routes: Routes = [
     path: 'register',
     canActivate: [guestGuard],
     loadComponent: () => import('./pages/register/register.component').then(m => m.RegisterComponent)
+  },
+  {
+    path: 'mot-de-passe-oublie',
+    canActivate: [guestGuard],
+    loadComponent: () => import('./pages/forgot-password/forgot-password.component')
+      .then(m => m.ForgotPasswordComponent)
+  },
+  {
+    path: 'reinitialiser-mot-de-passe',
+    canActivate: [guestGuard],
+    loadComponent: () => import('./pages/reset-password/reset-password.component')
+      .then(m => m.ResetPasswordComponent)
   },
   {
     path: 'dashboard-apprenant',
@@ -55,5 +70,5 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/cours/cours.component').then(m => m.CoursComponent)
   },
 
-  { path: '**', redirectTo: 'login' }
+  { path: '**', redirectTo: '' }
 ];

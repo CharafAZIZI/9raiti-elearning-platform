@@ -5,7 +5,6 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { TokenService } from '../../core/services/token.service';
 import { AdminUserService, User } from '../../core/services/admin-user.service';
-import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-dashboard-admin',
@@ -213,7 +212,7 @@ export class DashboardAdminComponent implements OnInit {
     this.logoutLoading = true;
     const token = this.tokenService.getToken();
     const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
-    this.http.post(`${environment.apiUrl}/auth/logout`, {}, { headers, responseType: 'text' as const }).subscribe({
+    this.http.post(`/api/auth/logout`, {}, { headers, responseType: 'text' as const }).subscribe({
       next: () => { this.tokenService.removeToken(); this.router.navigate(['/login']); },
       error: () => { this.tokenService.removeToken(); this.router.navigate(['/login']); }
     });

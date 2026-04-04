@@ -52,6 +52,15 @@ public class AuthService : IAuthService
 
         _repo.AddUser(user);
 
+        // Email spécifique enseignant — compte en cours de traitement
+        if (user.role?.ToLower() == "enseignant")
+        {
+            _emailService.SendEmailEnseignantInscription(
+                user.email,
+                $"{user.prenom} {user.nom}"
+            );
+        }
+
         string confirmationLink =
             $"https://localhost:7167/api/auth/confirm-email?token={token}";
 
