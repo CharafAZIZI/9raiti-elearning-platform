@@ -1,18 +1,20 @@
 package com.MicroServiceSpring.MicroServiceSpring.Services;
 
-import com.MicroServiceSpring.MicroServiceSpring.Models.Cours;
-import org.springframework.web.multipart.MultipartFile;
+import com.MicroServiceSpring.MicroServiceSpring.DTO.CoursDTO;
 
-import java.io.IOException;
 import java.util.List;
 
 public interface CoursService {
 
-    Cours createCours(Cours cours, MultipartFile file) throws IOException;
+    CoursDTO createCours(CoursDTO dto);
+    CoursDTO updateCours(Long id, CoursDTO dto);
+    CoursDTO getCoursById(Long id);
+    List<CoursDTO> getAllCours();
+    void deleteCours(Long id);
 
-    List<Cours> getAllCours();
+    List<CoursDTO> getCoursByModuleId(Long moduleId);
+    List<CoursDTO> getCoursPublies();
 
-    Cours getCoursById(Long id);
-
-
+    // Mise à jour du filePath uniquement (pour l'upload)
+    CoursDTO updateFilePath(Long id, String filePath);
 }

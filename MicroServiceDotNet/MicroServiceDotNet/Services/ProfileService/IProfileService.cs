@@ -6,5 +6,6 @@ namespace MicroServiceDotNet.Services.ProfileService
     {
         object GetMyProfile(int userId);
         object UpdateUser(int userId, UpdateProfileUserVM UpdateVM);
+        object UpdatePhoto(int userId, IFormFile file);
     }
 }

@@ -1,6 +1,5 @@
 ﻿using MicroServiceDotNet.DTO.LoginUser;
 using MicroServiceDotNet.DTO.RegisterUser;
-using MicroServiceDotNet.Models;
 
 namespace MicroServiceDotNet.Services.AuthService
 {

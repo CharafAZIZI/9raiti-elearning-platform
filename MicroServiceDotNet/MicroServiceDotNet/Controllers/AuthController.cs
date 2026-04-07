@@ -1,10 +1,12 @@
 ﻿using MicroServiceDotNet.DTO.GoogleApi;
 using MicroServiceDotNet.DTO.LoginUser;
 using MicroServiceDotNet.DTO.RegisterUser;
+using MicroServiceDotNet.DTO.ResetPassword;
 using MicroServiceDotNet.Filters;
 using MicroServiceDotNet.Mappers;
 using MicroServiceDotNet.Repository;
 using MicroServiceDotNet.Services.AuthService;
+using MicroServiceDotNet.Services.PasswordService;
 using MicroServiceDotNet.Services.TokenBlacklistService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,16 +21,20 @@ namespace MicroServiceDotNet.Controllers
         private readonly IUserRepository _repo;
         private readonly IAuthService _service;
         private readonly ITokenBlacklistService _blacklist;
+        private readonly IPasswordService _passwordService;
+        private readonly IWebHostEnvironment _env;
 
 
-        public AuthController(IUserRepository repo, IAuthService service, ITokenBlacklistService blacklist)
+        public AuthController(IUserRepository repo, IAuthService service, ITokenBlacklistService blacklist , IPasswordService passwordService , IWebHostEnvironment env)
         {
             _repo = repo;
             _service = service;
             _blacklist = blacklist;
+            _passwordService = passwordService;
+            _env = env;
         }
-        // INSCRIPTION
-        [HttpPost("inscription")]
+
+        [HttpPost]
         public IActionResult Inscrire([FromBody] RegisterUserVM vm)
         {
             var result = _service.Inscrire(vm);
@@ -37,7 +43,7 @@ namespace MicroServiceDotNet.Controllers
             return Ok("Inscription réussie verifier votre email");
 
         }
-        // LOGIN
+
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginRequest request)
         {
@@ -48,30 +54,22 @@ namespace MicroServiceDotNet.Controllers
                 return Unauthorized("Identifiants invalides");
             }
 
-<<<<<<< HEAD
-            // On récupère l'utilisateur
             var user = _repo.GetByEmail(request.email);
 
-            //  AJOUT : Vérification Email
             if (user != null && !user.EmailConfirmed)
             {
                 return StatusCode(403, "Veuillez confirmer votre email avant de vous connecter.");
             }
-
-=======
-            var user = _repo.GetByEmail(request.email);
->>>>>>> 0d4fa9da73c6ff7f066946d733aa1662500032dc
             var response = AuthMapper.ToLoginResponse(user, result);
             return Ok(response);
         }
-        // CONFIRMATION EMAIL
+
         [HttpGet("confirm-email")]
         public IActionResult ConfirmEmail(string token)
         {
             if (string.IsNullOrEmpty(token))
                 return Redirect("/email-templates/invalide-token.html");
 
-<<<<<<< HEAD
             var user = _repo.GetByConfirmationToken(token);
 
             if (user == null)
@@ -83,8 +81,7 @@ namespace MicroServiceDotNet.Controllers
             _repo.Update(user);
             return Redirect("/email-templates/email-confirmed.html");
         }
-        // LOGOUT
-=======
+
         [HttpPost("google-login")]
         public IActionResult GoogleLogin([FromBody] GoogleLoginRequest request)
         {
@@ -95,7 +92,6 @@ namespace MicroServiceDotNet.Controllers
             return Ok(result);
         }
 
->>>>>>> 0d4fa9da73c6ff7f066946d733aa1662500032dc
         [HttpPost("logout")]
         [Authorize]
         public IActionResult Logout()
@@ -108,8 +104,7 @@ namespace MicroServiceDotNet.Controllers
 
             return Ok("Déconnexion réussie");
         }
-<<<<<<< HEAD
-        // ENDPOINT SECURISE
+
         [HttpGet]
         [Authorize]
         [ServiceFilter(typeof(TokenBlacklistFilter))]
@@ -120,7 +115,32 @@ namespace MicroServiceDotNet.Controllers
 
             return Ok($"Vous êtes connecté : {email} - Rôle : {role}");
         }
-=======
->>>>>>> 0d4fa9da73c6ff7f066946d733aa1662500032dc
+
+
+        [HttpPost("forgot")]
+        public IActionResult ForgotPassword([FromBody] ResetPasswordRequest request)
+        {
+            _passwordService.DemanderReinitialisation(request.Email);
+
+            return Ok("Si l'email existe, un lien de réinitialisation a été envoyé.");
+        }
+
+
+        [HttpPost("reset")]
+        public IActionResult ResetPassword([FromBody] ResetPasswordConfirm vm)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest("Données invalides.");
+
+            if (vm.NewPassword != vm.ConfirmPassword)
+                return BadRequest("Les mots de passe ne correspondent pas.");
+
+            var result = _passwordService.ConfirmerReinitialisation(vm.Token, vm.NewPassword);
+
+            if (!result)
+                return BadRequest(new { message = "Token invalide ou expiré." });
+
+            return Ok(new { message = "Mot de passe réinitialisé avec succès." });
+        }
     }
 }

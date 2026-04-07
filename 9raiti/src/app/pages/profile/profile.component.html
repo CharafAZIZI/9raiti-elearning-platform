@@ -1,0 +1,209 @@
+<div class="min-h-screen" style="background:var(--bg);">
+  <app-navbar></app-navbar>
+
+  <!-- Page loading -->
+  <div *ngIf="pageLoading" class="flex items-center justify-center h-[calc(100vh-64px)]">
+    <div class="flex flex-col items-center gap-3">
+      <svg class="animate-spin-slow" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--brand);"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
+      <span class="text-sm" style="color:var(--text-3);">Chargement...</span>
+    </div>
+  </div>
+
+  <div *ngIf="!pageLoading" class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- Header -->
+    <div class="flex items-center gap-4 mb-8 animate-fade-in">
+      <button (click)="goBack()" class="btn btn-ghost flex items-center gap-2" style="padding:8px 14px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        Retour
+      </button>
+      <div>
+        <h1 class="text-2xl font-bold" style="font-family:'Syne',sans-serif;color:var(--text);">Mon Profil</h1>
+        <p class="text-sm" style="color:var(--text-2);">Gérez vos informations personnelles</p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-6">
+
+      <!-- LEFT -->
+      <div class="space-y-4">
+        <!-- Avatar card -->
+        <div class="glass rounded-2xl p-6 text-center animate-slide-up">
+          <div class="w-18 h-18 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4"
+               style="width:72px;height:72px;background:linear-gradient(135deg,#F59E0B,#D97706);color:white;font-family:'Syne',sans-serif;box-shadow:0 8px 24px rgba(245,158,11,.35);">
+            {{ initials }}
+          </div>
+          <h2 class="font-bold text-base mb-1" style="font-family:'Syne',sans-serif;color:var(--text);">{{ displayName }}</h2>
+          <p class="text-xs mb-3" style="color:var(--text-3);">{{ email }}</p>
+          <span class="badge" [class.b-blue]="role==='APPRENANT'" [class.b-green]="role==='ENSEIGNANT'" [class.b-purple]="role==='ADMIN'">{{ role }}</span>
+          <div *ngIf="profile" class="mt-4 space-y-2 pt-4" style="border-top:1px solid var(--border);">
+            <div class="flex items-center justify-between text-xs">
+              <span style="color:var(--text-3);">Statut</span>
+              <span class="badge" [class.b-green]="profile.est_actif" [class.b-red]="!profile.est_actif">{{profile.est_actif ? 'Actif' : 'Suspendu'}}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Nav -->
+        <div class="glass rounded-2xl p-2 space-y-1 animate-slide-up d-1">
+          <button (click)="activeTab='info'"        class="nav-item" [class.active]="activeTab==='info'">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Informations
+          </button>
+          <button (click)="activeTab='password'"    class="nav-item" [class.active]="activeTab==='password'">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            Mot de passe
+          </button>
+          <button *ngIf="hasRoleDetails" (click)="activeTab='role-details'" class="nav-item" [class.active]="activeTab==='role-details'">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2"/></svg>
+            <span *ngIf="isApprenant">Profil Apprenant</span>
+            <span *ngIf="isEnseignant">Profil Enseignant</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- RIGHT -->
+      <div>
+
+        <!-- INFO TAB -->
+        <div *ngIf="activeTab==='info'" class="glass rounded-2xl p-6 sm:p-8 animate-scale-in">
+          <h3 class="font-bold text-lg mb-1" style="font-family:'Syne',sans-serif;color:var(--text);">Informations personnelles</h3>
+          <p class="text-sm mb-6" style="color:var(--text-2);">Mettez à jour vos données de profil</p>
+
+          <div *ngIf="successInfo" class="alert alert-green mb-5 animate-fade-in"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="flex-shrink-0"><polyline points="20 6 9 17 4 12"/></svg>{{successInfo}}</div>
+          <div *ngIf="errorInfo"   class="alert alert-red mb-5 animate-fade-in"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="flex-shrink-0"><circle cx="12" cy="12" r="10"/></svg>{{errorInfo}}</div>
+
+          <form [formGroup]="infoForm" (ngSubmit)="submitInfo()" novalidate class="space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-semibold mb-1.5" style="color:var(--text-2);">Prénom</label>
+                <input type="text" formControlName="prenom" placeholder="Mohammed" class="inp" [class.err]="prenom?.invalid && prenom?.touched"/>
+                <p *ngIf="prenom?.invalid && prenom?.touched" class="text-xs mt-1" style="color:var(--red);">Requis (min. 2 caractères).</p>
+              </div>
+              <div>
+                <label class="block text-sm font-semibold mb-1.5" style="color:var(--text-2);">Nom</label>
+                <input type="text" formControlName="nom" placeholder="Alaoui" class="inp" [class.err]="nom?.invalid && nom?.touched"/>
+                <p *ngIf="nom?.invalid && nom?.touched" class="text-xs mt-1" style="color:var(--red);">Requis (min. 2 caractères).</p>
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold mb-1.5" style="color:var(--text-2);">Email</label>
+              <div class="relative">
+                <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text-3);"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                <input type="email" formControlName="email" class="inp inp-icon" [class.err]="emailCtrl?.invalid && emailCtrl?.touched"/>
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold mb-1.5" style="color:var(--text-2);">Téléphone <span style="color:var(--text-3);font-weight:400;">(optionnel)</span></label>
+              <input type="tel" formControlName="telephone" placeholder="+212 6XX XXX XXX" class="inp"/>
+            </div>
+            <div class="flex justify-end pt-2" style="border-top:1px solid var(--border);">
+              <button type="submit" [disabled]="loadingInfo" class="btn btn-brand" style="padding:10px 22px;">
+                <svg *ngIf="loadingInfo" class="animate-spin-slow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
+                {{loadingInfo ? 'Enregistrement...' : 'Enregistrer'}}
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- PASSWORD TAB -->
+        <div *ngIf="activeTab==='password'" class="glass rounded-2xl p-6 sm:p-8 animate-scale-in">
+          <h3 class="font-bold text-lg mb-1" style="font-family:'Syne',sans-serif;color:var(--text);">Modifier le mot de passe</h3>
+          <p class="text-sm mb-6" style="color:var(--text-2);">Choisissez un mot de passe fort</p>
+
+          <div *ngIf="successPwd" class="alert alert-green mb-5"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="flex-shrink-0"><polyline points="20 6 9 17 4 12"/></svg>{{successPwd}}</div>
+          <div *ngIf="errorPwd"   class="alert alert-red mb-5"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="flex-shrink-0"><circle cx="12" cy="12" r="10"/></svg>{{errorPwd}}</div>
+
+          <form [formGroup]="passwordForm" (ngSubmit)="submitPassword()" novalidate class="space-y-4">
+            <div>
+              <label class="block text-sm font-semibold mb-1.5" style="color:var(--text-2);">Nouveau mot de passe</label>
+              <div class="relative">
+                <input [type]="showNew?'text':'password'" formControlName="mot_de_passe" placeholder="Min. 6 caractères" class="inp" style="padding-right:46px;" [class.err]="pwdNew?.invalid && pwdNew?.touched"/>
+                <button type="button" (click)="showNew=!showNew" class="absolute right-3.5 top-1/2 -translate-y-1/2" style="background:none;border:none;cursor:pointer;color:var(--text-3);">
+                  <svg *ngIf="!showNew" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  <svg *ngIf="showNew"  width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                </button>
+              </div>
+              <div *ngIf="pwdNew?.value" class="mt-2">
+                <div class="prog-track"><div class="prog-fill" [style.width]="pwdStrength.w" [style.background]="pwdStrength.c"></div></div>
+                <p class="text-xs mt-1 font-semibold" [style.color]="pwdStrength.c">{{pwdStrength.l}}</p>
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold mb-1.5" style="color:var(--text-2);">Confirmer</label>
+              <div class="relative">
+                <input [type]="showConf?'text':'password'" formControlName="confirmation_mot_de_passe" placeholder="Répétez le mot de passe" class="inp" style="padding-right:46px;" [class.err]="pwdConf?.touched && pwdConf?.errors?.['mismatch']"/>
+                <button type="button" (click)="showConf=!showConf" class="absolute right-3.5 top-1/2 -translate-y-1/2" style="background:none;border:none;cursor:pointer;color:var(--text-3);">
+                  <svg *ngIf="!showConf" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  <svg *ngIf="showConf"  width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                </button>
+              </div>
+              <p *ngIf="pwdConf?.touched && pwdConf?.errors?.['mismatch']" class="text-xs mt-1" style="color:var(--red);">Les mots de passe ne correspondent pas.</p>
+            </div>
+            <div class="flex justify-end pt-2" style="border-top:1px solid var(--border);">
+              <button type="submit" [disabled]="loadingPwd" class="btn btn-brand" style="padding:10px 22px;">
+                <svg *ngIf="loadingPwd" class="animate-spin-slow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
+                {{loadingPwd ? 'Modification...' : 'Modifier le mot de passe'}}
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- ROLE DETAILS TAB -->
+        <div *ngIf="activeTab==='role-details'" class="glass rounded-2xl p-6 sm:p-8 animate-scale-in">
+          <h3 class="font-bold text-lg mb-1" style="font-family:'Syne',sans-serif;color:var(--text);">
+            <ng-container *ngIf="isApprenant">Profil Apprenant</ng-container>
+            <ng-container *ngIf="isEnseignant">Profil Enseignant</ng-container>
+          </h3>
+          <p class="text-sm mb-5" style="color:var(--text-2);">Informations spécifiques à votre rôle</p>
+
+          <div *ngIf="successDetails" class="alert alert-green mb-4"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="flex-shrink-0"><polyline points="20 6 9 17 4 12"/></svg>{{successDetails}}</div>
+          <div *ngIf="errorDetails"   class="alert alert-red mb-4"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="flex-shrink-0"><circle cx="12" cy="12" r="10"/></svg>{{errorDetails}}</div>
+
+          <form [formGroup]="detailsForm" (ngSubmit)="submitDetails()" novalidate class="space-y-4">
+            <ng-container *ngIf="isApprenant">
+              <div>
+                <label class="block text-sm font-semibold mb-1.5" style="color:var(--text-2);">Niveau scolaire</label>
+                <input type="text" formControlName="niveau_scolaire" placeholder="ex: Bac+2, Licence..." class="inp"/>
+              </div>
+              <div>
+                <label class="block text-sm font-semibold mb-1.5" style="color:var(--text-2);">Statut</label>
+                <select formControlName="statut" class="inp" style="cursor:pointer;">
+                  <option value="">-- Sélectionner --</option>
+                  <option value="etudiant">Étudiant</option>
+                  <option value="professionnel">Professionnel</option>
+                  <option value="demandeur_emploi">Demandeur d'emploi</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-semibold mb-1.5" style="color:var(--text-2);">Score (0–20)</label>
+                <input type="number" formControlName="score" min="0" max="20" step="0.5" class="inp"/>
+                <div *ngIf="detailsForm.value.score!=null" class="mt-2">
+                  <div class="prog-track"><div class="prog-fill" style="background:var(--brand);" [style.width]="(detailsForm.value.score/20*100)+'%'"></div></div>
+                  <span class="text-xs mt-1 font-bold" style="color:var(--brand);">{{detailsForm.value.score}}/20</span>
+                </div>
+              </div>
+            </ng-container>
+            <ng-container *ngIf="isEnseignant">
+              <div>
+                <label class="block text-sm font-semibold mb-1.5" style="color:var(--text-2);">Spécialité</label>
+                <input type="text" formControlName="specialite" placeholder="ex: Mathématiques, Informatique..." class="inp"/>
+              </div>
+              <div *ngIf="profile?.details?.date_embauche" class="p-3 rounded-xl" style="background:var(--surface-2);border:1px solid var(--border);">
+                <p class="text-xs" style="color:var(--text-3);">Date d'embauche</p>
+                <p class="font-semibold text-sm mt-0.5" style="color:var(--text);">{{profile!.details!.date_embauche | date:'dd MMMM yyyy':'':'fr-FR'}}</p>
+              </div>
+            </ng-container>
+            <div class="flex justify-end pt-2" style="border-top:1px solid var(--border);">
+              <button type="submit" [disabled]="loadingDetails" class="btn btn-brand" style="padding:10px 22px;">
+                <svg *ngIf="loadingDetails" class="animate-spin-slow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
+                {{loadingDetails ? 'Enregistrement...' : 'Enregistrer'}}
+              </button>
+            </div>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

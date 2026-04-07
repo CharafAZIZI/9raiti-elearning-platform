@@ -1,10 +1,8 @@
 ﻿using MicroServiceDotNet.DTO.ManageUser;
 using MicroServiceDotNet.Filters;
-using MicroServiceDotNet.Mappers;
 using MicroServiceDotNet.Repository;
 using MicroServiceDotNet.Services.AdminUserService;
-using MicroServiceDotNet.Services.PasswordService;
-using MicroServiceDotNet.Services.UserRoleService;
+
 using Microsoft.AspNetCore.Mvc;
 
 namespace MicroServiceDotNet.Controllers
@@ -27,16 +25,12 @@ namespace MicroServiceDotNet.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            try
-            {
-                var user = _service.CreateUser(vm);
-                user.mot_de_passe = null;
-                return CreatedAtAction(nameof(GetById), new { id = user.id }, user);
-            }
-            catch (Exception ex)
-            {
-                return Conflict(ex.Message);
-            }
+            var user = _service.CreateUser(vm);
+
+            if (user == null)
+                return Conflict("Email déjà utilisé");
+
+            return CreatedAtAction(nameof(GetById), new { id = user.id }, user);
         }
 
         [HttpGet]
@@ -59,15 +53,12 @@ namespace MicroServiceDotNet.Controllers
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-            try
-            {
-                _service.Delete(id);
-                return NoContent();
-            }
-            catch
-            {
+            var deleted = _service.Delete(id);
+
+            if (!deleted)
                 return NotFound();
-            }
+
+            return NoContent();
         }
 
         [HttpPatch("valider/{id}")]
