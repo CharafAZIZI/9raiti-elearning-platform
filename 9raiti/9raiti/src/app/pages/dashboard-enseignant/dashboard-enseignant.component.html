@@ -1,0 +1,93 @@
+<div class="page-bg" style="min-height:100vh;">
+  <app-navbar></app-navbar>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" style="display:flex;flex-direction:column;gap:24px;">
+
+    <!-- Banner -->
+    <div class="banner banner-enseignant animate-fade-in">
+      <div class="banner-top-line"></div>
+      <div style="position:absolute;top:-60px;right:-60px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,var(--brand-bg) 0%,transparent 70%);pointer-events:none;"></div>
+      <div style="position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;">
+        <div>
+          <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:3px;color:var(--brand);margin-bottom:8px;">Espace Enseignant</p>
+          <h1 class="font-display" style="font-size:clamp(24px,4vw,36px);font-weight:700;color:var(--text-primary);margin-bottom:8px;">
+            Bienvenue, <span class="text-gold">{{ userName }}</span> 🏫
+          </h1>
+          <p style="font-size:14px;color:var(--text-secondary);">Gérez vos cours et suivez la progression de vos étudiants.</p>
+        </div>
+        <button class="btn-brand" style="display:flex;align-items:center;gap:8px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Créer un cours
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;">
+      <div *ngFor="let stat of stats; let i = index"
+           class="card card-hover animate-slide-up" [class]="'delay-'+i"
+           style="padding:20px;display:flex;align-items:center;gap:16px;">
+        <div style="width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;" [style]="stat.iconBg">{{ stat.icon }}</div>
+        <div>
+          <div class="font-display" style="font-size:26px;font-weight:700;color:var(--text-primary);">{{ stat.value }}</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">{{ stat.label }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Courses -->
+    <div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+        <h2 class="font-display" style="font-size:20px;font-weight:600;color:var(--text-primary);">Mes cours</h2>
+        <button style="font-size:14px;font-weight:600;color:var(--brand);background:none;border:none;cursor:pointer;">Voir tout →</button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px;">
+        <div *ngFor="let course of myCourses; let i = index"
+             class="card card-hover animate-slide-up" [class]="'delay-'+i"
+             style="overflow:hidden;cursor:pointer;">
+          <div style="height:120px;display:flex;align-items:center;justify-content:center;font-size:48px;" [style]="course.thumbBg">{{ course.icon }}</div>
+          <div style="padding:16px;">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:10px;">
+              <h3 style="font-size:14px;font-weight:600;color:var(--text-primary);line-height:1.4;">{{ course.title }}</h3>
+              <!-- <span class="badge" [style]="course.statusStyle">{{ course.status }}</span> -->
+               <span class="badge" [ngClass]="course.statusBadge">{{ course.status }}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-muted);margin-bottom:12px;">
+              <span>👥 {{ course.students }}</span>
+              <span *ngIf="course.rating">⭐ {{ course.rating }}/5</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding-top:12px;border-top:1px solid var(--border);">
+              <button style="font-size:12px;font-weight:600;color:var(--brand);background:none;border:none;cursor:pointer;">Modifier →</button>
+              <button style="font-size:12px;color:var(--text-muted);background:none;border:none;cursor:pointer;">Statistiques</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Activity -->
+    <div>
+      <h2 class="font-display" style="font-size:20px;font-weight:600;color:var(--text-primary);margin-bottom:20px;">Activité des étudiants</h2>
+      <div class="table-wrap animate-fade-in">
+        <div style="height:2px;background:linear-gradient(90deg,transparent,var(--brand),transparent);"></div>
+        <table>
+          <thead class="table-head"><tr><th>Date</th><th>Étudiant</th><th>Cours</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let e of recentEnrollments" class="table-row">
+              <td style="color:var(--text-muted);">{{ e.date }}</td>
+              <td>
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <div style="width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;" [style]="e.avatarStyle">{{ e.initial }}</div>
+                  <span style="color:var(--text-primary);font-weight:500;">{{ e.student }}</span>
+                </div>
+              </td>
+              <td style="color:var(--text-muted);">{{ e.course }}</td>
+              <td>{{ e.action }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
