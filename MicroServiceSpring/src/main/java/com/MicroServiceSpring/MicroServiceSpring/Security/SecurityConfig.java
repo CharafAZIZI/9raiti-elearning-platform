@@ -26,41 +26,46 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .cors(Customizer.withDefaults())
-            .csrf(csrf -> csrf.disable())
-            .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
+                .cors(Customizer.withDefaults())
+                .csrf(csrf -> csrf.disable())
 
-                // Lecture : ENSEIGNANT + APPRENANT
-                .requestMatchers(HttpMethod.GET, "/api/categories/**").hasAnyRole("ENSEIGNANT", "APPRENANT")
-                .requestMatchers(HttpMethod.GET, "/api/modules/**").hasAnyRole("ENSEIGNANT", "APPRENANT")
-                .requestMatchers(HttpMethod.GET, "/api/cours/**").hasAnyRole("ENSEIGNANT", "APPRENANT")
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                // Écriture : ENSEIGNANT uniquement
-                .requestMatchers(HttpMethod.POST, "/api/categories/**").hasRole("ENSEIGNANT")
-                .requestMatchers(HttpMethod.PUT,  "/api/categories/**").hasRole("ENSEIGNANT")
-                .requestMatchers(HttpMethod.DELETE, "/api/categories/**").hasRole("ENSEIGNANT")
-                .requestMatchers(HttpMethod.POST, "/api/modules/**").hasRole("ENSEIGNANT")
-                .requestMatchers(HttpMethod.PUT,  "/api/modules/**").hasRole("ENSEIGNANT")
-                .requestMatchers(HttpMethod.DELETE, "/api/modules/**").hasRole("ENSEIGNANT")
-                .requestMatchers(HttpMethod.POST, "/api/cours/**").hasRole("ENSEIGNANT")
-                .requestMatchers(HttpMethod.PUT,  "/api/cours/**").hasRole("ENSEIGNANT")
-                .requestMatchers(HttpMethod.DELETE, "/api/cours/**").hasRole("ENSEIGNANT")
+                .authorizeHttpRequests(auth -> auth
+                        // ADMIN : accès total
+//                        .requestMatchers("/**").hasRole("ADMIN")
 
-                .anyRequest().permitAll()
-            )
-            .exceptionHandling(ex -> ex
-                .authenticationEntryPoint((request, response, authException) -> {
-                    response.setContentType("application/json");
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    response.getWriter().write("{\"erreur\":\"Accès non autorisé\"}");
-                })
-            )
-            .addFilterBefore(
-                new JwtAuthenticationFilter(jwtSecret),
-                UsernamePasswordAuthenticationFilter.class
-            );
+                        // ENSEIGNANT : lecture + écriture
+                        .requestMatchers(HttpMethod.GET,    "/api/categories/**").hasAnyRole("ENSEIGNANT", "APPRENANT", "ADMIN")
+                        .requestMatchers(HttpMethod.GET,    "/api/modules/**").hasAnyRole("ENSEIGNANT", "APPRENANT", "ADMIN")
+                        .requestMatchers(HttpMethod.GET,    "/api/cours/**").hasAnyRole("ENSEIGNANT", "APPRENANT", "ADMIN")
+
+                        .requestMatchers(HttpMethod.POST,   "/api/categories/**").hasAnyRole("ENSEIGNANT", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT,    "/api/categories/**").hasAnyRole("ENSEIGNANT", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/categories/**").hasAnyRole("ENSEIGNANT", "ADMIN")
+                        .requestMatchers(HttpMethod.POST,   "/api/modules/**").hasAnyRole("ENSEIGNANT", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT,    "/api/modules/**").hasAnyRole("ENSEIGNANT", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/modules/**").hasAnyRole("ENSEIGNANT", "ADMIN")
+                        .requestMatchers(HttpMethod.POST,   "/api/cours/**").hasAnyRole("ENSEIGNANT", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT,    "/api/cours/**").hasAnyRole("ENSEIGNANT", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/cours/**").hasAnyRole("ENSEIGNANT", "ADMIN")
+
+                        .anyRequest().authenticated()
+                )
+
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setContentType("application/json");
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.getWriter().write("{\"erreur\":\"Accès non autorisé\"}");
+                        })
+                )
+
+                .addFilterBefore(
+                        new JwtAuthenticationFilter(jwtSecret),
+                        UsernamePasswordAuthenticationFilter.class
+                );
 
         return http.build();
     }
@@ -68,7 +73,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:4200"));
+        configuration.setAllowedOrigins(List.of(
+                "http://localhost:4200",
+                "http://localhost:9000",
+                "http://api-gateway:9000"
+        ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
