@@ -1,0 +1,90 @@
+version: "3.9"
+services:
+  angular:
+    build:
+      context: ./9raiti
+      dockerfile: Dockerfile
+    container_name: angular
+    ports:
+      - "4200:80"
+    depends_on:
+      - api-gateway
+    networks:
+      - elearning-net
+
+  api-gateway:
+    build:
+      context: ./ApiGateway/ApiGateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    ports:
+      - "9000:9000"
+    depends_on:
+      - dotnet-service
+      - spring-service
+    networks:
+      - elearning-net
+
+  dotnet-service:
+    build:
+      context: ./MicroServiceDotNet/MicroServiceDotNet
+      dockerfile: Dockerfile
+    container_name: dotnet-service
+    environment:
+      - ASPNETCORE_URLS=http://+:5000
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=GestionUtilisateurs;User Id=sa;Password=REMOVED_PASSWORD;TrustServerCertificate=True;
+    depends_on:
+      - sqlserver
+    networks:
+      - elearning-net
+
+  spring-service:
+    build:
+      context: ./MicroServiceSpring
+      dockerfile: Dockerfile
+    container_name: spring-service
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/GestionCours
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=REMOVED_PASSWORD
+    depends_on:
+      - postgres
+    networks:
+      - elearning-net
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sqlserver
+    environment:
+      SA_PASSWORD: "REMOVED_PASSWORD"
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "REMOVED_PASSWORD"
+      MSSQL_AGENT_ENABLED: "false"
+    ports:
+      - "1434:1433"
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+    networks:
+      - elearning-net
+
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    environment:
+      - POSTGRES_DB=GestionCours
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=REMOVED_PASSWORD
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - elearning-net
+
+networks:
+  elearning-net:
+    driver: bridge
+
+volumes:
+  sqlserver-data:
+  postgres-data:
