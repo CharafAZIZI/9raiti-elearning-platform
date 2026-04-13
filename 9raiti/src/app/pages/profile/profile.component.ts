@@ -78,6 +78,16 @@ export class ProfileComponent implements OnInit {
     this.initials    = this.computeInitials(user);
 
     this.buildForms();
+
+    // FIX PAGE BLANCHE GOOGLE: souscrit au BehaviorSubject user$
+    this.userState.user$.subscribe(u => {
+      if (u) {
+        this.displayName = this.userState.getDisplayName();
+        this.initials    = this.computeInitials(u);
+        this.cdr.detectChanges();
+      }
+    });
+
     this.loadProfile();
   }
 

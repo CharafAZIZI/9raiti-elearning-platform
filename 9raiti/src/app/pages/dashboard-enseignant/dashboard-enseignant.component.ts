@@ -3,9 +3,10 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { TokenService } from '../../core/services/token.service';
+import { UserStateService } from '../../core/services/user-state.service';
 import { CatalogueService } from '../../core/services/catalogue.service';
 import { CategorieDTO } from '../../models/categorie.model';
-import { ModuleDTO }    from '../../models/module.model';
+import { ModuleDTO, StatutModule } from '../../models/module.model';
 import { CoursDTO, Niveau, StatutCours } from '../../models/cours.model';
 
 @Component({
@@ -78,6 +79,7 @@ export class DashboardEnseignantComponent implements OnInit {
 
   constructor(
     private tokenService: TokenService,
+    private userStateService: UserStateService,
     private catalogueService: CatalogueService,
     private fb: FormBuilder,
     private cdr: ChangeDetectorRef
@@ -85,6 +87,9 @@ export class DashboardEnseignantComponent implements OnInit {
 
   ngOnInit(): void {
     this.userName = this.tokenService.getDisplayName();
+    this.userStateService.user$.subscribe(() => {
+      this.userName = this.userStateService.getDisplayName();
+    });
     this.buildForms();
     this.loadAll();
   }
@@ -103,6 +108,7 @@ export class DashboardEnseignantComponent implements OnInit {
       description: ['', Validators.required],
       code:        ['', [Validators.required, Validators.pattern(/^[A-Z0-9\-_]+$/)]],
       actif:       [true],
+      statut:      ['ACTIF'],
       categorieId: [null],
     });
 
@@ -217,17 +223,19 @@ export class DashboardEnseignantComponent implements OnInit {
 
   openCreateMod(): void {
     this.editingMod = null;
-    this.modForm.reset({ nom: '', description: '', code: '', actif: true, categorieId: null });
+    this.modForm.reset({ nom: '', description: '', code: '', actif: true, statut: 'ACTIF', categorieId: null });
     this.showModModal = true;
   }
 
   openEditMod(mod: ModuleDTO): void {
     this.editingMod = mod;
+    const statut = mod.statut ?? (mod.actif ? 'ACTIF' : 'BROUILLON');
     this.modForm.patchValue({
       nom:         mod.nom,
       description: mod.description,
       code:        mod.code,
       actif:       mod.actif,
+      statut,
       categorieId: mod.categorieId ?? null,
     });
     this.showModModal = true;
@@ -236,7 +244,9 @@ export class DashboardEnseignantComponent implements OnInit {
   submitMod(): void {
     if (this.modForm.invalid) { this.modForm.markAllAsTouched(); return; }
     this.modLoading = true;
-    const dto: ModuleDTO = { ...this.modForm.value };
+    const val = this.modForm.value;
+    const actif = val.statut === 'ACTIF';
+    const dto: ModuleDTO = { ...val, actif };
 
     const obs = this.editingMod?.id
       ? this.catalogueService.updateModule(this.editingMod.id, dto)

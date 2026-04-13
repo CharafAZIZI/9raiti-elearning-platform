@@ -2,45 +2,45 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { TokenService } from '../services/token.service';
 
-export const authGuard: CanActivateFn = () => {
+export const authGuard: CanActivateFn = (route, state) => {
   const tokenService = inject(TokenService);
-  const router = inject(Router);
+  const router       = inject(Router);
   if (tokenService.isLoggedIn()) return true;
-  router.navigate(['/login']);
+  router.navigate(['/login'], { queryParams: { returnUrl: state.url, reason: 'auth_required' } });
   return false;
 };
 
 export const roleGuard = (expectedRole: string): CanActivateFn => {
   return () => {
     const tokenService = inject(TokenService);
-    const router = inject(Router);
-
-    if (!tokenService.isLoggedIn()) {
-      router.navigate(['/login']);
-      return false;
-    }
-
+    const router       = inject(Router);
+    if (!tokenService.isLoggedIn()) { router.navigate(['/login']); return false; }
     const role = tokenService.getRole()?.toLowerCase();
     if (role === expectedRole.toLowerCase()) return true;
-
-    if (role === 'apprenant') router.navigate(['/dashboard-apprenant']);
+    if (role === 'apprenant')       router.navigate(['/dashboard-apprenant']);
     else if (role === 'enseignant') router.navigate(['/dashboard-enseignant']);
-    else if (role === 'admin') router.navigate(['/dashboard-admin']);
-    else router.navigate(['/login']);
+    else if (role === 'admin')      router.navigate(['/dashboard-admin']);
+    else                            router.navigate(['/login']);
     return false;
   };
 };
 
 export const guestGuard: CanActivateFn = () => {
   const tokenService = inject(TokenService);
-  const router = inject(Router);
-
+  const router       = inject(Router);
   if (!tokenService.isLoggedIn()) return true;
-
   const role = tokenService.getRole()?.toLowerCase();
-  if (role === 'apprenant') router.navigate(['/dashboard-apprenant']);
+  if (role === 'apprenant')       router.navigate(['/dashboard-apprenant']);
   else if (role === 'enseignant') router.navigate(['/dashboard-enseignant']);
-  else if (role === 'admin') router.navigate(['/dashboard-admin']);
-  else router.navigate(['/login']);
+  else if (role === 'admin')      router.navigate(['/dashboard-admin']);
+  else                            router.navigate(['/login']);
+  return false;
+};
+
+export const coursGuard: CanActivateFn = (route, state) => {
+  const tokenService = inject(TokenService);
+  const router       = inject(Router);
+  if (tokenService.isLoggedIn()) return true;
+  router.navigate(['/login'], { queryParams: { returnUrl: state.url, reason: 'cours_protected' } });
   return false;
 };

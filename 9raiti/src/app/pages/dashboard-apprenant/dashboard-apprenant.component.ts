@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { TokenService } from '../../core/services/token.service';
+import { UserStateService } from '../../core/services/user-state.service';
 
 @Component({
   selector: 'app-dashboard-apprenant', standalone: true,
@@ -64,8 +65,16 @@ export class DashboardApprenantComponent implements OnInit {
     selected: -1, timeLeft: 1800, answered: false, correct: false
   };
 
-  constructor(private tokenService: TokenService) {}
-  ngOnInit(): void { this.userName = this.tokenService.getDisplayName(); }
+  constructor(
+    private tokenService: TokenService,
+    private userStateService: UserStateService
+  ) {}
+  ngOnInit(): void {
+    this.userName = this.tokenService.getDisplayName();
+    this.userStateService.user$.subscribe(() => {
+      this.userName = this.userStateService.getDisplayName();
+    });
+  }
 
   setSection(s: string) { this.activeSection = s; }
 

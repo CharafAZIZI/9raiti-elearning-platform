@@ -1,104 +1,209 @@
-# 9raiti — Projet Angular Fusionné (v4 + v5)
+# 9raiti — Plateforme E-learning Angular
 
-Application Angular 17 (Standalone Components) pour une plateforme d'e-learning multi-rôles (Apprenant, Enseignant, Admin).
+## Description
+
+**9raiti** est une plateforme e-learning développée avec Angular (standalone components), connectée à un backend Spring Boot via une API REST. Elle gère une hiérarchie de contenu **Catégories → Modules → Cours** avec un système de rôles strict.
 
 ---
 
-## Architecture
+## Architecture du projet
 
 ```
 src/
 ├── app/
 │   ├── core/
-│   │   ├── guards/         # authGuard, roleGuard, guestGuard
-│   │   ├── interceptors/   # jwtInterceptor (attach token + 401 → logout auto)
-│   │   └── services/       # auth, catalogue, profile, admin-user, token, theme, user-state
-│   ├── models/             # CategorieDTO, ModuleDTO, CoursDTO, LoginRequest/Response, RegisterUserVM
+│   │   ├── guards/
+│   │   │   └── auth.guard.ts          # authGuard, roleGuard, guestGuard
+│   │   ├── interceptors/
+│   │   │   └── jwt.interceptor.ts     # Injection automatique du Bearer token
+│   │   └── services/
+│   │       ├── auth.service.ts        # Login, register, logout, Google OAuth
+│   │       ├── catalogue.service.ts   # CRUD Catégories / Modules / Cours
+│   │       ├── token.service.ts       # JWT storage, rôle, expiration
+│   │       ├── profile.service.ts     # Profil utilisateur
+│   │       ├── admin-user.service.ts  # Gestion utilisateurs (Admin)
+│   │       ├── theme.service.ts       # Thème clair/sombre
+│   │       └── user-state.service.ts  # État utilisateur global
+│   ├── models/
+│   │   ├── categorie.model.ts         # CategorieDTO
+│   │   ├── module.model.ts            # ModuleDTO, StatutModule
+│   │   ├── cours.model.ts             # CoursDTO, Niveau, StatutCours
+│   │   ├── login.model.ts
+│   │   ├── register.model.ts
+│   │   └── password.model.ts
 │   ├── pages/
-│   │   ├── login/
-│   │   ├── register/
-│   │   ├── pending-validation/
-│   │   ├── dashboard-admin/        # Gestion utilisateurs (CRUD réel via API .NET)
-│   │   ├── dashboard-apprenant/    # Tableau de bord apprenant
-│   │   ├── dashboard-enseignant/   # CRUD Catégories / Modules / Cours (API Spring Boot)
-│   │   ├── categories/             # Catalogue catégories (lecture)
-│   │   ├── modules/                # Catalogue modules (lecture)
-│   │   └── cours/                  # Catalogue cours (lecture + PDF viewer)
-│   ├── shared/
-│   │   └── components/navbar/      # Navbar réactive (thème, user state, logout)
-│   └── ...
+│   │   ├── home/                      # Landing page publique
+│   │   ├── login/                     # Authentification
+│   │   ├── register/                  # Inscription
+│   │   ├── forgot-password/           # Réinitialisation mot de passe
+│   │   ├── reset-password/
+│   │   ├── pending-validation/        # Attente de validation enseignant
+│   │   ├── categories/                # Liste catégories (authentifié)
+│   │   ├── modules/                   # Liste modules (authentifié, filtré par rôle)
+│   │   ├── cours/                     # Liste cours (authentifié, filtré par rôle)
+│   │   ├── dashboard-apprenant/       # Tableau de bord apprenant
+│   │   ├── dashboard-enseignant/      # Tableau de bord enseignant avec CRUD
+│   │   ├── dashboard-admin/           # Tableau de bord admin complet
+│   │   └── profile/                   # Profil utilisateur
+│   └── shared/
+│       └── components/
+│           └── navbar/                # Barre de navigation partagée
 ├── environments/
-│   └── environment.ts              # apiUrl (.NET 5000) + springApiUrl (Spring Boot 8080)
-└── styles.css                      # Variables CSS globales (dark/light mode)
+│   └── environment.ts                 # URLs API (apiUrl, springApiUrl)
+└── index.html                         # Point d'entrée, variables CSS globales
 ```
 
 ---
 
-## Backends requis
+## Rôles et règles métier
 
-| Backend | Port | Routes couvertes |
-|---------|------|-----------------|
-| API .NET (Gateway) | 5000 | `/api/auth/*`, `/api/profile`, `/api/users/*` |
-| API Spring Boot | 8080 | `/api/categories/*`, `/api/modules/*`, `/api/cours/*` |
+### 🎓 Apprenant
+
+| Élément         | Règle d'affichage                                           |
+|-----------------|-------------------------------------------------------------|
+| **Catégories**  | Toutes visibles (elles n'ont pas de statut)                 |
+| **Modules**     | Uniquement les modules avec `statut = ACTIF` (`actif=true`) |
+| **Cours**       | Uniquement les cours `PUBLIÉ` dont le **module parent est ACTIF** |
+| **Module BROUILLON ou ARCHIVÉ** | Totalement masqué, **même si ses cours sont publiés** |
+
+> Règle clé : un cours publié rattaché à un module non-actif est **invisible** pour l'apprenant.
+
+### 👨‍🏫 Enseignant
+
+- Accès complet à **tous les modules** (ACTIF, BROUILLON, ARCHIVÉ).
+- Accès complet à **tous les cours** (PUBLIÉ, BROUILLON, ARCHIVÉ).
+- Peut créer/modifier des modules et des cours depuis son tableau de bord.
+
+### 🔐 Admin
+
+- Accès complet sans restriction.
+- Section **"Gestion du Contenu"** dans le tableau de bord :
+  - CRUD complet des **Catégories** (nom, description)
+  - CRUD complet des **Modules** (nom, code, description, statut : ACTIF / BROUILLON / ARCHIVÉ, catégorie)
+  - CRUD complet des **Cours** (titre, description, niveau, statut, durée, module parent)
+- Section **"Gestion des Utilisateurs"** : validation, suspension, rôles.
 
 ---
 
-## Installation et démarrage
+## Statuts des Modules
+
+| Statut       | Apprenant | Enseignant | Admin |
+|--------------|-----------|------------|-------|
+| `ACTIF`      | ✅ Visible | ✅ Visible  | ✅ Visible |
+| `BROUILLON`  | ❌ Masqué  | ✅ Visible  | ✅ Visible |
+| `ARCHIVE`    | ❌ Masqué  | ✅ Visible  | ✅ Visible |
+
+## Statuts des Cours
+
+| Statut       | Apprenant (si module ACTIF) | Enseignant | Admin |
+|--------------|-----------------------------|------------|-------|
+| `PUBLIE`     | ✅ Visible                  | ✅ Visible  | ✅ Visible |
+| `BROUILLON`  | ❌ Masqué                   | ✅ Visible  | ✅ Visible |
+| `ARCHIVE`    | ❌ Masqué                   | ✅ Visible  | ✅ Visible |
+
+---
+
+## Page Home (publique)
+
+- **Première page** de l'application (route `/`).
+- Affiche les **catégories** et les **modules actifs uniquement**.
+- **Aucun accès direct aux cours** depuis la Home.
+- Cliquer sur "Voir les cours" d'un module → redirige vers `/login` si non connecté.
+- Contenu : hero slider, catalogue filtré, statistiques, témoignages, formulaire de réclamation, équipe, footer.
+
+---
+
+## Sécurité et Guards
+
+| Route            | Guard appliqué           | Comportement                              |
+|------------------|--------------------------|-------------------------------------------|
+| `/`              | aucun                    | Accessible à tous                         |
+| `/login`         | `guestGuard`             | Redirige vers dashboard si déjà connecté  |
+| `/register`      | `guestGuard`             | Redirige vers dashboard si déjà connecté  |
+| `/cours`         | `authGuard`              | Redirige vers `/login` si non connecté    |
+| `/modules`       | `authGuard`              | Redirige vers `/login` si non connecté    |
+| `/categories`    | `authGuard`              | Redirige vers `/login` si non connecté    |
+| `/dashboard-admin` | `authGuard + roleGuard('admin')` | Redirige si mauvais rôle      |
+| `/dashboard-enseignant` | `authGuard + roleGuard('enseignant')` | Redirige si mauvais rôle |
+| `/dashboard-apprenant` | `authGuard + roleGuard('apprenant')` | Redirige si mauvais rôle  |
+
+---
+
+## Installation et lancement
+
+### Prérequis
+- Node.js ≥ 18
+- Angular CLI ≥ 17
+- Backend Spring Boot démarré sur `http://localhost:8080`
+
+### Installation
 
 ```bash
-# 1. Installer les dépendances
+git clone <url-du-repo>
+cd 9raiti
 npm install
+```
 
-# 2. Démarrer en développement (proxy vers les deux backends)
-npm start
-# ou
+### Lancement
+
+```bash
+ng serve
+# ou avec le proxy configuré
 ng serve --proxy-config proxy.conf.json
 ```
 
-Le proxy Angular est configuré dans `proxy.conf.json` :
-- `/api/*` → `http://localhost:5000` (API .NET)
-- `/spring-api/*` → `http://localhost:8080/api/*` (Spring Boot)
+L'application est accessible sur `http://localhost:4200`.
+
+### Variables d'environnement
+
+Fichier `src/environments/environment.ts` :
+```ts
+export const environment = {
+  production: false,
+  apiUrl: '/api',           // Auth endpoints (Spring Security)
+  springApiUrl: '/spring-api' // Catalogue endpoints (Spring Boot)
+};
+```
+
+Le proxy (`proxy.conf.json`) redirige `/spring-api` vers `http://localhost:8080/api`.
 
 ---
 
-## Ce qui a été fusionné (v4 → v5)
+## Technologies utilisées
 
-| Élément | Source | Raison |
-|---------|--------|--------|
-| `CatalogueService` | v4 + v5 | CRUD complet (v4) + cache `shareReplay` + gestion erreurs (v5) |
-| `dashboard-enseignant` | v4 | CRUD API réel (catégories / modules / cours / upload PDF) |
-| `jwt.interceptor` | v5 | Gestion automatique 401 → déconnexion |
-| `environment.ts` | Fusionné | Double URL : `.NET` (5000) + `Spring Boot` (8080) |
-| `proxy.conf.json` | Fusionné | Double proxy : `/api` + `/spring-api` |
-| Toutes les autres pages | v5 | Version la plus récente |
-
----
-
-## Rôles et redirections
-
-| Rôle | Route après login |
-|------|------------------|
-| `apprenant` | `/dashboard-apprenant` |
-| `enseignant` | `/dashboard-enseignant` |
-| `admin` | `/dashboard-admin` |
-| Enseignant non validé | `/en-attente` |
+| Technologie       | Version  | Usage                              |
+|-------------------|----------|------------------------------------|
+| Angular           | 17+      | Framework frontend (standalone)    |
+| TypeScript        | 5+       | Langage principal                  |
+| TailwindCSS       | 3+       | Styles utilitaires                 |
+| RxJS              | 7+       | Observables, forkJoin, shareReplay |
+| Angular Reactive Forms | -   | Formulaires CRUD                   |
+| Spring Boot       | 3+       | Backend REST API                   |
+| JWT               | -        | Authentification stateless         |
 
 ---
 
-## Fonctionnalités
+## Règles de filtrage — Résumé
 
-- **Authentification** : Login/Register + Google OAuth2
-- **Gestion des thèmes** : Dark / Light (persisté dans localStorage)
-- **Admin** : Gestion complète des utilisateurs (valider, activer, suspendre, supprimer)
-- **Enseignant** : CRUD Catégories, Modules, Cours + upload PDF
-- **Apprenant** : Navigation catalogue (catégories → modules → cours) + lecture PDF
-- **Sécurité** : JWT interceptor, guards par rôle, expiration token
+```
+Apprenant accède à /cours :
+  Pour chaque cours → visible si :
+    ✓ cours.statut === 'PUBLIE'
+    ✓ cours.moduleId.statut === 'ACTIF'   (actif === true)
+    ✗ cours.statut === 'BROUILLON' → masqué
+    ✗ cours.statut === 'ARCHIVE'  → masqué
+    ✗ module parent BROUILLON/ARCHIVE → tous ses cours masqués
+
+Enseignant et Admin accèdent à /cours :
+  Tous les cours, tous statuts, tous modules.
+```
 
 ---
 
-## Commandes utiles
+## Docker
 
 ```bash
-npm start          # Démarrage développement
-npm run build      # Build production
+docker build -t 9raiti .
+docker run -p 4200:80 9raiti
 ```
+
