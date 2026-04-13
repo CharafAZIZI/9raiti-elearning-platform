@@ -107,7 +107,7 @@
               <svg *ngIf="showPassword"  width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
             </button>
           </div>
-          <div *ngIf="mot_de_passe?.value" class="mt-2">
+          <div *ngIf="mot_de_passe && mot_de_passe.value" class="mt-2">
             <div class="prog-track"><div class="prog-fill" [style.width]="passwordStrength.width" [style.background]="passwordStrength.color"></div></div>
             <p class="text-xs mt-1 font-semibold" [style.color]="passwordStrength.color">{{ passwordStrength.label }}</p>
           </div>

@@ -33,14 +33,13 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 .authorizeHttpRequests(auth -> auth
-                        // ADMIN : accès total
-//                        .requestMatchers("/**").hasRole("ADMIN")
 
-                        // ENSEIGNANT : lecture + écriture
-                        .requestMatchers(HttpMethod.GET,    "/api/categories/**").hasAnyRole("ENSEIGNANT", "APPRENANT", "ADMIN")
-                        .requestMatchers(HttpMethod.GET,    "/api/modules/**").hasAnyRole("ENSEIGNANT", "APPRENANT", "ADMIN")
-                        .requestMatchers(HttpMethod.GET,    "/api/cours/**").hasAnyRole("ENSEIGNANT", "APPRENANT", "ADMIN")
+                        // ← PUBLIC : page Home visible sans connexion
+                        .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/modules/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/cours/**").permitAll()
 
+                        // ENSEIGNANT / APPRENANT / ADMIN : écriture
                         .requestMatchers(HttpMethod.POST,   "/api/categories/**").hasAnyRole("ENSEIGNANT", "ADMIN")
                         .requestMatchers(HttpMethod.PUT,    "/api/categories/**").hasAnyRole("ENSEIGNANT", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/categories/**").hasAnyRole("ENSEIGNANT", "ADMIN")

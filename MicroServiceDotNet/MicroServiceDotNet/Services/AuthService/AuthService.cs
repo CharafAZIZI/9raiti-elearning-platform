@@ -13,25 +13,29 @@ public class AuthService : IAuthService
     private readonly IUserRoleService _role;
     private readonly IJwtService _jwtService;
     private readonly IPasswordService _passwordService;
-    private readonly IEmailService _emailService; 
+    private readonly IEmailService _emailService;
     private readonly IGoogleAuthService _googleAuthService;
     private readonly ILogger<AuthService> _logger;
+    private readonly IConfiguration _configuration; // ← Ajouté
 
     public AuthService(
         IUserRepository repo,
         IUserRoleService role,
         IJwtService jwtService,
         IPasswordService passwordService,
-        IEmailService emailService, 
+        IEmailService emailService,
         IGoogleAuthService googleAuthService,
-        ILogger<AuthService> logger)    {
+        ILogger<AuthService> logger,
+        IConfiguration configuration) // ← Ajouté
+    {
         _repo = repo;
         _role = role;
         _jwtService = jwtService;
         _passwordService = passwordService;
-        _emailService = emailService; 
+        _emailService = emailService;
         _googleAuthService = googleAuthService;
         _logger = logger;
+        _configuration = configuration; // ← Ajouté
     }
 
     public LoginResult Inscrire(RegisterUserVM vm)
@@ -42,17 +46,13 @@ public class AuthService : IAuthService
 
         var user = _role.RegisterUser(vm);
         user.provider = "Local";
-
         user.mot_de_passe = _passwordService.HashPassword(user, vm.mot_de_passe);
 
         var token = Guid.NewGuid().ToString();
-
-        //user.EmailConfirmed = false;
         user.EmailConfirmationToken = token;
-
         _repo.AddUser(user);
 
-        // Email spécifique enseignant — compte en cours de traitement
+        // Email spécifique enseignant
         if (user.role?.ToLower() == "enseignant")
         {
             _emailService.SendEmailEnseignantInscription(
@@ -61,8 +61,9 @@ public class AuthService : IAuthService
             );
         }
 
-        string confirmationLink =
-            $"https://localhost:7167/api/auth/confirm-email?token={token}";
+        // ← URL lue depuis appsettings.json
+        string baseUrl = _configuration["AppSettings:ApiBaseUrl"];
+        string confirmationLink = $"{baseUrl}/api/auth/confirm-email?token={token}";
 
         if (!string.IsNullOrEmpty(user.email))
         {
@@ -73,10 +74,7 @@ public class AuthService : IAuthService
             );
         }
 
-        return new LoginResult
-        {
-            Success = true
-        };
+        return new LoginResult { Success = true };
     }
 
     public LoginResult Login(string email, string mot_de_passe)
@@ -97,9 +95,7 @@ public class AuthService : IAuthService
         try
         {
             var payload = _googleAuthService.ValidateToken(idToken);
-
             var user = _repo.GetOrCreateFromGooglePayload(payload);
-
             var token = _jwtService.GenerateToken(user, out DateTime expiration);
             return new LoginResult
             {

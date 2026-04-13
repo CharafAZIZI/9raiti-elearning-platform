@@ -8,7 +8,8 @@ services:
     ports:
       - "4200:80"
     depends_on:
-      - api-gateway
+      api-gateway:
+        condition: service_started
     networks:
       - elearning-net
 
@@ -20,8 +21,10 @@ services:
     ports:
       - "9000:9000"
     depends_on:
-      - dotnet-service
-      - spring-service
+      dotnet-service:
+        condition: service_started
+      spring-service:
+        condition: service_started
     networks:
       - elearning-net
 
@@ -30,11 +33,13 @@ services:
       context: ./MicroServiceDotNet/MicroServiceDotNet
       dockerfile: Dockerfile
     container_name: dotnet-service
+    restart: on-failure   # ← Redémarre automatiquement si crash
     environment:
       - ASPNETCORE_URLS=http://+:5000
       - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=GestionUtilisateurs;User Id=sa;Password=REMOVED_PASSWORD;TrustServerCertificate=True;
     depends_on:
-      - sqlserver
+      sqlserver:
+        condition: service_healthy  # ← Attend que SQL Server soit VRAIMENT prêt
     networks:
       - elearning-net
 
@@ -43,12 +48,14 @@ services:
       context: ./MicroServiceSpring
       dockerfile: Dockerfile
     container_name: spring-service
+    restart: on-failure   # ← Redémarre automatiquement si crash
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/GestionCours
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=REMOVED_PASSWORD
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy  # ← Attend que Postgres soit VRAIMENT prêt
     networks:
       - elearning-net
 
@@ -66,6 +73,12 @@ services:
       - sqlserver-data:/var/opt/mssql
     networks:
       - elearning-net
+    healthcheck:   # ← Vérifie que SQL Server est prêt
+      test: ["CMD", "/opt/mssql-tools18/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "REMOVED_PASSWORD", "-Q", "SELECT 1", "-No"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
   postgres:
     image: postgres:15
@@ -80,6 +93,12 @@ services:
       - postgres-data:/var/lib/postgresql/data
     networks:
       - elearning-net
+    healthcheck:   # ← Vérifie que Postgres est prêt
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
 networks:
   elearning-net:

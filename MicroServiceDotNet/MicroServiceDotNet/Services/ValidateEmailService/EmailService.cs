@@ -7,396 +7,245 @@ namespace MicroServiceDotNet.Services.ValidateEmailService
     public class EmailService : IEmailService
     {
         private readonly IConfiguration _config;
-        private readonly IWebHostEnvironment _env;
+        // ← IWebHostEnvironment _env supprimé
 
-        public EmailService(IConfiguration config, IWebHostEnvironment env)
+        public EmailService(IConfiguration config) // ← _env supprimé
         {
             _config = config;
-            _env = env;
         }
 
+        // ── Envoi générique ───────────────────────────────────────
+        private void Send(string toEmail, string subject, string htmlBody)
+        {
+            var smtpServer = _config["SmtpSettings:SmtpServer"];
+            var port = int.Parse(_config["SmtpSettings:Port"]);
+            var from = _config["SmtpSettings:From"];
+            var username = _config["SmtpSettings:Username"];
+            var password = _config["SmtpSettings:Password"];
+
+            using var client = new SmtpClient(smtpServer, port)
+            {
+                UseDefaultCredentials = false,
+                Credentials = new NetworkCredential(username, password),
+                EnableSsl = true
+            };
+            using var mail = new MailMessage(from, toEmail, subject, htmlBody)
+            {
+                IsBodyHtml = true
+            };
+            client.Send(mail);
+        }
+
+        // ── Email confirmation compte ─────────────────────────────
         public void SendEmail(string toEmail, string subject, string confirmationLink)
         {
-            var smtpServer = _config["SmtpSettings:SmtpServer"];
-            var port = int.Parse(_config["SmtpSettings:Port"]);
-            var from = _config["SmtpSettings:From"];
-            var username = _config["SmtpSettings:Username"];
-            var password = _config["SmtpSettings:Password"];
-
-            using (SmtpClient client = new SmtpClient(smtpServer, port))
-            {
-                client.UseDefaultCredentials = false;
-                client.Credentials = new NetworkCredential(username, password);
-                client.EnableSsl = true;
-
-                string htmlBody = GetHtmlBody(confirmationLink);
-
-                using (MailMessage mail = new MailMessage(from, toEmail, subject, htmlBody))
-                {
-                    mail.IsBodyHtml = true;
-                    client.Send(mail);
-                }
-            }
+            Send(toEmail, subject, BuildConfirmEmailHtml(confirmationLink));
         }
 
-        // ── Email inscription enseignant ─────────────────────────────
+        // ── Email enseignant inscription ──────────────────────────
         public void SendEmailEnseignantInscription(string toEmail, string nomComplet)
         {
-            var smtpServer = _config["SmtpSettings:SmtpServer"];
-            var port = int.Parse(_config["SmtpSettings:Port"]);
-            var from = _config["SmtpSettings:From"];
-            var username = _config["SmtpSettings:Username"];
-            var password = _config["SmtpSettings:Password"];
-
-            string subject = "9raiti — Votre inscription est en cours de traitement";
-            string htmlBody = GetHtmlBodyEnseignantInscription(nomComplet);
-
-            using var client = new SmtpClient(smtpServer, port)
-            {
-                UseDefaultCredentials = false,
-                Credentials = new NetworkCredential(username, password),
-                EnableSsl = true
-            };
-
-            using var mail = new MailMessage(from, toEmail, subject, htmlBody)
-            {
-                IsBodyHtml = true
-            };
-
-            client.Send(mail);
+            Send(toEmail, "9raiti — Votre inscription est en cours de traitement",
+                 BuildEnseignantInscriptionHtml(nomComplet));
         }
 
-        // ── Email validation admin ────────────────────────────────────
+        // ── Email enseignant validé ───────────────────────────────
         public void SendEmailEnseignantValide(string toEmail, string nomComplet)
         {
-            var smtpServer = _config["SmtpSettings:SmtpServer"];
-            var port = int.Parse(_config["SmtpSettings:Port"]);
-            var from = _config["SmtpSettings:From"];
-            var username = _config["SmtpSettings:Username"];
-            var password = _config["SmtpSettings:Password"];
-
-            string subject = "9raiti — Votre compte enseignant est activé !";
-            string htmlBody = GetHtmlBodyEnseignantValide(nomComplet);
-
-            using var client = new SmtpClient(smtpServer, port)
-            {
-                UseDefaultCredentials = false,
-                Credentials = new NetworkCredential(username, password),
-                EnableSsl = true
-            };
-
-            using var mail = new MailMessage(from, toEmail, subject, htmlBody)
-            {
-                IsBodyHtml = true
-            };
-
-            client.Send(mail);
+            Send(toEmail, "9raiti — Votre compte enseignant est activé !",
+                 BuildEnseignantValideHtml(nomComplet));
         }
 
-        private string GetHtmlBody(string link)
-        {
-            string templatePath = Path.Combine(
-                _env.WebRootPath,
-                "email-templates",
-                "ConfirmEmailTemplate.html");
+        // ══════════════════════════════════════════════════════════
+        // TEMPLATES HTML (style 9raiti amber/dark)
+        // ══════════════════════════════════════════════════════════
 
-            string html = File.ReadAllText(templatePath);
-
-            return html.Replace("{{LINK}}", link);
-        }
-
-        private string GetHtmlBodyEnseignantInscription(string nomComplet)
-        {
-            return $@"
-<!DOCTYPE html>
+        private string BuildConfirmEmailHtml(string link) => $@"<!DOCTYPE html>
 <html lang=""fr"">
-<head>
-  <meta charset=""UTF-8"">
-  <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
-  <title>Inscription en cours</title>
-</head>
-<body style=""margin:0;padding:0;background:#f8fafc;font-family:'Segoe UI',Arial,sans-serif;"">
-
-  <table width=""100%"" cellpadding=""0"" cellspacing=""0"" style=""background:#f8fafc;padding:40px 20px;"">
-    <tr>
-      <td align=""center"">
-        <table width=""600"" cellpadding=""0"" cellspacing=""0""
-               style=""background:#ffffff;border-radius:16px;overflow:hidden;
-                      box-shadow:0 4px 24px rgba(0,0,0,0.08);"">
-
-          <!-- Header -->
-          <tr>
-            <td style=""background:linear-gradient(135deg,#F59E0B,#D97706);
-                        padding:36px 40px;text-align:center;"">
-              <div style=""width:56px;height:56px;background:rgba(255,255,255,0.2);
-                           border-radius:14px;display:inline-flex;align-items:center;
-                           justify-content:center;font-size:28px;font-weight:bold;
-                           color:white;margin-bottom:12px;"">9</div>
-              <h1 style=""color:white;margin:0;font-size:24px;font-weight:700;
-                          letter-spacing:-0.5px;"">9raiti</h1>
-              <p style=""color:rgba(255,255,255,0.85);margin:6px 0 0;font-size:13px;"">
-                Plateforme E-Learning
-              </p>
-            </td>
-          </tr>
-
-          <!-- Corps -->
-          <tr>
-            <td style=""padding:40px;"">
-
-              <!-- Icône statut -->
-              <div style=""text-align:center;margin-bottom:28px;"">
-                <div style=""width:72px;height:72px;background:#FEF3C7;border-radius:50%;
-                             display:inline-flex;align-items:center;justify-content:center;
-                             font-size:36px;"">⏳</div>
-              </div>
-
-              <h2 style=""color:#0f172a;font-size:22px;font-weight:700;
-                          margin:0 0 12px;text-align:center;"">
-                Inscription reçue avec succès
-              </h2>
-
-              <p style=""color:#475569;font-size:15px;line-height:1.7;margin:0 0 20px;"">
-                Bonjour <strong style=""color:#0f172a;"">{nomComplet}</strong>,
-              </p>
-
-              <p style=""color:#475569;font-size:15px;line-height:1.7;margin:0 0 20px;"">
-                Nous avons bien reçu votre demande d'inscription en tant qu'<strong>enseignant</strong>
-                sur la plateforme <strong>9raiti</strong>.
-              </p>
-
-              <!-- Encadré statut -->
-              <div style=""background:#FFFBEB;border:1px solid #FDE68A;border-radius:12px;
-                           padding:20px 24px;margin:24px 0;"">
-                <div style=""display:flex;align-items:flex-start;gap:12px;"">
-                  <span style=""font-size:20px;margin-top:2px;"">📋</span>
-                  <div>
-                    <p style=""color:#92400E;font-weight:700;font-size:14px;margin:0 0 6px;"">
-                      Compte en cours de traitement
-                    </p>
-                    <p style=""color:#B45309;font-size:13px;line-height:1.6;margin:0;"">
-                      Votre compte est actuellement en attente de validation par notre équipe administrative.
-                      Vous recevrez un email de confirmation dès que votre compte sera activé.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Étapes -->
-              <p style=""color:#0f172a;font-weight:700;font-size:14px;margin:24px 0 12px;"">
-                Prochaines étapes :
-              </p>
-              <table width=""100%"" cellpadding=""0"" cellspacing=""0"">
-                <tr>
-                  <td style=""padding:8px 0;"">
-                    <div style=""display:flex;align-items:center;gap:12px;"">
-                      <div style=""width:32px;height:32px;background:#F59E0B;border-radius:50%;
-                                   color:white;font-weight:700;font-size:14px;
-                                   display:inline-flex;align-items:center;
-                                   justify-content:center;flex-shrink:0;"">1</div>
-                      <span style=""color:#475569;font-size:14px;"">
-                        Vérification de vos informations par l'administrateur
-                      </span>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td style=""padding:8px 0;"">
-                    <div style=""display:flex;align-items:center;gap:12px;"">
-                      <div style=""width:32px;height:32px;background:#F59E0B;border-radius:50%;
-                                   color:white;font-weight:700;font-size:14px;
-                                   display:inline-flex;align-items:center;
-                                   justify-content:center;flex-shrink:0;"">2</div>
-                      <span style=""color:#475569;font-size:14px;"">
-                        Activation de votre compte (sous 24–48h)
-                      </span>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td style=""padding:8px 0;"">
-                    <div style=""display:flex;align-items:center;gap:12px;"">
-                      <div style=""width:32px;height:32px;background:#F59E0B;border-radius:50%;
-                                   color:white;font-weight:700;font-size:14px;
-                                   display:inline-flex;align-items:center;
-                                   justify-content:center;flex-shrink:0;"">3</div>
-                      <span style=""color:#475569;font-size:14px;"">
-                        Email de confirmation avec accès à la plateforme
-                      </span>
-                    </div>
-                  </td>
-                </tr>
-              </table>
-
-            </td>
-          </tr>
-
-          <!-- Footer -->
-          <tr>
-            <td style=""background:#f8fafc;border-top:1px solid #e2e8f0;
-                        padding:24px 40px;text-align:center;"">
-              <p style=""color:#94a3b8;font-size:12px;margin:0;"">
-                © 2025 9raiti — Plateforme E-Learning<br>
-                Cet email a été envoyé automatiquement, merci de ne pas y répondre.
-              </p>
-            </td>
-          </tr>
-
-        </table>
+<head><meta charset=""UTF-8""><meta name=""viewport"" content=""width=device-width,initial-scale=1"">
+<title>Confirmez votre compte 9raiti</title></head>
+<body style=""margin:0;padding:0;background:#080c14;font-family:'Segoe UI',Arial,sans-serif;"">
+<table width=""100%"" cellpadding=""0"" cellspacing=""0"" style=""background:#080c14;padding:48px 20px;"">
+<tr><td align=""center"">
+<table width=""540"" cellpadding=""0"" cellspacing=""0""
+       style=""background:#0f1623;border-radius:20px;border:1px solid rgba(255,255,255,.06);
+              box-shadow:0 20px 60px rgba(0,0,0,.6);"">
+  <!-- HEADER -->
+  <tr><td align=""center"" style=""background:linear-gradient(135deg,#F59E0B,#D97706);padding:40px 40px 36px;"">
+    <div style=""width:56px;height:56px;background:rgba(0,0,0,.2);border-radius:14px;
+                display:inline-block;line-height:56px;text-align:center;
+                font-size:26px;font-weight:800;color:white;margin-bottom:16px;"">9</div>
+    <div style=""font-size:12px;font-weight:700;letter-spacing:3px;text-transform:uppercase;
+                color:rgba(0,0,0,.5);margin-bottom:8px;"">9raiti</div>
+    <h1 style=""margin:0;color:#fff;font-size:22px;font-weight:700;"">Confirmez votre adresse email</h1>
+    <p style=""margin:8px 0 0;color:rgba(255,255,255,.8);font-size:13px;"">
+      Une dernière étape pour activer votre compte</p>
+  </td></tr>
+  <!-- BODY -->
+  <tr><td style=""padding:40px;"">
+    <table cellpadding=""0"" cellspacing=""0"" style=""margin:0 auto 28px;""><tr><td align=""center"">
+      <div style=""width:72px;height:72px;background:rgba(245,158,11,.1);
+                  border:2px solid rgba(245,158,11,.3);border-radius:50%;
+                  display:inline-block;line-height:72px;text-align:center;font-size:36px;"">✉️</div>
+    </td></tr></table>
+    <p style=""color:#94a3b8;font-size:15px;line-height:1.7;margin:0 0 16px;"">Bonjour,</p>
+    <p style=""color:#94a3b8;font-size:15px;line-height:1.7;margin:0 0 28px;"">
+      Merci de vous être inscrit sur <strong style=""color:#f1f5f9;"">9raiti</strong>.
+      Pour activer votre compte, confirmez votre adresse email :</p>
+    <table cellpadding=""0"" cellspacing=""0"" style=""width:100%;margin:0 auto 28px;""><tr>
+      <td align=""center"" style=""background:linear-gradient(135deg,#F59E0B,#D97706);border-radius:12px;
+                                   box-shadow:0 4px 20px rgba(245,158,11,.35);"">
+        <a href=""{link}"" style=""display:block;padding:16px 44px;color:#fff;
+                                   font-size:15px;font-weight:700;text-decoration:none;"">
+          ✅ &nbsp;Confirmer mon compte</a>
       </td>
-    </tr>
-  </table>
+    </tr></table>
+    <div style=""background:rgba(245,158,11,.05);border:1px solid rgba(245,158,11,.15);
+                border-radius:12px;padding:16px 20px;margin-bottom:20px;"">
+      <p style=""color:#F59E0B;font-weight:700;font-size:13px;margin:0 0 8px;"">
+        📚 Après confirmation, vous pourrez :</p>
+      <p style=""color:#94a3b8;font-size:13px;margin:3px 0;"">📖 &nbsp;Accéder à tous les cours</p>
+      <p style=""color:#94a3b8;font-size:13px;margin:3px 0;"">🎯 &nbsp;Suivre votre progression</p>
+      <p style=""color:#94a3b8;font-size:13px;margin:3px 0;"">🏆 &nbsp;Obtenir des certifications</p>
+    </div>
+    <p style=""color:#475569;font-size:13px;line-height:1.6;margin:0;"">
+      ⚠️ Si vous n'avez pas créé de compte, ignorez cet email.
+      Ce lien expire dans <strong style=""color:#94a3b8;"">24 heures</strong>.</p>
+  </td></tr>
+  <!-- FOOTER -->
+  <tr><td style=""height:1px;background:rgba(255,255,255,.06);""></td></tr>
+  <tr><td align=""center"" style=""padding:24px 40px;"">
+    <p style=""margin:0 0 4px;color:#475569;font-size:12px;"">
+      © 2025 <strong style=""color:#F59E0B;"">9raiti</strong> — Plateforme E-Learning</p>
+    <p style=""margin:0;color:#2d3d52;font-size:11px;"">
+      Email automatique, merci de ne pas y répondre.</p>
+  </td></tr>
+</table>
+</td></tr></table>
+</body></html>";
 
-</body>
-</html>";
-        }
-
-        private string GetHtmlBodyEnseignantValide(string nomComplet)
-        {
-            string loginUrl = "http://localhost:4200/login";
-
-            return $@"
-<!DOCTYPE html>
+        private string BuildEnseignantInscriptionHtml(string nomComplet) => $@"<!DOCTYPE html>
 <html lang=""fr"">
-<head>
-  <meta charset=""UTF-8"">
-  <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
-  <title>Compte activé</title>
-</head>
-<body style=""margin:0;padding:0;background:#f8fafc;font-family:'Segoe UI',Arial,sans-serif;"">
+<head><meta charset=""UTF-8""><meta name=""viewport"" content=""width=device-width,initial-scale=1"">
+<title>Inscription en cours — 9raiti</title></head>
+<body style=""margin:0;padding:0;background:#080c14;font-family:'Segoe UI',Arial,sans-serif;"">
+<table width=""100%"" cellpadding=""0"" cellspacing=""0"" style=""background:#080c14;padding:48px 20px;"">
+<tr><td align=""center"">
+<table width=""540"" cellpadding=""0"" cellspacing=""0""
+       style=""background:#0f1623;border-radius:20px;border:1px solid rgba(255,255,255,.06);
+              box-shadow:0 20px 60px rgba(0,0,0,.6);"">
+  <tr><td align=""center"" style=""background:linear-gradient(135deg,#F59E0B,#D97706);padding:40px 40px 36px;"">
+    <div style=""width:56px;height:56px;background:rgba(0,0,0,.2);border-radius:14px;
+                display:inline-block;line-height:56px;text-align:center;
+                font-size:26px;font-weight:800;color:white;margin-bottom:16px;"">9</div>
+    <div style=""font-size:12px;font-weight:700;letter-spacing:3px;text-transform:uppercase;
+                color:rgba(0,0,0,.5);margin-bottom:8px;"">9raiti</div>
+    <h1 style=""margin:0;color:#fff;font-size:22px;font-weight:700;"">Inscription reçue !</h1>
+    <p style=""margin:8px 0 0;color:rgba(255,255,255,.8);font-size:13px;"">
+      Votre demande est en cours de traitement</p>
+  </td></tr>
+  <tr><td style=""padding:40px;"">
+    <table cellpadding=""0"" cellspacing=""0"" style=""margin:0 auto 28px;""><tr><td align=""center"">
+      <div style=""width:72px;height:72px;background:rgba(245,158,11,.1);
+                  border:2px solid rgba(245,158,11,.3);border-radius:50%;
+                  display:inline-block;line-height:72px;text-align:center;font-size:36px;"">⏳</div>
+    </td></tr></table>
+    <p style=""color:#94a3b8;font-size:15px;line-height:1.7;margin:0 0 16px;"">
+      Bonjour <strong style=""color:#f1f5f9;"">{nomComplet}</strong>,</p>
+    <p style=""color:#94a3b8;font-size:15px;line-height:1.7;margin:0 0 24px;"">
+      Nous avons bien reçu votre demande d'inscription en tant
+      qu'<strong style=""color:#F59E0B;"">enseignant</strong> sur la plateforme
+      <strong style=""color:#f1f5f9;"">9raiti</strong>.</p>
+    <div style=""background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2);
+                border-radius:12px;padding:20px 24px;margin-bottom:24px;"">
+      <p style=""color:#F59E0B;font-weight:700;font-size:13px;margin:0 0 12px;"">
+        📋 Prochaines étapes :</p>
+      <p style=""color:#94a3b8;font-size:13px;margin:5px 0;"">
+        1️⃣ &nbsp;Vérification de vos informations par l'administrateur</p>
+      <p style=""color:#94a3b8;font-size:13px;margin:5px 0;"">
+        2️⃣ &nbsp;Activation de votre compte (sous 24–48h)</p>
+      <p style=""color:#94a3b8;font-size:13px;margin:5px 0;"">
+        3️⃣ &nbsp;Email de confirmation avec accès à la plateforme</p>
+    </div>
+    <div style=""background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.15);
+                border-radius:12px;padding:14px 20px;"">
+      <p style=""color:#10b981;font-size:13px;margin:0;"">
+        ✅ &nbsp;Votre compte sera activé dès validation par notre équipe.</p>
+    </div>
+  </td></tr>
+  <tr><td style=""height:1px;background:rgba(255,255,255,.06);""></td></tr>
+  <tr><td align=""center"" style=""padding:24px 40px;"">
+    <p style=""margin:0 0 4px;color:#475569;font-size:12px;"">
+      © 2025 <strong style=""color:#F59E0B;"">9raiti</strong> — Plateforme E-Learning</p>
+    <p style=""margin:0;color:#2d3d52;font-size:11px;"">
+      Email automatique, merci de ne pas y répondre.</p>
+  </td></tr>
+</table>
+</td></tr></table>
+</body></html>";
 
-  <table width=""100%"" cellpadding=""0"" cellspacing=""0"" style=""background:#f8fafc;padding:40px 20px;"">
-    <tr>
-      <td align=""center"">
-        <table width=""600"" cellpadding=""0"" cellspacing=""0""
-               style=""background:#ffffff;border-radius:16px;overflow:hidden;
-                      box-shadow:0 4px 24px rgba(0,0,0,0.08);"">
-
-          <!-- Header -->
-          <tr>
-            <td style=""background:linear-gradient(135deg,#F59E0B,#D97706);
-                        padding:36px 40px;text-align:center;"">
-              <div style=""width:56px;height:56px;background:rgba(255,255,255,0.2);
-                           border-radius:14px;display:inline-flex;align-items:center;
-                           justify-content:center;font-size:28px;font-weight:bold;
-                           color:white;margin-bottom:12px;"">9</div>
-              <h1 style=""color:white;margin:0;font-size:24px;font-weight:700;"">9raiti</h1>
-              <p style=""color:rgba(255,255,255,0.85);margin:6px 0 0;font-size:13px;"">
-                Plateforme E-Learning
-              </p>
-            </td>
-          </tr>
-
-          <!-- Corps -->
-          <tr>
-            <td style=""padding:40px;"">
-
-              <!-- Icône succès -->
-              <div style=""text-align:center;margin-bottom:28px;"">
-                <div style=""width:72px;height:72px;background:#D1FAE5;border-radius:50%;
-                             display:inline-flex;align-items:center;justify-content:center;
-                             font-size:36px;"">✅</div>
-              </div>
-
-              <h2 style=""color:#0f172a;font-size:22px;font-weight:700;
-                          margin:0 0 12px;text-align:center;"">
-                Votre compte est activé !
-              </h2>
-
-              <p style=""color:#475569;font-size:15px;line-height:1.7;margin:0 0 20px;"">
-                Bonjour <strong style=""color:#0f172a;"">{nomComplet}</strong>,
-              </p>
-
-              <p style=""color:#475569;font-size:15px;line-height:1.7;margin:0 0 20px;"">
-                Bonne nouvelle ! Votre compte enseignant sur <strong>9raiti</strong>
-                a été <strong style=""color:#059669;"">validé et activé</strong> par notre équipe.
-                Vous pouvez dès maintenant accéder à la plateforme.
-              </p>
-
-              <!-- Encadré succès -->
-              <div style=""background:#ECFDF5;border:1px solid #A7F3D0;border-radius:12px;
-                           padding:20px 24px;margin:24px 0;"">
-                <div style=""display:flex;align-items:flex-start;gap:12px;"">
-                  <span style=""font-size:20px;margin-top:2px;"">🎓</span>
-                  <div>
-                    <p style=""color:#065F46;font-weight:700;font-size:14px;margin:0 0 6px;"">
-                      Accès enseignant accordé
-                    </p>
-                    <p style=""color:#047857;font-size:13px;line-height:1.6;margin:0;"">
-                      Vous avez maintenant accès à toutes les fonctionnalités enseignant :
-                      création de cours, gestion des modules, suivi des apprenants.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Bouton connexion -->
-              <div style=""text-align:center;margin:32px 0;"">
-                <a href=""{loginUrl}""
-                   style=""display:inline-block;background:linear-gradient(135deg,#F59E0B,#D97706);
-                          color:white;text-decoration:none;padding:14px 40px;
-                          border-radius:12px;font-weight:700;font-size:15px;
-                          box-shadow:0 4px 16px rgba(245,158,11,0.35);"">
-                  Accéder à mon espace enseignant →
-                </a>
-              </div>
-
-              <!-- Fonctionnalités -->
-              <p style=""color:#0f172a;font-weight:700;font-size:14px;margin:0 0 12px;"">
-                Ce que vous pouvez faire maintenant :
-              </p>
-              <table width=""100%"" cellpadding=""0"" cellspacing=""0"">
-                <tr>
-                  <td style=""padding:6px 0;"">
-                    <span style=""color:#475569;font-size:14px;"">
-                      📚 &nbsp;Créer et publier vos cours
-                    </span>
-                  </td>
-                </tr>
-                <tr>
-                  <td style=""padding:6px 0;"">
-                    <span style=""color:#475569;font-size:14px;"">
-                      📦 &nbsp;Gérer vos modules et catégories
-                    </span>
-                  </td>
-                </tr>
-                <tr>
-                  <td style=""padding:6px 0;"">
-                    <span style=""color:#475569;font-size:14px;"">
-                      👥 &nbsp;Suivre la progression de vos apprenants
-                    </span>
-                  </td>
-                </tr>
-                <tr>
-                  <td style=""padding:6px 0;"">
-                    <span style=""color:#475569;font-size:14px;"">
-                      📝 &nbsp;Créer des évaluations et quiz
-                    </span>
-                  </td>
-                </tr>
-              </table>
-
-            </td>
-          </tr>
-
-          <!-- Footer -->
-          <tr>
-            <td style=""background:#f8fafc;border-top:1px solid #e2e8f0;
-                        padding:24px 40px;text-align:center;"">
-              <p style=""color:#94a3b8;font-size:12px;margin:0;"">
-                © 2025 9raiti — Plateforme E-Learning<br>
-                Cet email a été envoyé automatiquement, merci de ne pas y répondre.
-              </p>
-            </td>
-          </tr>
-
-        </table>
+        private string BuildEnseignantValideHtml(string nomComplet)
+        {
+            string loginUrl = $"{_config["AppSettings:FrontendUrl"]}/login";
+            return $@"<!DOCTYPE html>
+<html lang=""fr"">
+<head><meta charset=""UTF-8""><meta name=""viewport"" content=""width=device-width,initial-scale=1"">
+<title>Compte activé — 9raiti</title></head>
+<body style=""margin:0;padding:0;background:#080c14;font-family:'Segoe UI',Arial,sans-serif;"">
+<table width=""100%"" cellpadding=""0"" cellspacing=""0"" style=""background:#080c14;padding:48px 20px;"">
+<tr><td align=""center"">
+<table width=""540"" cellpadding=""0"" cellspacing=""0""
+       style=""background:#0f1623;border-radius:20px;border:1px solid rgba(255,255,255,.06);
+              box-shadow:0 20px 60px rgba(0,0,0,.6);"">
+  <tr><td align=""center"" style=""background:linear-gradient(135deg,#F59E0B,#D97706);padding:40px 40px 36px;"">
+    <div style=""width:56px;height:56px;background:rgba(0,0,0,.2);border-radius:14px;
+                display:inline-block;line-height:56px;text-align:center;
+                font-size:26px;font-weight:800;color:white;margin-bottom:16px;"">9</div>
+    <div style=""font-size:12px;font-weight:700;letter-spacing:3px;text-transform:uppercase;
+                color:rgba(0,0,0,.5);margin-bottom:8px;"">9raiti</div>
+    <h1 style=""margin:0;color:#fff;font-size:22px;font-weight:700;"">Votre compte est activé !</h1>
+    <p style=""margin:8px 0 0;color:rgba(255,255,255,.8);font-size:13px;"">
+      Bienvenue sur 9raiti</p>
+  </td></tr>
+  <tr><td style=""padding:40px;"">
+    <table cellpadding=""0"" cellspacing=""0"" style=""margin:0 auto 28px;""><tr><td align=""center"">
+      <div style=""width:72px;height:72px;background:rgba(16,185,129,.1);
+                  border:2px solid rgba(16,185,129,.3);border-radius:50%;
+                  display:inline-block;line-height:72px;text-align:center;font-size:36px;"">✅</div>
+    </td></tr></table>
+    <p style=""color:#94a3b8;font-size:15px;line-height:1.7;margin:0 0 16px;"">
+      Bonjour <strong style=""color:#f1f5f9;"">{nomComplet}</strong>,</p>
+    <p style=""color:#94a3b8;font-size:15px;line-height:1.7;margin:0 0 24px;"">
+      Bonne nouvelle ! Votre compte enseignant sur <strong style=""color:#f1f5f9;"">9raiti</strong>
+      a été <strong style=""color:#10b981;"">validé et activé</strong>.
+      Vous pouvez maintenant accéder à la plateforme.</p>
+    <div style=""background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.15);
+                border-radius:12px;padding:20px 24px;margin-bottom:28px;"">
+      <p style=""color:#10b981;font-weight:700;font-size:13px;margin:0 0 10px;"">
+        🎓 Accès enseignant accordé :</p>
+      <p style=""color:#94a3b8;font-size:13px;margin:4px 0;"">📚 &nbsp;Créer et publier vos cours</p>
+      <p style=""color:#94a3b8;font-size:13px;margin:4px 0;"">📦 &nbsp;Gérer vos modules et catégories</p>
+      <p style=""color:#94a3b8;font-size:13px;margin:4px 0;"">👥 &nbsp;Suivre la progression de vos apprenants</p>
+    </div>
+    <table cellpadding=""0"" cellspacing=""0"" style=""width:100%;margin:0 auto 0;""><tr>
+      <td align=""center"" style=""background:linear-gradient(135deg,#F59E0B,#D97706);border-radius:12px;
+                                   box-shadow:0 4px 20px rgba(245,158,11,.35);"">
+        <a href=""{loginUrl}"" style=""display:block;padding:16px 44px;color:#fff;
+                                       font-size:15px;font-weight:700;text-decoration:none;"">
+          Accéder à mon espace enseignant →</a>
       </td>
-    </tr>
-  </table>
-
-</body>
-</html>";
+    </tr></table>
+  </td></tr>
+  <tr><td style=""height:1px;background:rgba(255,255,255,.06);""></td></tr>
+  <tr><td align=""center"" style=""padding:24px 40px;"">
+    <p style=""margin:0 0 4px;color:#475569;font-size:12px;"">
+      © 2025 <strong style=""color:#F59E0B;"">9raiti</strong> — Plateforme E-Learning</p>
+    <p style=""margin:0;color:#2d3d52;font-size:11px;"">
+      Email automatique, merci de ne pas y répondre.</p>
+  </td></tr>
+</table>
+</td></tr></table>
+</body></html>";
         }
     }
 }
