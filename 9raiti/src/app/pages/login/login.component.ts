@@ -154,8 +154,14 @@ export class LoginComponent implements OnInit, AfterViewInit {
       },
       error: (err) => {
         this.loading = false;
-        if (err.status === 403) this.errorMessage = "Votre compte est en attente de validation par un administrateur.";
-        else if (err.status === 401) this.errorMessage = 'Email ou mot de passe incorrect.';
+        if (err.status === 403) {
+          const msg = err.error ?? '';
+          if (typeof msg === 'string' && msg.toLowerCase().includes('email')) {
+            this.errorMessage = "Veuillez confirmer votre adresse email avant de vous connecter.";
+          } else {
+            this.errorMessage = "Votre compte est en attente de validation par un administrateur.";
+          }
+        }        else if (err.status === 401) this.errorMessage = 'Email ou mot de passe incorrect.';
         else this.errorMessage = 'Une erreur est survenue. Veuillez réessayer.';
       }
     });

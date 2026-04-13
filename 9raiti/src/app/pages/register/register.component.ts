@@ -75,8 +75,7 @@ export class RegisterComponent {
         if (this.selectedRole === 'enseignant') {
           this.successMessage = 'Compte créé avec succès. Votre compte est en attente de validation par un administrateur.';
         } else {
-          this.successMessage = 'Inscription réussie ! Vous pouvez maintenant vous connecter.';
-          setTimeout(() => this.router.navigate(['/login']), 2500);
+          this.successMessage = 'Inscription réussie ! Vérifiez votre email pour activer votre compte.';          
         }
       },
       error: (err) => {

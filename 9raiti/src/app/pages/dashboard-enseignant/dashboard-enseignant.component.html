@@ -12,7 +12,7 @@
         <div class="flex items-center gap-3">
           <div class="w-11 h-11 rounded-full flex items-center justify-center font-bold text-base flex-shrink-0"
                style="background:linear-gradient(135deg,#10b981,#059669);color:white;font-family:'Syne',sans-serif;">
-            {{ userName?.charAt(0) || 'E' }}
+            {{ userName.charAt(0) || 'E' }}
           </div>
           <div class="min-w-0">
             <div class="text-sm font-bold truncate" style="color:var(--text);">{{ userName }}</div>
@@ -275,7 +275,7 @@
                     <td><span class="text-xs clamp-2" style="color:var(--text-2);max-width:200px;display:block;">{{m.description}}</span></td>
                     <td><span class="text-sm" style="color:var(--text-2);">{{getCatName(m.categorieId)}}</span></td>
                     <td><span class="badge" [class.b-green]="m.actif" [class.b-red]="!m.actif">{{m.actif ? 'Actif' : 'Inactif'}}</span></td>
-                    <td><span class="badge b-blue">{{m.cours?.length ?? 0}} cours</span></td>
+                    <td><span class="badge b-blue">{{ m.cours ? m.cours.length : 0 }} cours</span></td>
                     <td>
                       <div class="flex items-center justify-end gap-1.5">
                         <button (click)="openEditMod(m)" class="btn btn-ghost btn-sm">

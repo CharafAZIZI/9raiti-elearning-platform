@@ -28,6 +28,20 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/reset-password/reset-password.component')
       .then(m => m.ResetPasswordComponent)
   },
+
+  // ── Pages confirmation email (remplacent wwwroot) ─────────
+  {
+    path: 'email-confirme',
+    loadComponent: () => import('./pages/email-confirme/email-confirme.component')
+      .then(m => m.EmailConfirmeComponent)
+  },
+  {
+    path: 'email-invalide',
+    loadComponent: () => import('./pages/email-invalide/email-invalide.component')
+      .then(m => m.EmailInvalideComponent)
+  },
+
+  // ── Dashboards ────────────────────────────────────────────
   {
     path: 'dashboard-apprenant',
     canActivate: [authGuard, roleGuard('apprenant')],
