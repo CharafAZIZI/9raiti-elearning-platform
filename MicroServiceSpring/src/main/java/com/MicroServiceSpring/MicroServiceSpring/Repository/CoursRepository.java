@@ -1,7 +1,7 @@
 package com.MicroServiceSpring.MicroServiceSpring.Repository;
 
-import com.MicroServiceSpring.MicroServiceSpring.Models.Cours;
-import com.MicroServiceSpring.MicroServiceSpring.Models.StatutCours;
+import com.MicroServiceSpring.MicroServiceSpring.Models.Cours.Cours;
+import com.MicroServiceSpring.MicroServiceSpring.Models.Cours.StatutCours;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

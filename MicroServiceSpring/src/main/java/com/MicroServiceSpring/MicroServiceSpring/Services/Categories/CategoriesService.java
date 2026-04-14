@@ -1,4 +1,4 @@
-package com.MicroServiceSpring.MicroServiceSpring.Services;
+package com.MicroServiceSpring.MicroServiceSpring.Services.Categories;
 
 import com.MicroServiceSpring.MicroServiceSpring.DTO.CategoriesDTO;
 

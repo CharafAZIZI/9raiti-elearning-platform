@@ -1,7 +1,7 @@
 package com.MicroServiceSpring.MicroServiceSpring.DTO;
 
-import com.MicroServiceSpring.MicroServiceSpring.Models.Niveau;
-import com.MicroServiceSpring.MicroServiceSpring.Models.StatutCours;
+import com.MicroServiceSpring.MicroServiceSpring.Models.Cours.Niveau;
+import com.MicroServiceSpring.MicroServiceSpring.Models.Cours.StatutCours;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;

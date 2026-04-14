@@ -15,6 +15,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Collections;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import java.security.Key;
 
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -36,13 +39,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String token = header.substring(7);
 
             try {
-                Claims claims = Jwts.parserBuilder()
-                        .setSigningKey(jwtSecret.getBytes())
-                        .build()
-                        .parseClaimsJws(token)
-                        .getBody();
 
-                // Support des claims standards et Microsoft
+                Key key = new SecretKeySpec(jwtSecret.getBytes(), "HmacSHA256");
+
+                Claims claims = Jwts.parser()
+                        .verifyWith((SecretKey) key)
+                        .build()
+                        .parseSignedClaims(token)
+                        .getPayload();
+
                 String email = claims.get("email", String.class);
                 if (email == null) {
                     email = claims.get(

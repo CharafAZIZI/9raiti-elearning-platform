@@ -1,8 +1,8 @@
 package com.MicroServiceSpring.MicroServiceSpring.Mappers;
 
 import com.MicroServiceSpring.MicroServiceSpring.DTO.CoursDTO;
-import com.MicroServiceSpring.MicroServiceSpring.Models.Cours;
-import com.MicroServiceSpring.MicroServiceSpring.Models.Module;
+import com.MicroServiceSpring.MicroServiceSpring.Models.Cours.Cours;
+import com.MicroServiceSpring.MicroServiceSpring.Models.Modules.Module;
 import org.springframework.stereotype.Component;
 
 @Component

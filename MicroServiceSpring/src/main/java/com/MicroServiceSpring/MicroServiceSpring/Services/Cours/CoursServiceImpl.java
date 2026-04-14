@@ -1,11 +1,11 @@
-package com.MicroServiceSpring.MicroServiceSpring.Services;
+package com.MicroServiceSpring.MicroServiceSpring.Services.Cours;
 
 import com.MicroServiceSpring.MicroServiceSpring.DTO.CoursDTO;
 import com.MicroServiceSpring.MicroServiceSpring.Exceptions.ResourceNotFoundException;
 import com.MicroServiceSpring.MicroServiceSpring.Mappers.CoursMapper;
-import com.MicroServiceSpring.MicroServiceSpring.Models.Cours;
-import com.MicroServiceSpring.MicroServiceSpring.Models.Module;
-import com.MicroServiceSpring.MicroServiceSpring.Models.StatutCours;
+import com.MicroServiceSpring.MicroServiceSpring.Models.Cours.Cours;
+import com.MicroServiceSpring.MicroServiceSpring.Models.Modules.Module;
+import com.MicroServiceSpring.MicroServiceSpring.Models.Cours.StatutCours;
 import com.MicroServiceSpring.MicroServiceSpring.Repository.CoursRepository;
 import com.MicroServiceSpring.MicroServiceSpring.Repository.ModuleRepository;
 import lombok.RequiredArgsConstructor;

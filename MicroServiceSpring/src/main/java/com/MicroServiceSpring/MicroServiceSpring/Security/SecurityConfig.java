@@ -1,5 +1,4 @@
 package com.MicroServiceSpring.MicroServiceSpring.Security;
-
 import com.MicroServiceSpring.MicroServiceSpring.Filters.JwtAuthenticationFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,12 +33,26 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
 
-                        // ← PUBLIC : page Home visible sans connexion
+                        // ── PUBLIC : catalogue visible sans connexion ─────────
                         .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/modules/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/cours/**").permitAll()
 
-                        // ENSEIGNANT / APPRENANT / ADMIN : écriture
+                        // ── PUBLIC : soumission anonyme de feedback (page Home) ─
+                        .requestMatchers(HttpMethod.POST, "/api/feedbacks/anonyme").permitAll()
+
+                        // ── APPRENANT + ENSEIGNANT : soumettre un feedback ─────
+                        .requestMatchers(HttpMethod.POST, "/api/feedbacks")
+                                .hasAnyRole("APPRENANT", "ENSEIGNANT")
+
+                        // ── ENSEIGNANT : consulter les avis sur ses cours ───────
+                        .requestMatchers(HttpMethod.GET, "/api/feedbacks/cours/**")
+                                .hasAnyRole("ENSEIGNANT", "ADMIN")
+
+                        // ── ADMIN : gestion complète des feedbacks ─────────────
+                        .requestMatchers("/api/feedbacks/**").hasRole("ADMIN")
+
+                        // ── ENSEIGNANT / ADMIN : écriture catalogue ────────────
                         .requestMatchers(HttpMethod.POST,   "/api/categories/**").hasAnyRole("ENSEIGNANT", "ADMIN")
                         .requestMatchers(HttpMethod.PUT,    "/api/categories/**").hasAnyRole("ENSEIGNANT", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/categories/**").hasAnyRole("ENSEIGNANT", "ADMIN")
