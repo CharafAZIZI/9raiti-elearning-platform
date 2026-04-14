@@ -85,6 +85,31 @@
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS" ]
     },
     {
+      "DownstreamPathTemplate": "/api/feedbacks/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "spring-service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/feedbacks/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "OPTIONS" ]
+    },
+    // endpoint sans evrything ( verfication )
+    {
+      "DownstreamPathTemplate": "/api/feedbacks",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "spring-service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/feedbacks",
+      "UpstreamHttpMethod": [ "GET", "POST", "OPTIONS" ]
+    },
+    {
       "DownstreamPathTemplate": "/api/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
