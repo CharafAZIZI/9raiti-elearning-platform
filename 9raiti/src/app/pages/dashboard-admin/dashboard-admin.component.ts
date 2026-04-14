@@ -2,24 +2,58 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import {
+  FormsModule, ReactiveFormsModule, FormBuilder, FormGroup,
+  Validators, AbstractControl, ValidationErrors
+} from '@angular/forms';
 import { TokenService } from '../../core/services/token.service';
 import { AdminUserService, User } from '../../core/services/admin-user.service';
 import { CatalogueService } from '../../core/services/catalogue.service';
+import { ProfileService } from '../../core/services/profile.service';
+import { ThemeService } from '../../core/services/theme.service';
+import { FeedbackService } from '../../core/services/feedback.service';
 import { CategorieDTO } from '../../models/categorie.model';
 import { ModuleDTO, StatutModule } from '../../models/module.model';
 import { CoursDTO, Niveau, StatutCours } from '../../models/cours.model';
+import {
+  FeedbackDTO, FeedbackReponseDTO,
+  TypeAvis, StatutFeedback,
+  TYPE_AVIS_LABELS, STATUT_LABELS
+} from '../../models/feedback.model';
+
+// Validator: nouveauMdp === confirmationMdp
+function passwordMatchValidator(group: AbstractControl): ValidationErrors | null {
+  const pwd  = group.get('mot_de_passe')?.value;
+  const conf = group.get('confirmation_mot_de_passe');
+  if (pwd && conf?.value && pwd !== conf.value) {
+    conf.setErrors({ mismatch: true });
+    return { mismatch: true };
+  }
+  if (conf?.errors?.['mismatch']) conf.setErrors(null);
+  return null;
+}
 
 @Component({
   selector: 'app-dashboard-admin',
   standalone: true,
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './dashboard-admin.component.html',
-  styleUrls: ['./dashboard-admin.component.css']
+  styleUrls: ['./dashboard-admin.component.css'],
 })
 export class DashboardAdminComponent implements OnInit {
 
-  // ── Utilisateurs ─────────────────────────────────────────────────────────────
+  // ── UI state ───────────────────────────────────────────────────────────────
+  activeTab = 'dashboard';
+  logoutLoading = false;
+  errorMessage = '';
+  successMessage = '';
+
+  // ── Profile display ────────────────────────────────────────────────────────
+  displayName = '';
+  profileEmail = '';
+  initials = '?';
+
+  // ── Users ──────────────────────────────────────────────────────────────────
   users: User[] = [];
   filteredUsers: User[] = [];
   loading = true;
@@ -29,20 +63,7 @@ export class DashboardAdminComponent implements OnInit {
   statusFilter = 'all';
   deleteConfirmId: number | null = null;
 
-  // ── UI ────────────────────────────────────────────────────────────────────────
-  activeTab = 'users';
-  logoutLoading = false;
-  errorMessage = '';
-  successMessage = '';
-
-  // ── Profil ────────────────────────────────────────────────────────────────────
-  displayName = '';
-  email = '';
-  initials = '?';
-
-  // ══════════════════════════════════════════════════════════════════════════════
-  // GESTION DU CONTENU
-  // ══════════════════════════════════════════════════════════════════════════════
+  // ── Content ────────────────────────────────────────────────────────────────
   categories:  CategorieDTO[] = [];
   modules:     ModuleDTO[]    = [];
   cours:       CoursDTO[]     = [];
@@ -51,9 +72,11 @@ export class DashboardAdminComponent implements OnInit {
   loadingModules    = false;
   loadingCours      = false;
 
-  contentTab: 'categories' | 'modules' | 'cours' = 'categories';
+  contentTab: string = 'categories';
 
-  // Suppression contenu
+  expandedCatIds: Set<number> = new Set();
+  expandedModIds: Set<number> = new Set();
+
   deleteTarget: { type: 'categorie' | 'module' | 'cours'; id: number; name: string } | null = null;
 
   // Formulaire Catégorie
@@ -77,31 +100,69 @@ export class DashboardAdminComponent implements OnInit {
   niveaux:  Niveau[]      = ['DEBUTANT', 'INTERMEDIAIRE', 'AVANCE'];
   statuts:  StatutCours[] = ['BROUILLON', 'PUBLIE', 'ARCHIVE'];
 
+  // ── Feedbacks ──────────────────────────────────────────────────────────────
+  feedbacks:         FeedbackDTO[] = [];
+  feedbacksFiltres:  FeedbackDTO[] = [];
+  loadingFeedbacks   = false;
+  feedbackError      = '';
+  feedbackDetail:    FeedbackDTO | null = null;
+  showFeedbackDetail = false;
+  reponseForm        = { statut: '' as StatutFeedback, reponseAdmin: '' };
+  reponseLoading     = false;
+  reponseSuccess     = '';
+  fbFiltreType:   TypeAvis | ''     = '';
+  fbFiltreStatut: StatutFeedback | '' = '';
+
+  readonly typesAvis: { value: TypeAvis; label: string }[] =
+    Object.entries(TYPE_AVIS_LABELS).map(([v, l]) => ({ value: v as TypeAvis, label: l }));
+  readonly statutsAvis: { value: StatutFeedback; label: string }[] =
+    Object.entries(STATUT_LABELS).map(([v, l]) => ({ value: v as StatutFeedback, label: l }));
+
+  // ── Profile tab ────────────────────────────────────────────────────────────
+  profileTab: 'info' | 'password' = 'info';
+  profileInfoForm!: FormGroup;
+  profilePwdForm!:  FormGroup;
+  profileLoadingInfo = false;
+  profileLoadingPwd  = false;
+  profileSuccessInfo = '';
+  profileErrorInfo   = '';
+  profileSuccessPwd  = '';
+  profileErrorPwd    = '';
+  showOldPwd  = false;
+  showNewPwd  = false;
+  showConfPwd = false;
+
   constructor(
-    private adminService: AdminUserService,
-    private tokenService: TokenService,
-    private router: Router,
-    private http: HttpClient,
-    private cdr: ChangeDetectorRef,
-    private catalogueService: CatalogueService,
-    private fb: FormBuilder
+    private adminService:    AdminUserService,
+    private tokenService:    TokenService,
+    private router:          Router,
+    private http:            HttpClient,
+    private cdr:             ChangeDetectorRef,
+    private catalogueService:CatalogueService,
+    private profileService:  ProfileService,
+    public  themeService:    ThemeService,
+    private fb:              FormBuilder,
+    private feedbackService: FeedbackService
   ) {}
 
   ngOnInit(): void {
     const user = this.tokenService.getUser();
     if (user) {
-      this.email = user.email ?? '';
-      this.displayName = this.tokenService.getDisplayName();
-      this.initials = user.prenom && user.nom
+      this.profileEmail = user.email ?? '';
+      this.displayName  = this.tokenService.getDisplayName();
+      this.initials     = user.prenom && user.nom
         ? (user.prenom[0] + user.nom[0]).toUpperCase()
         : (user.email?.substring(0, 2).toUpperCase() ?? '?');
     }
     this.buildForms();
     this.loadUsers();
     this.loadContentData();
+    this.loadProfileData();
   }
 
+  // ── Build forms ────────────────────────────────────────────────────────────
   private buildForms(): void {
+    // Content forms
     this.catForm = this.fb.group({
       nom:         ['', [Validators.required, Validators.minLength(2)]],
       description: [''],
@@ -109,7 +170,7 @@ export class DashboardAdminComponent implements OnInit {
     this.modForm = this.fb.group({
       nom:         ['', [Validators.required, Validators.minLength(2)]],
       description: ['', Validators.required],
-      code:        ['', [Validators.required, Validators.pattern(/^[A-Z0-9\-_]+$/)]],
+      code:        ['', [Validators.required, Validators.pattern(/^[A-Z]{2,10}-\d+$/)]],
       actif:       [true],
       statut:      ['ACTIF'],
       categorieId: [null],
@@ -122,9 +183,79 @@ export class DashboardAdminComponent implements OnInit {
       dureeMinutes: [null, [Validators.min(1)]],
       moduleId:     [null, Validators.required],
     });
+    // Profile forms
+    this.profileInfoForm = this.fb.group({
+      prenom:    ['', Validators.required],
+      nom:       ['', Validators.required],
+      email:     ['', [Validators.required, Validators.email]],
+      telephone: [''],
+    });
+    this.profilePwdForm = this.fb.group({
+      old_password:              ['', Validators.required],
+      mot_de_passe:              ['', [Validators.required, Validators.minLength(8)]],
+      confirmation_mot_de_passe: ['', Validators.required],
+    }, { validators: passwordMatchValidator });
   }
 
-  // ── Chargement contenu ────────────────────────────────────────────────────────
+  // ── Profile data ───────────────────────────────────────────────────────────
+  loadProfileData(): void {
+    this.profileService.getMyProfile().subscribe({
+      next: (p) => {
+        this.profileInfoForm.patchValue({
+          prenom:    p.prenom ?? '',
+          nom:       p.nom ?? '',
+          email:     p.email ?? '',
+          telephone: p.telephone ?? '',
+        });
+        this.cdr.detectChanges();
+      },
+      error: () => {}
+    });
+  }
+
+  submitProfileInfo(): void {
+    if (this.profileInfoForm.invalid) { this.profileInfoForm.markAllAsTouched(); return; }
+    this.profileLoadingInfo = true;
+    this.profileService.updateMyProfile(this.profileInfoForm.value).subscribe({
+      next: (p) => {
+        this.profileLoadingInfo = false;
+        this.displayName = `${p.prenom} ${p.nom}`;
+        this.initials = p.prenom && p.nom ? (p.prenom[0] + p.nom[0]).toUpperCase() : this.initials;
+        this.profileSuccessInfo = 'Profil mis à jour avec succès.';
+        this.profileErrorInfo = '';
+        setTimeout(() => { this.profileSuccessInfo = ''; this.cdr.detectChanges(); }, 4000);
+        this.cdr.detectChanges();
+      },
+      error: (e) => {
+        this.profileLoadingInfo = false;
+        this.profileErrorInfo = this.extractError(e, 'Erreur lors de la mise à jour du profil.');
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  submitProfilePwd(): void {
+    if (this.profilePwdForm.invalid) { this.profilePwdForm.markAllAsTouched(); return; }
+    this.profileLoadingPwd = true;
+    const { mot_de_passe, confirmation_mot_de_passe } = this.profilePwdForm.value;
+    this.profileService.updateMyProfile({ mot_de_passe, confirmation_mot_de_passe }).subscribe({
+      next: () => {
+        this.profileLoadingPwd = false;
+        this.profilePwdForm.reset();
+        this.profileSuccessPwd = 'Mot de passe modifié avec succès.';
+        this.profileErrorPwd = '';
+        setTimeout(() => { this.profileSuccessPwd = ''; this.cdr.detectChanges(); }, 4000);
+        this.cdr.detectChanges();
+      },
+      error: (e) => {
+        this.profileLoadingPwd = false;
+        this.profileErrorPwd = this.extractError(e, 'Erreur lors du changement de mot de passe.');
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  // ── Content data ────────────────────────────────────────────────────────────
   loadContentData(): void { this.loadCategories(); this.loadModules(); this.loadCours(); }
 
   loadCategories(): void {
@@ -154,19 +285,33 @@ export class DashboardAdminComponent implements OnInit {
     });
   }
 
-  // ── Stats contenu ─────────────────────────────────────────────────────────────
   get contentStats() {
     return {
       totalCategories: this.categories.length,
       totalModules:    this.modules.length,
-      modulesActifs:   this.modules.filter(m => m.actif).length,
+      modulesActifs:   this.modules.filter(m => m.actif || m.statut === 'ACTIF').length,
       totalCours:      this.cours.length,
       coursPublies:    this.cours.filter(c => c.statut === 'PUBLIE').length,
       coursBrouillons: this.cours.filter(c => c.statut === 'BROUILLON').length,
     };
   }
 
-  // ── CRUD Catégories ───────────────────────────────────────────────────────────
+  // Accordion helpers
+  toggleCatExpand(id: number): void {
+    if (this.expandedCatIds.has(id)) this.expandedCatIds.delete(id);
+    else this.expandedCatIds.add(id);
+  }
+  toggleModExpand(id: number): void {
+    if (this.expandedModIds.has(id)) this.expandedModIds.delete(id);
+    else this.expandedModIds.add(id);
+  }
+  isCatExpanded(id: number): boolean { return this.expandedCatIds.has(id); }
+  isModExpanded(id: number): boolean { return this.expandedModIds.has(id); }
+  getModulesForCat(catId: number): ModuleDTO[]  { return this.modules.filter(m => m.categorieId === catId); }
+  getCoursForMod(modId: number):   CoursDTO[]   { return this.cours.filter(c => c.moduleId === modId); }
+  getModulesWithoutCat():          ModuleDTO[]  { return this.modules.filter(m => !m.categorieId); }
+
+  // ── CRUD Catégories ─────────────────────────────────────────────────────────
   openCreateCat(): void { this.editingCat = null; this.catForm.reset({ nom: '', description: '' }); this.showCatModal = true; }
   openEditCat(cat: CategorieDTO): void { this.editingCat = cat; this.catForm.patchValue({ nom: cat.nom, description: cat.description ?? '' }); this.showCatModal = true; }
 
@@ -182,7 +327,7 @@ export class DashboardAdminComponent implements OnInit {
     });
   }
 
-  // ── CRUD Modules ──────────────────────────────────────────────────────────────
+  // ── CRUD Modules ────────────────────────────────────────────────────────────
   openCreateMod(): void { this.editingMod = null; this.modForm.reset({ nom: '', description: '', code: '', actif: true, statut: 'ACTIF', categorieId: null }); this.showModModal = true; }
   openEditMod(mod: ModuleDTO): void {
     this.editingMod = mod;
@@ -195,7 +340,6 @@ export class DashboardAdminComponent implements OnInit {
     if (this.modForm.invalid) { this.modForm.markAllAsTouched(); return; }
     this.modLoading = true;
     const val = this.modForm.value;
-    // Synchronise actif booléen avec le statut
     const actif = val.statut === 'ACTIF';
     const dto: ModuleDTO = { ...val, actif };
     const obs = this.editingMod?.id
@@ -207,7 +351,7 @@ export class DashboardAdminComponent implements OnInit {
     });
   }
 
-  // ── CRUD Cours ────────────────────────────────────────────────────────────────
+  // ── CRUD Cours ──────────────────────────────────────────────────────────────
   openCreateCours(): void {
     this.editingCours = null;
     this.coursForm.reset({ titre: '', description: '', niveau: 'DEBUTANT', statut: 'BROUILLON', dureeMinutes: null, moduleId: null });
@@ -223,10 +367,12 @@ export class DashboardAdminComponent implements OnInit {
     if (this.coursForm.invalid) { this.coursForm.markAllAsTouched(); return; }
     this.coursLoading = true;
     const dto: CoursDTO = {
-      titre: this.coursForm.value.titre, description: this.coursForm.value.description,
-      niveau: this.coursForm.value.niveau, statut: this.coursForm.value.statut,
+      titre:        this.coursForm.value.titre,
+      description:  this.coursForm.value.description,
+      niveau:       this.coursForm.value.niveau,
+      statut:       this.coursForm.value.statut,
       dureeMinutes: this.coursForm.value.dureeMinutes || undefined,
-      moduleId: Number(this.coursForm.value.moduleId),
+      moduleId:     Number(this.coursForm.value.moduleId),
     };
     const obs = this.editingCours?.idCours
       ? this.catalogueService.updateCours(this.editingCours.idCours, dto)
@@ -237,7 +383,7 @@ export class DashboardAdminComponent implements OnInit {
     });
   }
 
-  // ── Suppression contenu ───────────────────────────────────────────────────────
+  // ── Suppression contenu ─────────────────────────────────────────────────────
   confirmDeleteContent(type: 'categorie' | 'module' | 'cours', id: number, name: string): void { this.deleteTarget = { type, id, name }; }
   cancelDeleteContent(): void { this.deleteTarget = null; }
   executeDeleteContent(): void {
@@ -259,14 +405,14 @@ export class DashboardAdminComponent implements OnInit {
     });
   }
 
-  // ── Helpers affichage ─────────────────────────────────────────────────────────
+  // ── Display helpers ─────────────────────────────────────────────────────────
   getCatName(id?: number): string { return id ? (this.categories.find(c => c.id === id)?.nom ?? '—') : '—'; }
   getModName(id?: number): string { return id ? (this.modules.find(m => m.id === id)?.nom ?? '—') : '—'; }
   getNiveauLabel(n?: Niveau): string {
     return n === 'DEBUTANT' ? '🟢 Débutant' : n === 'INTERMEDIAIRE' ? '🟡 Intermédiaire' : n === 'AVANCE' ? '🔴 Avancé' : '—';
   }
   getStatutCls(s?: StatutCours): string { return s === 'PUBLIE' ? 'b-green' : s === 'ARCHIVE' ? 'b-red' : 'b-orange'; }
-  getStatutLabel(s?: StatutCours): string { return s === 'PUBLIE' ? '🟢 Publié' : s === 'ARCHIVE' ? '📦 Archivé' : '📝 Brouillon'; }
+  getStatutCours(s?: StatutCours): string { return s === 'PUBLIE' ? '🟢 Publié' : s === 'ARCHIVE' ? '📦 Archivé' : '📝 Brouillon'; }
   formatDuree(min?: number): string {
     if (!min) return '—';
     const h = Math.floor(min / 60), m = min % 60;
@@ -277,9 +423,7 @@ export class DashboardAdminComponent implements OnInit {
   get mf() { return this.modForm.controls; }
   get ff() { return this.coursForm.controls; }
 
-  // ══════════════════════════════════════════════════════════════════════════════
-  // GESTION UTILISATEURS
-  // ══════════════════════════════════════════════════════════════════════════════
+  // ── Users ────────────────────────────────────────────────────────────────────
   loadUsers(): void {
     this.loading = true;
     this.adminService.getAll().subscribe({
@@ -294,8 +438,8 @@ export class DashboardAdminComponent implements OnInit {
       const q = this.searchQuery.toLowerCase();
       result = result.filter(u => u.nom?.toLowerCase().includes(q) || u.prenom?.toLowerCase().includes(q) || u.email?.toLowerCase().includes(q));
     }
-    if (this.roleFilter !== 'all')         result = result.filter(u => u.role?.toLowerCase() === this.roleFilter);
-    if (this.statusFilter === 'active')    result = result.filter(u => u.est_actif);
+    if (this.roleFilter !== 'all')          result = result.filter(u => u.role?.toLowerCase() === this.roleFilter);
+    if (this.statusFilter === 'active')     result = result.filter(u => u.est_actif);
     else if (this.statusFilter === 'inactive') result = result.filter(u => !u.est_actif);
     else if (this.statusFilter === 'pending')  result = result.filter(u => u.role?.toLowerCase() === 'enseignant' && !u.est_valide);
     this.filteredUsers = result;
@@ -309,6 +453,10 @@ export class DashboardAdminComponent implements OnInit {
       pending:     this.users.filter(u => u.role?.toLowerCase() === 'enseignant' && !u.est_valide).length,
       suspended:   this.users.filter(u => !u.est_actif).length
     };
+  }
+
+  getPendingUsers(): User[] {
+    return this.users.filter(u => u.role?.toLowerCase() === 'enseignant' && !u.est_valide);
   }
 
   valider(user: User): void {
@@ -351,15 +499,7 @@ export class DashboardAdminComponent implements OnInit {
     return user.email?.substring(0, 2).toUpperCase() ?? '??';
   }
 
-  getRoleClass(role: string): string {
-    switch (role?.toLowerCase()) {
-      case 'apprenant':  return 'badge-apprenant';
-      case 'enseignant': return 'badge-enseignant';
-      case 'admin':      return 'badge-admin';
-      default:           return 'badge-default';
-    }
-  }
-
+  // ── Auth ─────────────────────────────────────────────────────────────────────
   logout(): void {
     this.logoutLoading = true;
     const token = this.tokenService.getToken();
@@ -370,6 +510,7 @@ export class DashboardAdminComponent implements OnInit {
     });
   }
 
+  // ── Feedback methods ─────────────────────────────────────────────────────────
   private showSuccess(msg: string): void {
     this.successMessage = msg; this.errorMessage = '';
     setTimeout(() => { this.successMessage = ''; this.cdr.detectChanges(); }, 4000);
@@ -382,5 +523,103 @@ export class DashboardAdminComponent implements OnInit {
 
   private extractError(err: any, fallback: string): string {
     return err?.error?.message ?? err?.error?.error ?? err?.message ?? fallback;
+  }
+
+  // ── Gestion Feedbacks ─────────────────────────────────────────────────────
+
+  loadFeedbacks(): void {
+    this.loadingFeedbacks = true;
+    this.feedbackError    = '';
+    const t = this.fbFiltreType   || undefined;
+    const s = this.fbFiltreStatut || undefined;
+    this.feedbackService.getAll(t as TypeAvis, s as StatutFeedback).subscribe({
+      next: (data) => {
+        this.feedbacks        = data;
+        this.feedbacksFiltres = data;
+        this.loadingFeedbacks = false;
+        this.cdr.detectChanges();
+      },
+      error: (err: Error) => {
+        this.feedbackError    = err.message;
+        this.loadingFeedbacks = false;
+      }
+    });
+  }
+
+  appliquerFiltresFeedback(): void { this.loadFeedbacks(); }
+
+  reinitialiserFiltresFeedback(): void {
+    this.fbFiltreType   = '';
+    this.fbFiltreStatut = '';
+    this.loadFeedbacks();
+  }
+
+  ouvrirFeedback(fb: FeedbackDTO): void {
+    this.feedbackDetail  = { ...fb };
+    this.reponseForm     = {
+      statut:       (fb.statut as StatutFeedback) ?? 'EN_ATTENTE',
+      reponseAdmin: fb.reponseAdmin ?? ''
+    };
+    this.reponseSuccess  = '';
+    this.showFeedbackDetail = true;
+  }
+
+  fermerFeedbackDetail(): void {
+    this.showFeedbackDetail = false;
+    this.feedbackDetail     = null;
+    this.reponseSuccess     = '';
+  }
+
+  envoyerReponse(): void {
+    if (!this.feedbackDetail?.idFeedback) return;
+    this.reponseLoading = true;
+    this.reponseSuccess = '';
+    const reponse: FeedbackReponseDTO = {
+      statut:       this.reponseForm.statut,
+      reponseAdmin: this.reponseForm.reponseAdmin || undefined
+    };
+    this.feedbackService.repondre(this.feedbackDetail.idFeedback, reponse).subscribe({
+      next: (updated) => {
+        this.reponseLoading = false;
+        this.reponseSuccess = 'Réponse enregistrée avec succès.';
+        const idx = this.feedbacks.findIndex(f => f.idFeedback === updated.idFeedback);
+        if (idx !== -1) this.feedbacks[idx] = updated;
+        this.feedbacksFiltres = [...this.feedbacks];
+        this.cdr.detectChanges();
+        setTimeout(() => this.fermerFeedbackDetail(), 1800);
+      },
+      error: (err: Error) => {
+        this.reponseLoading = false;
+        this.feedbackError  = err.message;
+      }
+    });
+  }
+
+  supprimerFeedback(id: number): void {
+    if (!confirm('Supprimer définitivement cet avis ?')) return;
+    this.feedbackService.supprimer(id).subscribe({
+      next: () => {
+        this.feedbacks        = this.feedbacks.filter(f => f.idFeedback !== id);
+        this.feedbacksFiltres = [...this.feedbacks];
+        if (this.feedbackDetail?.idFeedback === id) this.fermerFeedbackDetail();
+        this.cdr.detectChanges();
+      },
+      error: (err: Error) => { this.feedbackError = err.message; }
+    });
+  }
+
+  getTypeLabel(type: string): string  { return (TYPE_AVIS_LABELS as any)[type] ?? type; }
+  getStatutLabel(s: string): string   { return (STATUT_LABELS as any)[s] ?? s; }
+
+  getStatutColor(s: string): string {
+    const m: Record<string, string> = { EN_ATTENTE: 'var(--orange)', EN_COURS: 'var(--blue)', RESOLU: 'var(--green)', REJETE: 'var(--red)' };
+    return m[s] ?? 'var(--text-3)';
+  }
+  getStatutDim(s: string): string {
+    const m: Record<string, string> = { EN_ATTENTE: 'var(--orange-dim)', EN_COURS: 'var(--blue-dim)', RESOLU: 'var(--green-dim)', REJETE: 'var(--red-dim)' };
+    return m[s] ?? 'var(--surface-2)';
+  }
+  getFeedbackCountByStatut(statut: string): number {
+    return this.feedbacks.filter(f => f.statut === statut).length;
   }
 }

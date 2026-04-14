@@ -251,7 +251,13 @@
                    class="btn btn-ghost btn-sm w-full justify-center">Voir les cours →</a>
               </ng-container>
               <ng-template #lockCours>
-                <a routerLink="/login" class="btn btn-brand btn-sm w-full justify-center">🔒 Connexion requise</a>
+                <div class="rounded-xl p-3 text-center" style="background:var(--brand-dim);border:1px solid var(--border-brand);">
+                  <p class="text-xs font-semibold mb-2" style="color:var(--brand);">🔒 Contenu réservé aux membres</p>
+                  <div class="flex gap-1.5">
+                    <a routerLink="/login" class="btn btn-ghost btn-sm flex-1 justify-center" style="font-size:11px;">Connexion</a>
+                    <a routerLink="/register" class="btn btn-brand btn-sm flex-1 justify-center" style="font-size:11px;">S'inscrire</a>
+                  </div>
+                </div>
               </ng-template>
             </div>
           </div>
@@ -403,6 +409,8 @@
       </div>
 
       <div class="glass-brand p-8 rounded-3xl">
+
+        <!-- ✅ Succès -->
         <div *ngIf="claimSent" class="alert alert-green animate-scale-in">
           <span class="text-lg">✅</span>
           <div>
@@ -411,19 +419,43 @@
           </div>
         </div>
 
+        <!-- ⚠️ Erreur -->
+        <div *ngIf="claimError && !claimSent" class="mb-4 p-3 rounded-xl flex items-center gap-2"
+             style="background:var(--red-dim);border:1px solid rgba(239,68,68,.3);color:var(--red);">
+          <span>⚠️</span>
+          <p class="text-sm">{{ claimError }}</p>
+        </div>
+
         <div *ngIf="!claimSent">
           <h3 class="font-display font-bold text-xl mb-6" style="color:var(--text)">Envoyer un message</h3>
           <div class="space-y-5">
+
+            <!-- Email -->
             <div>
               <label class="block text-xs font-semibold uppercase tracking-wider mb-2" style="color:var(--text-3)">Votre adresse email</label>
-              <input type="email" [(ngModel)]="claim.email" placeholder="exemple@email.com" class="inp" />
+              <input type="email" [(ngModel)]="feedbackEmail" placeholder="exemple@email.com" class="inp" />
             </div>
+
+            <!-- Type d'avis -->
+            <div>
+              <label class="block text-xs font-semibold uppercase tracking-wider mb-2" style="color:var(--text-3)">Type d'avis</label>
+              <select [(ngModel)]="feedbackType" class="inp" style="cursor:pointer;">
+                <option value="" disabled selected>— Choisir un type —</option>
+                <option *ngFor="let t of typesAvis" [value]="t.value">{{ t.label }}</option>
+              </select>
+            </div>
+
+            <!-- Message -->
             <div>
               <label class="block text-xs font-semibold uppercase tracking-wider mb-2" style="color:var(--text-3)">Votre message</label>
-              <textarea [(ngModel)]="claim.message" rows="5" placeholder="Décrivez votre réclamation..."
-                        class="inp resize-none" style="min-height:130px"></textarea>
+              <textarea [(ngModel)]="feedbackMessage" rows="5" placeholder="Décrivez votre réclamation, suggestion ou question..."
+                        class="inp resize-none" style="min-height:130px" maxlength="2000"></textarea>
+              <p class="text-xs text-right mt-1" style="color:var(--text-3);">{{ feedbackMessage.length }} / 2000</p>
             </div>
-            <button (click)="submitClaim()" [disabled]="claimLoading || !claim.email || !claim.message"
+
+            <!-- Bouton -->
+            <button (click)="submitClaim()"
+                    [disabled]="claimLoading || !feedbackEmail || !feedbackMessage || !feedbackType"
                     class="btn btn-brand w-full py-3.5 text-base rounded-2xl">
               <span *ngIf="!claimLoading">Envoyer le message →</span>
               <span *ngIf="claimLoading" class="flex items-center justify-center gap-2">
@@ -434,6 +466,7 @@
                 Envoi en cours...
               </span>
             </button>
+
           </div>
         </div>
       </div>

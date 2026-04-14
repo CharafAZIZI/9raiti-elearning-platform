@@ -1,1 +1,103 @@
-/* Global styles in src/index.html */
+/* ============================================================
+   Dashboard Admin — styles dédiés
+   Les styles globaux (glass, btn, inp, badge, tbl, nav-item,
+   alert, stat-accent…) sont dans src/index.html.
+   Ce fichier contient uniquement les surcharges et ajouts
+   spécifiques à ce composant.
+   ============================================================ */
+
+/* ── nav-item actif : couleur purple pour l'admin ─────────────
+   (remplace la couleur brand par défaut)                       */
+:host .nav-item.active {
+  background : var(--purple-dim) !important;
+  border-color: rgba(139, 92, 246, .25) !important;
+  color       : var(--purple) !important;
+}
+
+/* ── Bouton "Gérer les utilisateurs" (outline purple) ────────── */
+:host .btn-outline-purple {
+  background  : transparent;
+  border      : 1px solid rgba(139, 92, 246, .4) !important;
+  color       : var(--purple);
+  font-size   : 14px;
+  padding     : 10px 18px;
+}
+:host .btn-outline-purple:hover {
+  background  : var(--purple-dim);
+  border-color: var(--purple) !important;
+}
+
+/* ── Profile avatar glow (sidebar) ───────────────────────────── */
+:host .admin-avatar {
+  box-shadow: 0 6px 20px rgba(139, 92, 246, .35);
+}
+
+/* ── Table : highlight pending rows ─────────────────────────── */
+:host .tbl-row.pending-row td {
+  background: rgba(249, 115, 22, .03);
+}
+
+/* ── Content sub-tabs : scrollable on mobile ─────────────────── */
+:host .content-tabs-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+:host .content-tabs-wrap::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Modal : amélioration de l'overflow sur petits écrans ────── */
+:host .modal-body {
+  max-height: calc(90vh - 120px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-brand) transparent;
+}
+
+/* ── Profil : section password — icône œil ───────────────────── */
+:host .pwd-eye {
+  background  : none;
+  border      : none;
+  cursor      : pointer;
+  color       : var(--text-3);
+  padding     : 0;
+  display     : flex;
+  align-items : center;
+  transition  : color .15s;
+}
+:host .pwd-eye:hover { color: var(--text-2); }
+
+/* ── Hiérarchie : indentation visuelle ───────────────────────── */
+:host .hierarchy-cat  { border-left: 3px solid var(--green);  }
+:host .hierarchy-mod  { border-left: 3px solid var(--brand);  }
+:host .hierarchy-cours{ border-left: 3px solid var(--blue);   }
+
+/* ── Animation : entrée décalée des stat-cards ──────────────── */
+:host .stat-card-0 { animation-delay:  0ms; }
+:host .stat-card-1 { animation-delay: 50ms; }
+:host .stat-card-2 { animation-delay: 100ms; }
+:host .stat-card-3 { animation-delay: 150ms; }
+:host .stat-card-4 { animation-delay: 200ms; }
+
+/* ── Empty state illustration ────────────────────────────────── */
+:host .empty-icon {
+  font-size  : 3rem;
+  line-height: 1;
+  display    : block;
+  margin-bottom: .75rem;
+  opacity    : .7;
+}
+
+/* ── Responsive : sidebar collapse sur md ────────────────────── */
+@media (max-width: 767px) {
+  :host main {
+    padding-left : 1rem;
+    padding-right: 1rem;
+  }
+}
+
+/* ── Transitions de tab ──────────────────────────────────────── */
+:host ng-container {
+  display: contents;
+}

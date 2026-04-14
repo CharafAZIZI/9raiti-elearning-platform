@@ -102,7 +102,7 @@
               class="btn btn-ghost btn-sm">Réinitialiser les filtres</button>
     </div>
 
-    <!-- ══ VUE GRILLE ══════════════════════════════════════════ -->
+    <!-- ══ VUE GRILLE ══ -->
     <div *ngIf="!loading && !errorMsg && filtered.length > 0 && vue==='grille'"
          class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
 
@@ -133,6 +133,13 @@
                   style="background:rgba(0,0,0,.45);border-color:transparent;color:white;">
               {{ c.niveau === 'DEBUTANT' ? '🟢 Débutant'
                : c.niveau === 'INTERMEDIAIRE' ? '🟡 Intermédiaire' : '🔴 Avancé' }}
+            </span>
+          </div>
+
+          <!-- Indicateur fichier top (si fichier présent) -->
+          <div *ngIf="c.filePath" class="absolute bottom-3 right-3">
+            <span class="badge text-xs" style="background:rgba(0,0,0,.5);border-color:transparent;color:white;">
+              {{ isPdf(c.filePath) ? '📄 PDF' : '🎬 Vidéo' }}
             </span>
           </div>
 
@@ -169,14 +176,15 @@
             </div>
           </div>
 
-          <button class="btn btn-brand btn-sm w-full">
-            S'inscrire à ce cours
+          <!-- ✅ MODIFIÉ : bouton avec routerLink vers la page de détail -->
+          <button class="btn btn-brand btn-sm w-full" [routerLink]="['/cours', c.idCours]">
+            {{ isApprenant ? '▶ Voir le cours' : '📂 Ouvrir le cours' }}
           </button>
         </div>
       </div>
     </div>
 
-    <!-- ══ VUE LISTE ════════════════════════════════════════════ -->
+    <!-- ══ VUE LISTE ══ -->
     <div *ngIf="!loading && !errorMsg && filtered.length > 0 && vue==='liste'"
          class="glass rounded-2xl overflow-hidden animate-fade-in">
       <div class="scroll-x">
@@ -188,6 +196,8 @@
               <th>Statut</th>
               <th>Durée</th>
               <th>Inscrits</th>
+              <!-- ✅ AJOUTÉ : colonne fichier -->
+              <th>Fichier</th>
               <th>Créé le</th>
               <th></th>
             </tr>
@@ -234,12 +244,25 @@
                 <span style="color:var(--text-2);">{{ c.nombreInscrits ?? 0 }}</span>
               </td>
 
+              <!-- ✅ AJOUTÉ : badge fichier dans vue liste -->
+              <td>
+                <span *ngIf="!c.filePath" style="color:var(--text-4);font-size:12px;">—</span>
+                <span *ngIf="c.filePath" class="badge text-xs"
+                      [class.b-green]="isPdf(c.filePath)"
+                      [class.b-blue]="!isPdf(c.filePath)">
+                  {{ isPdf(c.filePath) ? '📄 PDF' : '🎬 Vidéo' }}
+                </span>
+              </td>
+
               <td>
                 <span style="color:var(--text-3);font-size:12px;">{{ formatDate(c.dateCreation) }}</span>
               </td>
 
               <td>
-                <button class="btn btn-brand btn-sm">S'inscrire</button>
+                <!-- ✅ MODIFIÉ : routerLink vers cours-detail -->
+                <button class="btn btn-brand btn-sm" [routerLink]="['/cours', c.idCours]">
+                  {{ isApprenant ? '▶ Voir' : 'Ouvrir' }}
+                </button>
               </td>
             </tr>
           </tbody>

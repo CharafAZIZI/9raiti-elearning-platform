@@ -1,0 +1,103 @@
+<!-- src/app/shared/components/feedback-form/feedback-form.component.html -->
+
+<div class="feedback-form-wrapper">
+
+  <!-- Titre + bouton fermer (si utilisé dans un modal) -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="mb-0 fw-bold">
+      <i class="bi bi-chat-left-dots me-2 text-primary"></i>Soumettre un avis
+    </h5>
+    <button type="button" class="btn-close" (click)="onClose()" aria-label="Fermer"></button>
+  </div>
+
+  <!-- Message succès -->
+  <div *ngIf="successMessage" class="alert alert-success d-flex align-items-center gap-2">
+    <i class="bi bi-check-circle-fill"></i>
+    <span>{{ successMessage }}</span>
+  </div>
+
+  <!-- Message erreur -->
+  <div *ngIf="errorMessage" class="alert alert-danger d-flex align-items-center gap-2">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    <span>{{ errorMessage }}</span>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+
+    <!-- Email -->
+    <div class="mb-3">
+      <label for="fb-email" class="form-label fw-semibold">
+        Email <span class="text-danger">*</span>
+      </label>
+      <input
+        id="fb-email"
+        type="email"
+        class="form-control"
+        [class.is-invalid]="isInvalid('email')"
+        formControlName="email"
+        placeholder="votre@email.com"
+        autocomplete="email"
+      />
+      <div class="invalid-feedback">{{ getError('email') }}</div>
+      <small *ngIf="prefillEmail" class="text-muted">
+        <i class="bi bi-lock me-1"></i>Email pré-rempli depuis votre compte.
+      </small>
+    </div>
+
+    <!-- Type d'avis -->
+    <div class="mb-3">
+      <label for="fb-type" class="form-label fw-semibold">
+        Type d'avis <span class="text-danger">*</span>
+      </label>
+      <select
+        id="fb-type"
+        class="form-select"
+        [class.is-invalid]="isInvalid('typeAvis')"
+        formControlName="typeAvis"
+      >
+        <option value="" disabled selected>— Choisir un type —</option>
+        <option *ngFor="let t of typesAvis" [value]="t.value">{{ t.label }}</option>
+      </select>
+      <div class="invalid-feedback">{{ getError('typeAvis') }}</div>
+    </div>
+
+    <!-- Info cours lié (optionnel, affiché si coursId fourni) -->
+    <div *ngIf="coursId" class="alert alert-info py-2 mb-3 d-flex align-items-center gap-2">
+      <i class="bi bi-book"></i>
+      <small>Cet avis sera lié au cours <strong>#{{ coursId }}</strong>.</small>
+    </div>
+
+    <!-- Message -->
+    <div class="mb-3">
+      <label for="fb-message" class="form-label fw-semibold">
+        Message <span class="text-danger">*</span>
+      </label>
+      <textarea
+        id="fb-message"
+        class="form-control"
+        [class.is-invalid]="isInvalid('message')"
+        formControlName="message"
+        rows="5"
+        placeholder="Décrivez votre avis, suggestion ou problème..."
+        maxlength="2000"
+      ></textarea>
+      <div class="invalid-feedback">{{ getError('message') }}</div>
+      <div class="form-text text-end">
+        {{ form.get('message')?.value?.length ?? 0 }} / 2000
+      </div>
+    </div>
+
+    <!-- Bouton soumettre -->
+    <div class="d-flex justify-content-end gap-2">
+      <button type="button" class="btn btn-outline-secondary" (click)="onClose()">
+        Annuler
+      </button>
+      <button type="submit" class="btn btn-primary" [disabled]="loading">
+        <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+        <i *ngIf="!loading" class="bi bi-send me-2"></i>
+        {{ loading ? 'Envoi...' : 'Envoyer' }}
+      </button>
+    </div>
+
+  </form>
+</div>

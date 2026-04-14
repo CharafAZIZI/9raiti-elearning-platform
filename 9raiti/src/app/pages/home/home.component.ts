@@ -5,8 +5,10 @@ import { FormsModule } from '@angular/forms';
 import { CatalogueService } from '../../core/services/catalogue.service';
 import { AuthService } from '../../core/services/auth.service';
 import { UserStateService } from '../../core/services/user-state.service';
+import { FeedbackService } from '../../core/services/feedback.service';
 import { CategorieDTO } from '../../models/categorie.model';
 import { ModuleDTO } from '../../models/module.model';
+import { FeedbackDTO, TypeAvis } from '../../models/feedback.model';
 
 @Component({
   selector: 'app-home',
@@ -49,10 +51,22 @@ export class HomeComponent implements OnInit, OnDestroy {
   currentSlide = 0;
   private slideInterval?: ReturnType<typeof setInterval>;
 
-  /* ── Réclamation ────────────────────────────────────────── */
-  claim = { email: '', message: '' };
-  claimSent    = false;
-  claimLoading = false;
+  /* ── Feedback / Réclamation ─────────────────────────────── */
+  feedbackEmail   = '';
+  feedbackType: TypeAvis | '' = '';
+  feedbackMessage = '';
+  claimSent       = false;
+  claimLoading    = false;
+  claimError      = '';
+
+  readonly typesAvis: { value: TypeAvis; label: string }[] = [
+    { value: 'RECLAMATION',         label: 'Réclamation' },
+    { value: 'FEEDBACK_PLATEFORME', label: 'Feedback sur la plateforme' },
+    { value: 'SUGGESTION',          label: "Suggestion d'amélioration" },
+    { value: 'BUG',                 label: 'Signalement de bug' },
+    { value: 'AVIS_COURS',          label: 'Avis sur un cours' },
+    { value: 'AUTRE',               label: 'Autre' },
+  ];
 
   /* ── Testimonials ───────────────────────────────────────── */
   testimonials = [
@@ -101,11 +115,11 @@ export class HomeComponent implements OnInit, OnDestroy {
     private auth: AuthService,
     private userStateService: UserStateService,
     private router: Router,
+    private feedbackService: FeedbackService,
   ) {}
 
   ngOnInit(): void {
     this.isLoggedIn = this.auth.isLoggedIn();
-    // FIX: reactive — Google login met à jour isLoggedIn sans F5
     this.userStateService.user$.subscribe(u => {
       this.isLoggedIn = !!u && this.auth.isLoggedIn();
     });
@@ -163,15 +177,33 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.router.navigate(['/modules'], { queryParams: { categorieId: catId, categorieNom: catNom } });
   }
 
+  /** Soumission du feedback anonyme depuis la page Home */
   submitClaim(): void {
-    if (!this.claim.email || !this.claim.message) return;
+    if (!this.feedbackEmail || !this.feedbackMessage || !this.feedbackType) return;
+
     this.claimLoading = true;
-    setTimeout(() => {
-      this.claimLoading = false;
-      this.claimSent    = true;
-      this.claim        = { email: '', message: '' };
-      setTimeout(() => this.claimSent = false, 4000);
-    }, 1200);
+    this.claimError   = '';
+
+    const dto: FeedbackDTO = {
+      email:    this.feedbackEmail,
+      typeAvis: this.feedbackType as TypeAvis,
+      message:  this.feedbackMessage,
+    };
+
+    this.feedbackService.soumettreAnonyme(dto).subscribe({
+      next: () => {
+        this.claimLoading   = false;
+        this.claimSent      = true;
+        this.feedbackEmail   = '';
+        this.feedbackType    = '';
+        this.feedbackMessage = '';
+        setTimeout(() => this.claimSent = false, 5000);
+      },
+      error: (err: Error) => {
+        this.claimLoading = false;
+        this.claimError   = err.message;
+      }
+    });
   }
 
   @HostListener('window:scroll')

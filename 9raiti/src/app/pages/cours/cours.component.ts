@@ -155,4 +155,9 @@ export class CoursComponent implements OnInit {
     if (!d) return '—';
     return new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
   }
+
+  isPdf(filePath?: string): boolean {
+    if (!filePath) return false;
+    return filePath.toLowerCase().endsWith('.pdf');
+  }
 }

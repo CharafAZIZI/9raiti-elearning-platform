@@ -1,209 +1,185 @@
 # 9raiti — Plateforme E-learning Angular
 
-## Description
-
-**9raiti** est une plateforme e-learning développée avec Angular (standalone components), connectée à un backend Spring Boot via une API REST. Elle gère une hiérarchie de contenu **Catégories → Modules → Cours** avec un système de rôles strict.
-
----
-
-## Architecture du projet
-
-```
-src/
-├── app/
-│   ├── core/
-│   │   ├── guards/
-│   │   │   └── auth.guard.ts          # authGuard, roleGuard, guestGuard
-│   │   ├── interceptors/
-│   │   │   └── jwt.interceptor.ts     # Injection automatique du Bearer token
-│   │   └── services/
-│   │       ├── auth.service.ts        # Login, register, logout, Google OAuth
-│   │       ├── catalogue.service.ts   # CRUD Catégories / Modules / Cours
-│   │       ├── token.service.ts       # JWT storage, rôle, expiration
-│   │       ├── profile.service.ts     # Profil utilisateur
-│   │       ├── admin-user.service.ts  # Gestion utilisateurs (Admin)
-│   │       ├── theme.service.ts       # Thème clair/sombre
-│   │       └── user-state.service.ts  # État utilisateur global
-│   ├── models/
-│   │   ├── categorie.model.ts         # CategorieDTO
-│   │   ├── module.model.ts            # ModuleDTO, StatutModule
-│   │   ├── cours.model.ts             # CoursDTO, Niveau, StatutCours
-│   │   ├── login.model.ts
-│   │   ├── register.model.ts
-│   │   └── password.model.ts
-│   ├── pages/
-│   │   ├── home/                      # Landing page publique
-│   │   ├── login/                     # Authentification
-│   │   ├── register/                  # Inscription
-│   │   ├── forgot-password/           # Réinitialisation mot de passe
-│   │   ├── reset-password/
-│   │   ├── pending-validation/        # Attente de validation enseignant
-│   │   ├── categories/                # Liste catégories (authentifié)
-│   │   ├── modules/                   # Liste modules (authentifié, filtré par rôle)
-│   │   ├── cours/                     # Liste cours (authentifié, filtré par rôle)
-│   │   ├── dashboard-apprenant/       # Tableau de bord apprenant
-│   │   ├── dashboard-enseignant/      # Tableau de bord enseignant avec CRUD
-│   │   ├── dashboard-admin/           # Tableau de bord admin complet
-│   │   └── profile/                   # Profil utilisateur
-│   └── shared/
-│       └── components/
-│           └── navbar/                # Barre de navigation partagée
-├── environments/
-│   └── environment.ts                 # URLs API (apiUrl, springApiUrl)
-└── index.html                         # Point d'entrée, variables CSS globales
-```
-
----
-
-## Rôles et règles métier
-
-### 🎓 Apprenant
-
-| Élément         | Règle d'affichage                                           |
-|-----------------|-------------------------------------------------------------|
-| **Catégories**  | Toutes visibles (elles n'ont pas de statut)                 |
-| **Modules**     | Uniquement les modules avec `statut = ACTIF` (`actif=true`) |
-| **Cours**       | Uniquement les cours `PUBLIÉ` dont le **module parent est ACTIF** |
-| **Module BROUILLON ou ARCHIVÉ** | Totalement masqué, **même si ses cours sont publiés** |
-
-> Règle clé : un cours publié rattaché à un module non-actif est **invisible** pour l'apprenant.
-
-### 👨‍🏫 Enseignant
-
-- Accès complet à **tous les modules** (ACTIF, BROUILLON, ARCHIVÉ).
-- Accès complet à **tous les cours** (PUBLIÉ, BROUILLON, ARCHIVÉ).
-- Peut créer/modifier des modules et des cours depuis son tableau de bord.
-
-### 🔐 Admin
-
-- Accès complet sans restriction.
-- Section **"Gestion du Contenu"** dans le tableau de bord :
-  - CRUD complet des **Catégories** (nom, description)
-  - CRUD complet des **Modules** (nom, code, description, statut : ACTIF / BROUILLON / ARCHIVÉ, catégorie)
-  - CRUD complet des **Cours** (titre, description, niveau, statut, durée, module parent)
-- Section **"Gestion des Utilisateurs"** : validation, suspension, rôles.
-
----
-
-## Statuts des Modules
-
-| Statut       | Apprenant | Enseignant | Admin |
-|--------------|-----------|------------|-------|
-| `ACTIF`      | ✅ Visible | ✅ Visible  | ✅ Visible |
-| `BROUILLON`  | ❌ Masqué  | ✅ Visible  | ✅ Visible |
-| `ARCHIVE`    | ❌ Masqué  | ✅ Visible  | ✅ Visible |
-
-## Statuts des Cours
-
-| Statut       | Apprenant (si module ACTIF) | Enseignant | Admin |
-|--------------|-----------------------------|------------|-------|
-| `PUBLIE`     | ✅ Visible                  | ✅ Visible  | ✅ Visible |
-| `BROUILLON`  | ❌ Masqué                   | ✅ Visible  | ✅ Visible |
-| `ARCHIVE`    | ❌ Masqué                   | ✅ Visible  | ✅ Visible |
-
----
-
-## Page Home (publique)
-
-- **Première page** de l'application (route `/`).
-- Affiche les **catégories** et les **modules actifs uniquement**.
-- **Aucun accès direct aux cours** depuis la Home.
-- Cliquer sur "Voir les cours" d'un module → redirige vers `/login` si non connecté.
-- Contenu : hero slider, catalogue filtré, statistiques, témoignages, formulaire de réclamation, équipe, footer.
-
----
-
-## Sécurité et Guards
-
-| Route            | Guard appliqué           | Comportement                              |
-|------------------|--------------------------|-------------------------------------------|
-| `/`              | aucun                    | Accessible à tous                         |
-| `/login`         | `guestGuard`             | Redirige vers dashboard si déjà connecté  |
-| `/register`      | `guestGuard`             | Redirige vers dashboard si déjà connecté  |
-| `/cours`         | `authGuard`              | Redirige vers `/login` si non connecté    |
-| `/modules`       | `authGuard`              | Redirige vers `/login` si non connecté    |
-| `/categories`    | `authGuard`              | Redirige vers `/login` si non connecté    |
-| `/dashboard-admin` | `authGuard + roleGuard('admin')` | Redirige si mauvais rôle      |
-| `/dashboard-enseignant` | `authGuard + roleGuard('enseignant')` | Redirige si mauvais rôle |
-| `/dashboard-apprenant` | `authGuard + roleGuard('apprenant')` | Redirige si mauvais rôle  |
-
----
-
-## Installation et lancement
-
-### Prérequis
-- Node.js ≥ 18
-- Angular CLI ≥ 17
-- Backend Spring Boot démarré sur `http://localhost:8080`
-
-### Installation
+## 🚀 Démarrage rapide
 
 ```bash
-git clone <url-du-repo>
+docker-compose up --build
+```
+
+| Service        | URL                           |
+|----------------|-------------------------------|
+| Angular        | http://localhost:4200          |
+| API Gateway    | http://localhost:9000          |
+| Spring Boot    | interne : spring-service:8080  |
+| MinIO API S3   | http://localhost:9002          |
+| MinIO Console  | http://localhost:9003          |
+| PostgreSQL     | localhost:5433                 |
+| SQL Server     | localhost:1434                 |
+
+**Console MinIO :** http://localhost:9003 — login `minioadmin` / `REMOVED_PASSWORD`
+
+---
+
+## 📐 Architecture Angular
+
+```
+src/app/
+├── core/
+│   ├── guards/         auth.guard.ts
+│   ├── interceptors/   jwt.interceptor.ts
+│   └── services/       auth, catalogue, admin-user, token, theme…
+├── models/             categorie, module, cours, login, register…
+└── pages/
+    ├── home/                   Page d'accueil publique
+    ├── dashboard-admin/        Tableau de bord Administrateur ✨
+    ├── dashboard-enseignant/   Tableau de bord Enseignant
+    ├── dashboard-apprenant/    Tableau de bord Apprenant
+    ├── categories/             Liste catégories
+    ├── modules/                Liste modules
+    ├── cours/                  Liste cours par module
+    └── cours-detail/           Lecture cours + MinIO
+```
+
+---
+
+## ✨ Nouveautés (dernière mise à jour)
+
+### 1. Code de module — nouvelle regex
+
+Le champ **Code** dans les formulaires Module (Admin & Enseignant) respecte désormais
+le format `PREFIXE-NUMERO` :
+
+| Valide ✅ | Invalide ❌ |
+|-----------|------------|
+| `SPR-1`   | `SPRING`   |
+| `DOT-2`   | `ALG-L1`   |
+| `ML-10`   | `123-ABC`  |
+| `JAVA-3`  | `SP_R-1`   |
+
+**Règle :** 2 à 10 lettres majuscules, un tiret, puis un ou plusieurs chiffres.  
+Regex : `^[A-Z]{2,10}-\d+$`
+
+Le champ passe automatiquement en majuscules à la saisie.
+
+---
+
+### 2. Vue hiérarchique — onglet 🗂️
+
+Dans le dashboard Admin → **Gestion Contenu** → onglet **🗂️ Vue hiérarchique** :
+
+- Accordéon imbriqué **Catégories → Modules → Cours** sur une seule page
+- Cliquer sur une catégorie déroule ses modules
+- Cliquer sur un module déroule ses cours
+- Boutons **✏️ Modifier** et **🗑️ Supprimer** disponibles à chaque niveau
+- Bouton **+ Module** sur chaque catégorie : ouvre le formulaire module pré-rempli avec la catégorie
+- Bouton **+ Cours** sur chaque module : ouvre le formulaire cours pré-rempli avec le module
+- Section **"Modules sans catégorie"** pour les modules non classés
+
+Aucune navigation entre pages n'est nécessaire — tout le CRUD se fait en place via les modals existants.
+
+---
+
+### 3. Formulaires CRUD améliorés
+
+Les modals (Catégorie, Module, Cours) dans le dashboard Admin :
+
+- **Validation en temps réel** avec messages d'erreur contextuels
+- **Champ Code** : format clairement indiqué, auto-majuscule
+- **Feedback utilisateur** : messages succès/erreur animés (4–5 s)
+- **Loading states** sur les boutons de soumission
+
+---
+
+### 4. Page Home — contrôle d'accès amélioré
+
+Dans la section **Catalogue** de la page d'accueil :
+
+- Les catégories et modules **actifs** sont visibles par tous (sans connexion)
+- Pour chaque module, si l'utilisateur **n'est pas connecté** :
+  - Affichage d'un encart "🔒 Contenu réservé aux membres"
+  - Boutons **Connexion** et **S'inscrire** intégrés dans la carte
+  - Pas de redirection abrupte — le message est contextuel
+- Si l'utilisateur **est connecté** : bouton "Voir les cours →" direct
+
+---
+
+### 5. Rôle Admin — contrôle global
+
+| Fonctionnalité              | Admin | Enseignant |
+|-----------------------------|-------|------------|
+| Voir tous les utilisateurs  | ✅    | ❌         |
+| Valider enseignants         | ✅    | ❌         |
+| Suspendre / Activer comptes | ✅    | ❌         |
+| Supprimer utilisateurs      | ✅    | ❌         |
+| CRUD Catégories             | ✅    | ❌         |
+| CRUD Modules                | ✅    | ✅         |
+| CRUD Cours                  | ✅    | ✅         |
+| Upload fichiers (MinIO)     | ✅    | ✅         |
+| Vue hiérarchique            | ✅    | ❌         |
+
+---
+
+## 🔄 Flux MinIO
+
+### Upload (Enseignant / Admin)
+1. Créer un cours via le dashboard → modal
+2. Sélectionner un fichier (PDF ou vidéo MP4/WEBM)
+3. Angular appelle `POST /api/cours/{id}/upload` avec `multipart/form-data`
+4. Spring Boot valide le type → upload dans MinIO → sauvegarde l'`objectKey` en BDD
+
+### Lecture (Apprenant)
+1. Cliquer "Voir le cours" → route `/cours/{id}`
+2. `CoursDetailComponent` charge le cours
+3. Au clic "Accéder au contenu" → `GET /api/cours/{id}/presigned-url`
+4. Spring Boot génère une URL pré-signée (15 min)
+5. Angular :
+   - **PDF** → `<iframe>` avec l'URL pré-signée
+   - **Vidéo** → `<video>` HTML5
+
+---
+
+## 📦 Fichiers à intégrer (Spring Boot)
+
+| Fichier source                              | Destination                                              | Action    |
+|---------------------------------------------|----------------------------------------------------------|-----------|
+| `spring/MinioConfig/MinioConfig.java`       | `src/main/java/.../MinioConfig/MinioConfig.java`         | Remplacer |
+| `spring/Services/Minio/MinioService.java`   | `src/main/java/.../Services/Minio/MinioService.java`     | Remplacer |
+| `spring/Controllers/CoursController.java`   | `src/main/java/.../Controllers/CoursController.java`     | Remplacer |
+| `spring/application.properties`            | `src/main/resources/application.properties`              | Remplacer |
+
+---
+
+## ⚠️ Points d'attention
+
+### CORS MinIO
+Configurer via la console MinIO (Configuration > API > CORS) ou :
+```bash
+mc config host add local http://localhost:9002 minioadmin REMOVED_PASSWORD
+```
+
+### URL pré-signée dans Docker
+Ajouter dans `application.properties` :
+```properties
+minio.public-url=http://localhost:9002
+```
+Et dans `MinioService.generatePresignedUrl()` :
+```java
+return url.replace(minioUrl, minioPublicUrl);
+```
+
+### Sécurité
+- Bucket `cours` privé (pas d'accès public)
+- URLs pré-signées : expiration 15 min
+- Accès aux URLs uniquement pour les utilisateurs authentifiés (JWT)
+
+---
+
+## 🛠️ Développement local (sans Docker)
+
+```bash
 cd 9raiti
 npm install
+npm start        # http://localhost:4200  (proxy → localhost:9000)
 ```
 
-### Lancement
-
-```bash
-ng serve
-# ou avec le proxy configuré
-ng serve --proxy-config proxy.conf.json
-```
-
-L'application est accessible sur `http://localhost:4200`.
-
-### Variables d'environnement
-
-Fichier `src/environments/environment.ts` :
-```ts
-export const environment = {
-  production: false,
-  apiUrl: '/api',           // Auth endpoints (Spring Security)
-  springApiUrl: '/spring-api' // Catalogue endpoints (Spring Boot)
-};
-```
-
-Le proxy (`proxy.conf.json`) redirige `/spring-api` vers `http://localhost:8080/api`.
-
----
-
-## Technologies utilisées
-
-| Technologie       | Version  | Usage                              |
-|-------------------|----------|------------------------------------|
-| Angular           | 17+      | Framework frontend (standalone)    |
-| TypeScript        | 5+       | Langage principal                  |
-| TailwindCSS       | 3+       | Styles utilitaires                 |
-| RxJS              | 7+       | Observables, forkJoin, shareReplay |
-| Angular Reactive Forms | -   | Formulaires CRUD                   |
-| Spring Boot       | 3+       | Backend REST API                   |
-| JWT               | -        | Authentification stateless         |
-
----
-
-## Règles de filtrage — Résumé
-
-```
-Apprenant accède à /cours :
-  Pour chaque cours → visible si :
-    ✓ cours.statut === 'PUBLIE'
-    ✓ cours.moduleId.statut === 'ACTIF'   (actif === true)
-    ✗ cours.statut === 'BROUILLON' → masqué
-    ✗ cours.statut === 'ARCHIVE'  → masqué
-    ✗ module parent BROUILLON/ARCHIVE → tous ses cours masqués
-
-Enseignant et Admin accèdent à /cours :
-  Tous les cours, tous statuts, tous modules.
-```
-
----
-
-## Docker
-
-```bash
-docker build -t 9raiti .
-docker run -p 4200:80 9raiti
-```
-
+Le fichier `proxy.conf.json` redirige `/api/**` vers le gateway.

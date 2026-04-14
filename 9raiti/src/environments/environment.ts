@@ -6,6 +6,6 @@ export const environment = {
   apiUrl: 'http://localhost:9000/api',
   // API Spring Boot (catégories, modules, cours) — port 8080
   // En développement, le proxy Angular redirige /spring-api → http://localhost:8080
-  springApiUrl: 'http://localhost:9000/spring-api',
+  springApiUrl: 'http://localhost:9000/api',
   googleClientId: '212429201182-nau1rp4g1f8kjcvibfv3e6cb8mhpobua.apps.googleusercontent.com'
 };
