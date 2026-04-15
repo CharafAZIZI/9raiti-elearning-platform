@@ -65,6 +65,14 @@ export class FeedbackService {
       .pipe(catchError(this.handleError));
   }
 
+  // ── Apprenant / Enseignant : récupérer ses propres feedbacks ─────────────
+  // Le JWT est automatiquement attaché par le jwtInterceptor.
+  // L'email est extrait côté backend depuis le token.
+  getMesFeedbacks(): Observable<FeedbackDTO[]> {
+    return this.http.get<FeedbackDTO[]>(`${this.api}/mes-feedbacks`)
+      .pipe(catchError(this.handleError));
+  }
+
   // ── Gestion centralisée des erreurs ──────────────────────────────────────
   private handleError(error: HttpErrorResponse): Observable<never> {
     let message = 'Erreur inconnue';

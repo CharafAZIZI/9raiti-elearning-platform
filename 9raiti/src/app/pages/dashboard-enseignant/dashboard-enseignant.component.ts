@@ -100,6 +100,18 @@ export class DashboardEnseignantComponent implements OnInit {
   avisCoursListe:   FeedbackDTO[] = [];
   avisCoursCourant: number | null = null;
 
+  // ── Section Contenu – Navigation hiérarchique ──────────────────────────────
+  // Niveau 0 : liste des catégories
+  // Niveau 1 : modules de la catégorie sélectionnée
+  // Niveau 2 : cours du module sélectionné
+  contenuNiveau: 0 | 1 | 2 = 0;
+  contenuCategorieSelectee: CategorieDTO | null = null;
+  contenuModuleSelectionne: ModuleDTO | null    = null;
+  contenuModules: ModuleDTO[] = [];
+  contenuCours:   CoursDTO[]  = [];
+  contenuLoadingModules = false;
+  contenuLoadingCours   = false;
+
   constructor(
     private tokenService: TokenService,
     private userStateService: UserStateService,
@@ -465,6 +477,50 @@ export class DashboardEnseignantComponent implements OnInit {
       RESOLU: 'var(--green-dim)',      REJETE:  'var(--red-dim)',
     };
     return map[s] ?? 'var(--surface-2)';
+  }
+
+  // ── Section Contenu – Méthodes de navigation hiérarchique ──────────────────
+
+  ouvrirContenu(): void {
+    this.contenuNiveau = 0;
+    this.contenuCategorieSelectee = null;
+    this.contenuModuleSelectionne = null;
+    this.setSection('contenu');
+    if (this.categories.length === 0) this.loadCategories();
+  }
+
+  selectionnerCategorie(cat: CategorieDTO): void {
+    this.contenuCategorieSelectee = cat;
+    this.contenuModuleSelectionne = null;
+    this.contenuNiveau = 1;
+    this.contenuLoadingModules = true;
+    this.contenuModules = [];
+    this.catalogueService.getModulesByCategorie(cat.id!).subscribe({
+      next: (data) => { this.contenuModules = data; this.contenuLoadingModules = false; this.cdr.detectChanges(); },
+      error: ()     => { this.contenuLoadingModules = false; }
+    });
+  }
+
+  selectionnerModule(mod: ModuleDTO): void {
+    this.contenuModuleSelectionne = mod;
+    this.contenuNiveau = 2;
+    this.contenuLoadingCours = true;
+    this.contenuCours = [];
+    this.catalogueService.getCoursByModule(mod.id!).subscribe({
+      next: (data) => { this.contenuCours = data; this.contenuLoadingCours = false; this.cdr.detectChanges(); },
+      error: ()     => { this.contenuLoadingCours = false; }
+    });
+  }
+
+  contenuRetourCategories(): void {
+    this.contenuNiveau = 0;
+    this.contenuCategorieSelectee = null;
+    this.contenuModuleSelectionne = null;
+  }
+
+  contenuRetourModules(): void {
+    this.contenuNiveau = 1;
+    this.contenuModuleSelectionne = null;
   }
 
   // ── Helpers ─────────────────────────────────────────────────────────────────

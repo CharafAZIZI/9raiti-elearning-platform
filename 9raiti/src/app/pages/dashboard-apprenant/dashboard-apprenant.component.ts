@@ -6,7 +6,7 @@ import { NavbarComponent } from '../../shared/components/navbar/navbar.component
 import { TokenService } from '../../core/services/token.service';
 import { UserStateService } from '../../core/services/user-state.service';
 import { FeedbackService } from '../../core/services/feedback.service';
-import { FeedbackDTO, TypeAvis, TYPE_AVIS_LABELS } from '../../models/feedback.model';
+import { FeedbackDTO, TypeAvis, TYPE_AVIS_LABELS, STATUT_LABELS, STATUT_BADGE, StatutFeedback } from '../../models/feedback.model';
 
 @Component({
   selector: 'app-dashboard-apprenant',
@@ -82,6 +82,11 @@ export class DashboardApprenantComponent implements OnInit {
     options: ['O(n)', 'O(n log n)', 'O(n²)', 'O(log n)'],
     selected: -1, timeLeft: 1800, answered: false, correct: false
   };
+
+  // ── Mes avis / Réclamations ─────────────────────────────────────────────────
+  mesFeedbacks: FeedbackDTO[] = [];
+  mesFeedbacksLoading = false;
+  mesFeedbacksError   = '';
 
   constructor(
     private tokenService: TokenService,
@@ -178,5 +183,51 @@ export class DashboardApprenantComponent implements OnInit {
     this.fbLoading = false;
     this.fbSuccess = '';
     this.fbError   = '';
+  }
+
+  // ── Mes avis / Réclamations ─────────────────────────────────────────────────
+
+  loadMesFeedbacks(): void {
+    this.mesFeedbacksLoading = true;
+    this.mesFeedbacksError   = '';
+    this.feedbackService.getMesFeedbacks().subscribe({
+      next: (data) => {
+        this.mesFeedbacks        = data;
+        this.mesFeedbacksLoading = false;
+      },
+      error: (err: Error) => {
+        this.mesFeedbacksLoading = false;
+        this.mesFeedbacksError   = err.message;
+      }
+    });
+  }
+
+  openMesReclamations(): void {
+    this.setSection('mes-reclamations');
+    this.loadMesFeedbacks();
+  }
+
+  getStatutLabel(s: StatutFeedback | string | undefined): string {
+    return s ? ((STATUT_LABELS as any)[s] ?? s) : '–';
+  }
+
+  getStatutBadgeColor(s: StatutFeedback | string | undefined): string {
+    const map: Record<string, string> = {
+      EN_ATTENTE: 'var(--orange)', EN_COURS: 'var(--blue)',
+      RESOLU: 'var(--green)',      REJETE:  'var(--red)',
+    };
+    return s ? (map[s] ?? 'var(--text-3)') : 'var(--text-3)';
+  }
+
+  getStatutBadgeDim(s: StatutFeedback | string | undefined): string {
+    const map: Record<string, string> = {
+      EN_ATTENTE: 'var(--orange-dim)', EN_COURS: 'var(--blue-dim)',
+      RESOLU: 'var(--green-dim)',      REJETE:  'var(--red-dim)',
+    };
+    return s ? (map[s] ?? 'var(--surface-2)') : 'var(--surface-2)';
+  }
+
+  getTypeLabel(type: string): string {
+    return (TYPE_AVIS_LABELS as any)[type] ?? type;
   }
 }

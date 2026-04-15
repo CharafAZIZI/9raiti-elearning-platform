@@ -286,8 +286,8 @@
                     <td>
                       <!-- <div class="flex items-center gap-3">
                         <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
-                             [style.background]="user.role?.toLowerCase()==='enseignant' ? 'var(--green-dim)' : user.role?.toLowerCase()==='admin' ? 'var(--purple-dim)' : 'var(--blue-dim)'"
-                             [style.color]="user.role?.toLowerCase()==='enseignant' ? 'var(--green)' : user.role?.toLowerCase()==='admin' ? 'var(--purple)' : 'var(--blue)'">
+                             [style.background]="user.role.toLowerCase()==='enseignant' ? 'var(--green-dim)' : user.role.toLowerCase()==='admin' ? 'var(--purple-dim)' : 'var(--blue-dim)'"
+                             [style.color]="user.role.toLowerCase()==='enseignant' ? 'var(--green)' : user.role.toLowerCase()==='admin' ? 'var(--purple)' : 'var(--blue)'">
                           {{getInitials(user)}}
                         </div>
                         <div>
@@ -297,8 +297,8 @@
                       </div> -->
                       <div class="flex items-center gap-3">
                         <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
-                             [style.background]="user.role?.toLowerCase()==='enseignant' ? 'var(--green-dim)' : user.role?.toLowerCase()==='admin' ? 'var(--purple-dim)' : 'var(--blue-dim)'"
-                             [style.color]="user.role?.toLowerCase()==='enseignant' ? 'var(--green)' : user.role?.toLowerCase()==='admin' ? 'var(--purple)' : 'var(--blue)'">
+                             [style.background]="user.role.toLowerCase()==='enseignant' ? 'var(--green-dim)' : user.role.toLowerCase()==='admin' ? 'var(--purple-dim)' : 'var(--blue-dim)'"
+                             [style.color]="user.role.toLowerCase()==='enseignant' ? 'var(--green)' : user.role.toLowerCase()==='admin' ? 'var(--purple)' : 'var(--blue)'">
                           {{getInitials(user)}}
                         </div>
                         <div>
@@ -309,9 +309,9 @@
                     </td>
                     <td>
                       <span class="badge"
-                        [class.b-blue]="user.role?.toLowerCase()==='apprenant'"
-                        [class.b-green]="user.role?.toLowerCase()==='enseignant'"
-                        [class.b-purple]="user.role?.toLowerCase()==='admin'">
+                        [class.b-blue]="user.role.toLowerCase()==='apprenant'"
+                        [class.b-green]="user.role.toLowerCase()==='enseignant'"
+                        [class.b-purple]="user.role.toLowerCase()==='admin'">
                         {{user.role}}
                       </span>
                     </td>
@@ -321,17 +321,17 @@
                       </span>
                     </td>
                     <td>
-                      <span *ngIf="user.role?.toLowerCase()==='enseignant'">
+                      <span *ngIf="user.role.toLowerCase()==='enseignant'">
                         <span class="badge" [class.b-green]="user.est_valide" [class.b-orange]="!user.est_valide">
                           {{user.est_valide ? 'Validé' : 'En attente'}}
                         </span>
                       </span>
-                      <span *ngIf="user.role?.toLowerCase()!=='enseignant'" class="text-xs" style="color:var(--text-4);">—</span>
+                      <span *ngIf="user.role.toLowerCase()!=='enseignant'" class="text-xs" style="color:var(--text-4);">—</span>
                     </td>
                     <td>
                       <div class="flex items-center justify-end gap-1.5 flex-wrap">
                         <!-- Validate (enseignant only) -->
-                        <button *ngIf="user.role?.toLowerCase()==='enseignant' && !user.est_valide"
+                        <button *ngIf="user.role.toLowerCase()==='enseignant' && !user.est_valide"
                                 (click)="valider(user)" [disabled]="actionLoading[user.id]==='valider'"
                                 class="btn btn-success btn-sm" title="Valider l'enseignant">
                           <svg *ngIf="actionLoading[user.id]!=='valider'" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>

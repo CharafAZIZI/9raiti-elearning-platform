@@ -22,10 +22,11 @@
       <nav class="space-y-1 flex-1">
         <button *ngFor="let item of [
           {id:'accueil', icon:'🏠', label:'Tableau de bord'},
-          {id:'categories', icon:'🗂', label:'Catégories'},
+          {id:'contenu', icon:'🗂', label:'Contenu'},
+          {id:'categories', icon:'📂', label:'Catégories'},
           {id:'modules', icon:'📦', label:'Modules'},
           {id:'cours', icon:'📘', label:'Cours'}
-        ]" (click)="setSection(item.id)" class="nav-item" [class.active]="activeSection===item.id">
+        ]" (click)="item.id==='contenu' ? ouvrirContenu() : setSection(item.id)" class="nav-item" [class.active]="activeSection===item.id">
           <span class="text-base">{{item.icon}}</span>
           <span>{{item.label}}</span>
         </button>
@@ -148,6 +149,149 @@
               <div *ngIf="cours.length===0" class="text-xs text-center py-3" style="color:var(--text-3);">Aucun cours</div>
             </div>
           </div>
+        </div>
+      </ng-container>
+
+      <!-- ══ CONTENU – Navigation hiérarchique ══ -->
+      <ng-container *ngIf="activeSection==='contenu'">
+        <div class="animate-fade-in space-y-5">
+
+          <!-- Fil d'Ariane -->
+          <nav class="flex items-center gap-2 text-sm flex-wrap" style="color:var(--text-3);">
+            <button (click)="contenuRetourCategories()" class="font-semibold hover:underline" [style.color]="contenuNiveau>0 ? 'var(--brand)' : 'var(--text)'" style="background:none;border:none;cursor:pointer;padding:0;">
+              🗂 Catégories
+            </button>
+            <ng-container *ngIf="contenuNiveau >= 1 && contenuCategorieSelectee">
+              <span>›</span>
+              <button (click)="contenuRetourModules()" class="font-semibold hover:underline" [style.color]="contenuNiveau>1 ? 'var(--brand)' : 'var(--text)'" style="background:none;border:none;cursor:pointer;padding:0;">
+                📦 {{ contenuCategorieSelectee.nom }}
+              </button>
+            </ng-container>
+            <ng-container *ngIf="contenuNiveau === 2 && contenuModuleSelectionne">
+              <span>›</span>
+              <span style="color:var(--text);">📘 {{ contenuModuleSelectionne.nom }}</span>
+            </ng-container>
+          </nav>
+
+          <!-- ── Niveau 0 : Catégories ── -->
+          <ng-container *ngIf="contenuNiveau === 0">
+            <div class="flex items-center justify-between">
+              <div>
+                <h2 class="text-xl font-bold" style="font-family:'Syne',sans-serif;color:var(--text);">Catégories</h2>
+                <p class="text-sm mt-1" style="color:var(--text-3);">Cliquez sur une catégorie pour voir ses modules.</p>
+              </div>
+              <button (click)="setSection('categories');openCreateCat()" class="btn btn-ghost btn-sm">+ Nouvelle catégorie</button>
+            </div>
+            <div *ngIf="loadingCategories" class="flex items-center gap-3 py-10 justify-center">
+              <div class="w-6 h-6 rounded-full border-2 animate-spin" style="border-color:var(--brand);border-top-color:transparent;"></div>
+              <span class="text-sm" style="color:var(--text-3);">Chargement…</span>
+            </div>
+            <div *ngIf="!loadingCategories && categories.length===0" class="flex flex-col items-center justify-center py-14 rounded-2xl" style="background:var(--surface);border:1px dashed var(--border);">
+              <div class="text-4xl mb-3">🗂</div>
+              <p class="text-base font-semibold" style="color:var(--text);">Aucune catégorie</p>
+              <button (click)="setSection('categories');openCreateCat()" class="btn btn-brand mt-4">Créer une catégorie</button>
+            </div>
+            <div *ngIf="!loadingCategories && categories.length>0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <button *ngFor="let cat of categories" (click)="selectionnerCategorie(cat)"
+                      class="text-left rounded-2xl p-5 transition-all hover:scale-[1.02]"
+                      style="background:var(--surface);border:1px solid var(--border);cursor:pointer;width:100%;">
+                <div class="flex items-center gap-3 mb-3">
+                  <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0" style="background:var(--green-dim);">🗂</div>
+                  <span class="font-bold text-sm" style="color:var(--text);font-family:'Syne',sans-serif;">{{ cat.nom }}</span>
+                </div>
+                <p class="text-xs line-clamp-2" style="color:var(--text-3);">{{ cat.description || 'Aucune description' }}</p>
+                <div class="mt-3 flex items-center gap-1" style="color:var(--brand);">
+                  <span class="text-xs font-semibold">Voir les modules</span>
+                  <span class="text-xs">→</span>
+                </div>
+              </button>
+            </div>
+          </ng-container>
+
+          <!-- ── Niveau 1 : Modules de la catégorie ── -->
+          <ng-container *ngIf="contenuNiveau === 1">
+            <div class="flex items-center justify-between">
+              <div>
+                <h2 class="text-xl font-bold" style="font-family:'Syne',sans-serif;color:var(--text);">Modules — {{ contenuCategorieSelectee?.nom }}</h2>
+                <p class="text-sm mt-1" style="color:var(--text-3);">Cliquez sur un module pour voir ses cours.</p>
+              </div>
+              <div class="flex gap-2">
+                <button (click)="contenuRetourCategories()" class="btn btn-ghost btn-sm">← Retour</button>
+                <button (click)="setSection('modules');openCreateMod()" class="btn btn-ghost btn-sm">+ Nouveau module</button>
+              </div>
+            </div>
+            <div *ngIf="contenuLoadingModules" class="flex items-center gap-3 py-10 justify-center">
+              <div class="w-6 h-6 rounded-full border-2 animate-spin" style="border-color:var(--brand);border-top-color:transparent;"></div>
+              <span class="text-sm" style="color:var(--text-3);">Chargement des modules…</span>
+            </div>
+            <div *ngIf="!contenuLoadingModules && contenuModules.length===0" class="flex flex-col items-center justify-center py-14 rounded-2xl" style="background:var(--surface);border:1px dashed var(--border);">
+              <div class="text-4xl mb-3">📦</div>
+              <p class="text-base font-semibold" style="color:var(--text);">Aucun module dans cette catégorie</p>
+              <button (click)="setSection('modules');openCreateMod()" class="btn btn-brand mt-4">Créer un module</button>
+            </div>
+            <div *ngIf="!contenuLoadingModules && contenuModules.length>0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <button *ngFor="let mod of contenuModules" (click)="selectionnerModule(mod)"
+                      class="text-left rounded-2xl p-5 transition-all hover:scale-[1.02]"
+                      style="background:var(--surface);border:1px solid var(--border);cursor:pointer;width:100%;">
+                <div class="flex items-center gap-3 mb-2">
+                  <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0" style="background:var(--brand-dim);">📦</div>
+                  <div class="min-w-0">
+                    <span class="font-bold text-sm block truncate" style="color:var(--text);font-family:'Syne',sans-serif;">{{ mod.nom }}</span>
+                    <span class="text-xs" style="color:var(--text-4);">{{ mod.code }}</span>
+                  </div>
+                </div>
+                <p class="text-xs line-clamp-2" style="color:var(--text-3);">{{ mod.description || 'Aucune description' }}</p>
+                <div class="mt-3 flex items-center gap-1" style="color:var(--brand);">
+                  <span class="text-xs font-semibold">Voir les cours</span>
+                  <span class="text-xs">→</span>
+                </div>
+              </button>
+            </div>
+          </ng-container>
+
+          <!-- ── Niveau 2 : Cours du module ── -->
+          <ng-container *ngIf="contenuNiveau === 2">
+            <div class="flex items-center justify-between">
+              <div>
+                <h2 class="text-xl font-bold" style="font-family:'Syne',sans-serif;color:var(--text);">Cours — {{ contenuModuleSelectionne?.nom }}</h2>
+                <p class="text-sm mt-1" style="color:var(--text-3);">Cours appartenant à ce module.</p>
+              </div>
+              <div class="flex gap-2">
+                <button (click)="contenuRetourModules()" class="btn btn-ghost btn-sm">← Retour</button>
+                <button (click)="setSection('cours');openCreateCours()" class="btn btn-brand btn-sm">+ Nouveau cours</button>
+              </div>
+            </div>
+            <div *ngIf="contenuLoadingCours" class="flex items-center gap-3 py-10 justify-center">
+              <div class="w-6 h-6 rounded-full border-2 animate-spin" style="border-color:var(--brand);border-top-color:transparent;"></div>
+              <span class="text-sm" style="color:var(--text-3);">Chargement des cours…</span>
+            </div>
+            <div *ngIf="!contenuLoadingCours && contenuCours.length===0" class="flex flex-col items-center justify-center py-14 rounded-2xl" style="background:var(--surface);border:1px dashed var(--border);">
+              <div class="text-4xl mb-3">📘</div>
+              <p class="text-base font-semibold" style="color:var(--text);">Aucun cours dans ce module</p>
+              <button (click)="setSection('cours');openCreateCours()" class="btn btn-brand mt-4">Créer un cours</button>
+            </div>
+            <div *ngIf="!contenuLoadingCours && contenuCours.length>0" class="space-y-3">
+              <div *ngFor="let c of contenuCours"
+                   class="flex items-center gap-4 rounded-2xl p-4"
+                   style="background:var(--surface);border:1px solid var(--border);">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0" style="background:var(--blue-dim);">📘</div>
+                <div class="flex-1 min-w-0">
+                  <p class="font-semibold text-sm truncate" style="color:var(--text);">{{ c.titre }}</p>
+                  <div class="flex items-center gap-3 mt-1 flex-wrap">
+                    <span class="text-xs" style="color:var(--text-3);">{{ c.niveau }}</span>
+                    <span *ngIf="c.dureeMinutes" class="text-xs" style="color:var(--text-3);">⏱ {{ c.dureeMinutes }} min</span>
+                    <span class="text-xs font-semibold px-2 py-0.5 rounded-full" [class]="getStatutCls(c.statut)"
+                          style="font-size:10px;">{{ c.statut }}</span>
+                  </div>
+                </div>
+                <div class="flex gap-2 flex-shrink-0">
+                  <a [href]="getViewUrl(c)" target="_blank" class="btn btn-ghost btn-sm">👁 Voir</a>
+                  <button (click)="openEditCours(c)" class="btn btn-ghost btn-sm">✏️</button>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+
         </div>
       </ng-container>
 
@@ -364,9 +508,9 @@
                     <td><span class="text-xs" style="color:var(--text-3);">{{c.dateCreation ? (c.dateCreation | date:'dd/MM/yy') : '–'}}</span></td>
                     <td>
                       <div class="flex items-center justify-end gap-1.5">
-                        <button (click)="chargerAvisCours(c.idCours!)" class="btn btn-ghost btn-sm" title="Voir les avis des apprenants">
+                        <!-- <button (click)="chargerAvisCours(c.idCours!)" class="btn btn-ghost btn-sm" title="Voir les avis des apprenants">
                           ⭐ Avis
-                        </button>
+                        </button> -->
                         <button (click)="openEditCours(c)" class="btn btn-ghost btn-sm">
                           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                           Modifier
