@@ -1,10 +1,10 @@
-package com.MicroServiceSpring.MicroServiceSpring.Services;
+package com.MicroServiceSpring.MicroServiceSpring.Services.Modules;
 
 import com.MicroServiceSpring.MicroServiceSpring.DTO.ModuleDTO;
 import com.MicroServiceSpring.MicroServiceSpring.Exceptions.ConflictException;
 import com.MicroServiceSpring.MicroServiceSpring.Exceptions.ResourceNotFoundException;
 import com.MicroServiceSpring.MicroServiceSpring.Mappers.ModuleMapper;
-import com.MicroServiceSpring.MicroServiceSpring.Models.Module;
+import com.MicroServiceSpring.MicroServiceSpring.Models.Modules.Module;
 import com.MicroServiceSpring.MicroServiceSpring.Repository.ModuleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

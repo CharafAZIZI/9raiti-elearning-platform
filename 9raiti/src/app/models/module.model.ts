@@ -1,14 +1,15 @@
 import { CoursDTO } from './cours.model';
 
+export type StatutModule = 'ACTIF' | 'BROUILLON' | 'ARCHIVE';
+
 // Aligné sur ModuleDTO.java
-// Module.java a un @ManyToOne categorie → on ajoute categorieId
-// GET response inclut List<CoursDTO> cours
 export interface ModuleDTO {
   id?:           number;
   nom:           string;
   description:   string;
   code:          string;
-  actif:         boolean;
+  actif:         boolean;       // true = ACTIF côté backend (rétrocompatibilité)
+  statut?:       StatutModule;  // ACTIF | BROUILLON | ARCHIVE
   categorieId?:  number;
   cours?:        CoursDTO[];
 }

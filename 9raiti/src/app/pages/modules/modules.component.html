@@ -49,11 +49,17 @@
                   [class.btn-ghost]="filtre!=='actif'">
             ✅ Actifs ({{ actifCount }})
           </button>
-          <button (click)="setFiltre('inactif')"
+          <button (click)="setFiltre('brouillon')"
                   class="btn btn-sm"
-                  [class.btn-danger]="filtre==='inactif'"
-                  [class.btn-ghost]="filtre!=='inactif'">
-            🔴 Inactifs ({{ inactifCount }})
+                  [class.btn-brand]="filtre==='brouillon'"
+                  [class.btn-ghost]="filtre!=='brouillon'">
+            📝 Brouillons ({{ brouillonCount }})
+          </button>
+          <button (click)="setFiltre('archive')"
+                  class="btn btn-sm"
+                  [class.btn-danger]="filtre==='archive'"
+                  [class.btn-ghost]="filtre!=='archive'">
+            📦 Archivés ({{ archiveCount }})
           </button>
         </div>
       </div>
@@ -122,10 +128,10 @@
                 {{ mod.code }}
               </span>
               <span class="badge text-xs"
-                    [style.background]="mod.actif ? 'var(--green-dim)' : 'var(--red-dim)'"
-                    [style.border-color]="mod.actif ? 'var(--green)' : 'var(--red)'"
-                    [style.color]="mod.actif ? 'var(--green)' : 'var(--red)'">
-                {{ mod.actif ? '✅ Actif' : '🔴 Inactif' }}
+                    [style.background]="statutStyle(mod).bg"
+                    [style.border-color]="statutStyle(mod).border"
+                    [style.color]="statutStyle(mod).color">
+                {{ statutLabel(mod) }}
               </span>
             </div>
           </div>

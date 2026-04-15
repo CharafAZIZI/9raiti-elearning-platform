@@ -54,6 +54,9 @@
         </a>
 
         <p class="text-xs font-bold uppercase tracking-widest px-2 mt-5 mb-2" style="color:var(--text-4);">Compte</p>
+        <button (click)="ouvrirFeedbackGlobal()" class="nav-item">
+          <span class="text-base">💬</span><span>Envoyer un avis</span>
+        </button>
         <button (click)="setSection('profil')" class="nav-item">
           <span class="text-base">👤</span><span>Mon profil</span>
         </button>
@@ -208,6 +211,7 @@
                 <div class="flex gap-2 mt-3">
                   <button class="btn btn-brand btn-sm flex-1">Continuer →</button>
                   <button class="btn btn-ghost btn-sm">📊</button>
+                  <button (click)="ouvrirFeedbackCours(c.id)" class="btn btn-ghost btn-sm" title="Donner un avis sur ce cours">💬</button>
                 </div>
               </div>
             </div>
@@ -364,4 +368,97 @@
       </div>
     </div>
   </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <!-- MODAL FEEDBACK                                                         -->
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <div *ngIf="showFeedbackModal"
+       class="overlay"
+       (click)="fermerFeedback()">
+    <div class="modal" style="max-width:520px;" (click)="$event.stopPropagation()">
+
+      <!-- En-tête -->
+      <div class="flex items-center justify-between mb-5">
+        <div>
+          <h3 class="font-bold text-base" style="font-family:'Syne',sans-serif;color:var(--text);">
+            💬 Soumettre un avis
+          </h3>
+          <p class="text-xs mt-0.5" style="color:var(--text-3);">
+            <span *ngIf="feedbackCoursId">Avis lié au cours #{{ feedbackCoursId }}</span>
+            <span *ngIf="!feedbackCoursId">Feedback général sur la plateforme</span>
+          </p>
+        </div>
+        <button (click)="fermerFeedback()" style="background:none;border:none;cursor:pointer;color:var(--text-3);font-size:20px;">×</button>
+      </div>
+
+      <!-- Succès -->
+      <div *ngIf="fbSuccess" class="p-3 rounded-xl mb-4 flex items-center gap-2"
+           style="background:var(--green-dim);border:1px solid rgba(16,185,129,.3);color:var(--green);">
+        <span>✅</span><span class="text-sm">{{ fbSuccess }}</span>
+      </div>
+
+      <!-- Erreur -->
+      <div *ngIf="fbError" class="p-3 rounded-xl mb-4 flex items-center gap-2"
+           style="background:var(--red-dim);border:1px solid rgba(239,68,68,.3);color:var(--red);">
+        <span>⚠️</span><span class="text-sm">{{ fbError }}</span>
+      </div>
+
+      <div *ngIf="!fbSuccess" class="space-y-4">
+
+        <!-- Email -->
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider mb-1" style="color:var(--text-3);">
+            Email <span style="color:var(--red);">*</span>
+          </label>
+          <input type="email" [(ngModel)]="fbEmail"
+                 placeholder="votre@email.com" class="inp"
+                 [attr.disabled]="userEmail ? '' : null" />
+          <p *ngIf="userEmail" class="text-xs mt-1" style="color:var(--text-3);">
+            🔒 Pré-rempli depuis votre compte
+          </p>
+        </div>
+
+        <!-- Type d'avis -->
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider mb-1" style="color:var(--text-3);">
+            Type d'avis <span style="color:var(--red);">*</span>
+          </label>
+          <select [(ngModel)]="fbType" class="inp" style="cursor:pointer;">
+            <option value="" disabled selected>— Choisir un type —</option>
+            <option *ngFor="let t of typesAvis" [value]="t.value">{{ t.label }}</option>
+          </select>
+        </div>
+
+        <!-- Message -->
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider mb-1" style="color:var(--text-3);">
+            Message <span style="color:var(--red);">*</span>
+          </label>
+          <textarea [(ngModel)]="fbMessage" rows="5"
+                    placeholder="Décrivez votre avis, suggestion ou problème (min. 10 caractères)..."
+                    class="inp resize-none" style="min-height:120px;" maxlength="2000"></textarea>
+          <p class="text-xs text-right mt-1" style="color:var(--text-3);">{{ fbMessage.length }} / 2000</p>
+        </div>
+
+        <!-- Boutons -->
+        <div class="flex gap-3 pt-1">
+          <button (click)="fermerFeedback()" class="btn btn-ghost flex-1">Annuler</button>
+          <button (click)="soumettreFeedback()"
+                  [disabled]="fbLoading || !fbEmail || !fbType || fbMessage.length < 10"
+                  class="btn btn-brand flex-1">
+            <span *ngIf="!fbLoading">Envoyer →</span>
+            <span *ngIf="fbLoading" class="flex items-center justify-center gap-2">
+              <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+              </svg>
+              Envoi...
+            </span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
 </div>

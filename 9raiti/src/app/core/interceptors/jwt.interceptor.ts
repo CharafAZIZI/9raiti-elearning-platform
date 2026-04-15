@@ -16,11 +16,12 @@ export const jwtInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, nex
 
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
-      if (error.status === 401) {
-        // Token expiré ou invalide → déconnexion automatique
+      if (error.status === 401 && token) {
+        // Seulement si l'utilisateur ÉTAIT connecté (token expiré) → déconnexion automatique
         tokenService.removeToken();
         router.navigate(['/login']);
       }
+      // Si pas de token → appel public qui échoue → on ignore la redirection
       return throwError(() => error);
     })
   );

@@ -4,14 +4,19 @@ import { Observable, shareReplay, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { CategorieDTO } from '../../models/categorie.model';
-import { ModuleDTO }    from '../../models/module.model';
-import { CoursDTO }     from '../../models/cours.model';
+import { ModuleDTO } from '../../models/module.model';
+import { CoursDTO } from '../../models/cours.model';
+
+export interface PresignedUrlResponse {
+  url: string;
+  type: string;      // 'pdf' | 'video/mp4' | 'video/webm' | 'unknown'
+  objectKey: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class CatalogueService {
 
-  // Spring Boot API — routée via /spring-api → http://localhost:8080/api
-  private readonly api = environment.springApiUrl;
+  private readonly api = environment.apiUrl;
 
   // Cache simple pour éviter les appels répétés (lecture seule)
   private categories$?: Observable<CategorieDTO[]>;
@@ -20,14 +25,11 @@ export class CatalogueService {
 
   constructor(private http: HttpClient) {}
 
-  // ════════════════════════════════════════════════════════
-  // CATÉGORIES  →  CategoriesController.java
-  // ════════════════════════════════════════════════════════
+  // ── CATÉGORIES ──────────────────────────────────────────────────────────────
 
   createCategorie(dto: CategorieDTO): Observable<CategorieDTO> {
     this.clearCache();
-    return this.http.post<CategorieDTO>(`${this.api}/categories`, dto)
-      .pipe(catchError(this.handleError));
+    return this.http.post<CategorieDTO>(`${this.api}/categories`, dto).pipe(catchError(this.handleError));
   }
 
   getAllCategories(): Observable<CategorieDTO[]> {
@@ -39,30 +41,24 @@ export class CatalogueService {
   }
 
   getCategorieById(id: number): Observable<CategorieDTO> {
-    return this.http.get<CategorieDTO>(`${this.api}/categories/${id}`)
-      .pipe(catchError(this.handleError));
+    return this.http.get<CategorieDTO>(`${this.api}/categories/${id}`).pipe(catchError(this.handleError));
   }
 
   updateCategorie(id: number, dto: CategorieDTO): Observable<CategorieDTO> {
     this.clearCache();
-    return this.http.put<CategorieDTO>(`${this.api}/categories/${id}`, dto)
-      .pipe(catchError(this.handleError));
+    return this.http.put<CategorieDTO>(`${this.api}/categories/${id}`, dto).pipe(catchError(this.handleError));
   }
 
   deleteCategorie(id: number): Observable<void> {
     this.clearCache();
-    return this.http.delete<void>(`${this.api}/categories/${id}`)
-      .pipe(catchError(this.handleError));
+    return this.http.delete<void>(`${this.api}/categories/${id}`).pipe(catchError(this.handleError));
   }
 
-  // ════════════════════════════════════════════════════════
-  // MODULES  →  ModuleController.java
-  // ════════════════════════════════════════════════════════
+  // ── MODULES ─────────────────────────────────────────────────────────────────
 
   createModule(dto: ModuleDTO): Observable<ModuleDTO> {
     this.clearCache();
-    return this.http.post<ModuleDTO>(`${this.api}/modules`, dto)
-      .pipe(catchError(this.handleError));
+    return this.http.post<ModuleDTO>(`${this.api}/modules`, dto).pipe(catchError(this.handleError));
   }
 
   getAllModules(): Observable<ModuleDTO[]> {
@@ -74,35 +70,28 @@ export class CatalogueService {
   }
 
   getModulesByCategorie(categorieId: number): Observable<ModuleDTO[]> {
-    return this.http.get<ModuleDTO[]>(`${this.api}/modules/categorie/${categorieId}`)
-      .pipe(catchError(this.handleError));
+    return this.http.get<ModuleDTO[]>(`${this.api}/modules/categorie/${categorieId}`).pipe(catchError(this.handleError));
   }
 
   getModuleById(id: number): Observable<ModuleDTO> {
-    return this.http.get<ModuleDTO>(`${this.api}/modules/${id}`)
-      .pipe(catchError(this.handleError));
+    return this.http.get<ModuleDTO>(`${this.api}/modules/${id}`).pipe(catchError(this.handleError));
   }
 
   updateModule(id: number, dto: ModuleDTO): Observable<ModuleDTO> {
     this.clearCache();
-    return this.http.put<ModuleDTO>(`${this.api}/modules/${id}`, dto)
-      .pipe(catchError(this.handleError));
+    return this.http.put<ModuleDTO>(`${this.api}/modules/${id}`, dto).pipe(catchError(this.handleError));
   }
 
   deleteModule(id: number): Observable<void> {
     this.clearCache();
-    return this.http.delete<void>(`${this.api}/modules/${id}`)
-      .pipe(catchError(this.handleError));
+    return this.http.delete<void>(`${this.api}/modules/${id}`).pipe(catchError(this.handleError));
   }
 
-  // ════════════════════════════════════════════════════════
-  // COURS  →  CoursController.java
-  // ════════════════════════════════════════════════════════
+  // ── COURS ────────────────────────────────────────────────────────────────────
 
   createCours(dto: CoursDTO): Observable<CoursDTO> {
     this.clearCache();
-    return this.http.post<CoursDTO>(`${this.api}/cours`, dto)
-      .pipe(catchError(this.handleError));
+    return this.http.post<CoursDTO>(`${this.api}/cours`, dto).pipe(catchError(this.handleError));
   }
 
   getAllCours(): Observable<CoursDTO[]> {
@@ -114,61 +103,65 @@ export class CatalogueService {
   }
 
   getCoursByModule(moduleId: number): Observable<CoursDTO[]> {
-    return this.http.get<CoursDTO[]>(`${this.api}/cours/module/${moduleId}`)
-      .pipe(catchError(this.handleError));
+    return this.http.get<CoursDTO[]>(`${this.api}/cours/module/${moduleId}`).pipe(catchError(this.handleError));
   }
 
   getCoursPublies(): Observable<CoursDTO[]> {
-    return this.http.get<CoursDTO[]>(`${this.api}/cours/publies`)
-      .pipe(catchError(this.handleError));
+    return this.http.get<CoursDTO[]>(`${this.api}/cours/publies`).pipe(catchError(this.handleError));
   }
 
   getCoursById(id: number): Observable<CoursDTO> {
-    return this.http.get<CoursDTO>(`${this.api}/cours/${id}`)
-      .pipe(catchError(this.handleError));
+    return this.http.get<CoursDTO>(`${this.api}/cours/${id}`).pipe(catchError(this.handleError));
   }
 
   updateCours(id: number, dto: CoursDTO): Observable<CoursDTO> {
     this.clearCache();
-    return this.http.put<CoursDTO>(`${this.api}/cours/${id}`, dto)
-      .pipe(catchError(this.handleError));
+    return this.http.put<CoursDTO>(`${this.api}/cours/${id}`, dto).pipe(catchError(this.handleError));
   }
 
   deleteCours(id: number): Observable<void> {
     this.clearCache();
-    return this.http.delete<void>(`${this.api}/cours/${id}`)
-      .pipe(catchError(this.handleError));
+    return this.http.delete<void>(`${this.api}/cours/${id}`).pipe(catchError(this.handleError));
   }
 
-  /** POST /api/cours/{id}/upload — multipart/form-data avec champ "file" */
-  uploadCoursFile(id: number, file: File): Observable<string> {
+  /**
+   * Upload un fichier (PDF ou vidéo) pour un cours.
+   * POST /api/cours/{id}/upload  –  multipart/form-data, champ "file"
+   */
+  uploadCoursFile(id: number, file: File): Observable<{ objectKey: string; message: string }> {
     this.clearCache();
     const fd = new FormData();
     fd.append('file', file);
-    return this.http.post(`${this.api}/cours/${id}/upload`, fd, { responseType: 'text' })
+    return this.http.post<{ objectKey: string; message: string }>(
+      `${this.api}/cours/${id}/upload`, fd
+    ).pipe(catchError(this.handleError));
+  }
+
+  /**
+   * Récupère une URL pré-signée valable 15 min pour lire un fichier.
+   * GET /api/cours/{id}/presigned-url
+   * Utiliser cette URL directement dans <iframe src> ou <video src>.
+   */
+  getPresignedUrl(id: number): Observable<PresignedUrlResponse> {
+    return this.http.get<PresignedUrlResponse>(`${this.api}/cours/${id}/presigned-url`)
       .pipe(catchError(this.handleError));
   }
 
-  /** GET /api/cours/{id}/download?mode=inline — retourne le PDF en bytes */
-  getDownloadUrl(id: number, mode: 'inline' | 'attachment' = 'inline'): string {
-    return `${this.api}/cours/${id}/download?mode=${mode}`;
-  }
-
-  /** Vide le cache (appelé automatiquement après toute opération d'écriture) */
+  /** Vide le cache (après toute opération d'écriture) */
   clearCache(): void {
     this.categories$ = undefined;
-    this.modules$    = undefined;
-    this.cours$      = undefined;
+    this.modules$ = undefined;
+    this.cours$ = undefined;
   }
 
   private handleError(error: HttpErrorResponse): Observable<never> {
     let message = 'Erreur inconnue';
     if (error.status === 0) {
-      message = 'Impossible de contacter le serveur Spring Boot. Vérifiez qu\'il est démarré sur le port 8080.';
+      message = 'Impossible de contacter le serveur Spring Boot.';
     } else if (error.status === 401) {
       message = 'Non autorisé. Veuillez vous reconnecter.';
     } else if (error.status === 403) {
-      message = 'Accès refusé. Vous n\'avez pas les droits nécessaires.';
+      message = "Accès refusé. Vous n'avez pas les droits nécessaires.";
     } else if (error.status === 404) {
       message = `Ressource introuvable : ${error.url}`;
     } else if (error.error?.message) {

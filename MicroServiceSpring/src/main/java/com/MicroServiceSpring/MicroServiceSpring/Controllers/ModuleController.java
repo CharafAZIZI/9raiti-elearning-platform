@@ -1,7 +1,7 @@
 package com.MicroServiceSpring.MicroServiceSpring.Controllers;
 
 import com.MicroServiceSpring.MicroServiceSpring.DTO.ModuleDTO;
-import com.MicroServiceSpring.MicroServiceSpring.Services.ModuleService;
+import com.MicroServiceSpring.MicroServiceSpring.Services.Modules.ModuleService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

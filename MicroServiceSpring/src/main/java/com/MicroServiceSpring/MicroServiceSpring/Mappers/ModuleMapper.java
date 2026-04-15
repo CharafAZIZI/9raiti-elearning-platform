@@ -2,8 +2,8 @@ package com.MicroServiceSpring.MicroServiceSpring.Mappers;
 
 import com.MicroServiceSpring.MicroServiceSpring.DTO.ModuleDTO;
 import com.MicroServiceSpring.MicroServiceSpring.Exceptions.ResourceNotFoundException;
-import com.MicroServiceSpring.MicroServiceSpring.Models.Categories;
-import com.MicroServiceSpring.MicroServiceSpring.Models.Module;
+import com.MicroServiceSpring.MicroServiceSpring.Models.Cetagories.Categories;
+import com.MicroServiceSpring.MicroServiceSpring.Models.Modules.Module;
 import com.MicroServiceSpring.MicroServiceSpring.Repository.CategoriesRepository;
 import org.springframework.stereotype.Component;
 

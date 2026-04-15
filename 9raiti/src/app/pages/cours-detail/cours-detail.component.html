@@ -1,0 +1,145 @@
+<div class="min-h-screen" style="background:var(--bg);">
+  <app-navbar></app-navbar>
+
+  <div class="px-4 sm:px-6 lg:px-8 py-8 max-w-5xl mx-auto">
+
+    <!-- Retour -->
+    <a routerLink="/cours" style="color:var(--brand);text-decoration:none;font-size:13px;font-weight:600;">
+      ← Retour aux cours
+    </a>
+
+    <!-- Skeleton -->
+    <div *ngIf="loading" class="mt-6 space-y-4">
+      <div class="skeleton h-8 w-2/3 rounded-xl"></div>
+      <div class="skeleton h-4 w-full rounded-lg"></div>
+      <div class="skeleton h-4 w-4/5 rounded-lg"></div>
+      <div class="skeleton h-64 rounded-2xl mt-4"></div>
+    </div>
+
+    <!-- Erreur -->
+    <div *ngIf="!loading && errorMsg" class="alert alert-red rounded-2xl mt-6 animate-fade-in">
+      <span style="font-size:20px;">⚠️</span>
+      <p>{{ errorMsg }}</p>
+    </div>
+
+    <!-- Contenu -->
+    <div *ngIf="!loading && cours" class="mt-6 space-y-6 animate-fade-in">
+
+      <!-- Header du cours -->
+      <div class="glass rounded-2xl p-6">
+        <div class="flex flex-wrap gap-2 mb-3">
+          <span class="badge b-blue text-xs">{{ cours.niveau }}</span>
+          <span class="badge text-xs"
+                [style.color]="cours.statut === 'PUBLIE' ? 'var(--green)' : 'var(--text-3)'"
+                [style.border-color]="cours.statut === 'PUBLIE' ? 'var(--green)' : 'var(--border)'"
+                [style.background]="cours.statut === 'PUBLIE' ? 'var(--green-dim)' : 'var(--surface-2)'">
+            {{ cours.statut }}
+          </span>
+        </div>
+
+        <h1 class="text-2xl font-bold mb-2" style="font-family:'Syne',sans-serif;color:var(--text);">
+          {{ cours.titre }}
+        </h1>
+        <p class="text-sm leading-relaxed mb-4" style="color:var(--text-3);">
+          {{ cours.description }}
+        </p>
+
+        <div class="flex flex-wrap gap-4 text-xs" style="color:var(--text-3);">
+          <span>⏱ {{ formatDuree(cours.dureeMinutes) }}</span>
+          <span>👥 {{ cours.nombreInscrits ?? 0 }} inscrits</span>
+          <span>📅 Créé le {{ formatDate(cours.dateCreation) }}</span>
+        </div>
+      </div>
+
+      <!-- Zone fichier -->
+      <div class="glass rounded-2xl overflow-hidden">
+
+        <!-- Pas de fichier -->
+        <div *ngIf="!hasFile" class="flex flex-col items-center justify-center py-16 gap-3">
+          <span style="font-size:48px;">📭</span>
+          <p class="font-semibold" style="color:var(--text);">Aucun contenu disponible</p>
+          <p class="text-sm" style="color:var(--text-3);">L'enseignant n'a pas encore uploadé de fichier.</p>
+        </div>
+
+        <!-- Bouton accéder -->
+        <div *ngIf="hasFile && !presignedUrl && !fileLoading" class="flex flex-col items-center justify-center py-16 gap-4">
+          <span style="font-size:48px;">📚</span>
+          <p class="font-semibold" style="color:var(--text);">Contenu disponible</p>
+          <p class="text-sm mb-2" style="color:var(--text-3);">Cliquez pour accéder au cours</p>
+          <button (click)="loadFile()" class="btn btn-brand">
+            🎯 Accéder au contenu
+          </button>
+        </div>
+
+        <!-- Chargement -->
+        <div *ngIf="fileLoading" class="flex flex-col items-center justify-center py-16 gap-3">
+          <div class="skeleton h-12 w-12 rounded-full"></div>
+          <p class="text-sm" style="color:var(--text-3);">Chargement du fichier…</p>
+        </div>
+
+        <!-- Erreur fichier -->
+        <div *ngIf="fileError && !fileLoading" class="flex flex-col items-center justify-center py-12 gap-3">
+          <span style="font-size:36px;">❌</span>
+          <p class="text-sm font-semibold" style="color:var(--red);">{{ fileError }}</p>
+          <button (click)="loadFile()" class="btn btn-ghost btn-sm">🔄 Réessayer</button>
+        </div>
+
+        <!-- ── PDF VIEWER ── -->
+        <div *ngIf="isPdf && presignedUrl" class="flex flex-col">
+          <div class="flex items-center justify-between px-4 py-3"
+               style="background:var(--surface-2);border-bottom:1px solid var(--border);">
+            <div class="flex items-center gap-2">
+              <span style="font-size:18px;">📄</span>
+              <span class="text-sm font-semibold" style="color:var(--text);">Document PDF</span>
+            </div>
+            <a [href]="rawUrl" target="_blank" download
+               class="btn btn-ghost btn-sm">
+              ⬇ Télécharger
+            </a>
+          </div>
+          <!-- L'iframe utilise l'URL pré-signée directement -->
+          <iframe
+            [src]="presignedUrl"
+            class="w-full border-0"
+            style="height:75vh;min-height:500px;"
+            title="Visualisation PDF">
+          </iframe>
+        </div>
+
+        <!-- ── VIDEO PLAYER ── -->
+        <div *ngIf="isVideo && presignedUrl" class="flex flex-col">
+          <div class="flex items-center justify-between px-4 py-3"
+               style="background:var(--surface-2);border-bottom:1px solid var(--border);">
+            <div class="flex items-center gap-2">
+              <span style="font-size:18px;">🎬</span>
+              <span class="text-sm font-semibold" style="color:var(--text);">Vidéo du cours</span>
+            </div>
+            <a [href]="rawUrl" target="_blank"
+               class="btn btn-ghost btn-sm">
+              🔗 Ouvrir dans un onglet
+            </a>
+          </div>
+          <div class="flex items-center justify-center p-4"
+               style="background:#000;">
+            <video
+              controls
+              preload="metadata"
+              class="w-full rounded-xl"
+              style="max-height:70vh;"
+              [src]="rawUrl">
+              Votre navigateur ne supporte pas la lecture vidéo HTML5.
+            </video>
+          </div>
+        </div>
+
+        <!-- Type inconnu -->
+        <div *ngIf="fileType === 'unknown' && !fileLoading" class="flex flex-col items-center justify-center py-12 gap-3">
+          <span style="font-size:36px;">📎</span>
+          <p class="text-sm" style="color:var(--text-3);">Type de fichier non prévisualisable.</p>
+          <a [href]="rawUrl" target="_blank" download class="btn btn-brand btn-sm">⬇ Télécharger le fichier</a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

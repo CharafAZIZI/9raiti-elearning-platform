@@ -1,4 +1,4 @@
-package com.MicroServiceSpring.MicroServiceSpring.Services;
+package com.MicroServiceSpring.MicroServiceSpring.Services.Cours;
 
 import com.MicroServiceSpring.MicroServiceSpring.DTO.CoursDTO;
 

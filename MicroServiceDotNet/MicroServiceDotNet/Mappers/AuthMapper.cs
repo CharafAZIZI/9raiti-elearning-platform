@@ -27,6 +27,7 @@ namespace MicroServiceDotNet.Mappers
                 telephone = InscVM.telephone,
                 role = InscVM.role,
                 est_actif = true,
+                EmailConfirmed = false, // ← Ajouter explicitement
                 DateCreation = DateTime.UtcNow
             };
         }

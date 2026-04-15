@@ -4,9 +4,11 @@ import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CatalogueService } from '../../core/services/catalogue.service';
 import { AuthService } from '../../core/services/auth.service';
+import { UserStateService } from '../../core/services/user-state.service';
+import { FeedbackService } from '../../core/services/feedback.service';
 import { CategorieDTO } from '../../models/categorie.model';
 import { ModuleDTO } from '../../models/module.model';
-import { CoursDTO } from '../../models/cours.model';
+import { FeedbackDTO, TypeAvis } from '../../models/feedback.model';
 
 @Component({
   selector: 'app-home',
@@ -21,30 +23,23 @@ export class HomeComponent implements OnInit, OnDestroy {
   navOpen      = false;
   scrolled     = false;
   activeCatId: number | null = null;
-  activeModId: number | null = null;
 
   categories: CategorieDTO[] = [];
-  modules:    ModuleDTO[]    = [];
-  cours:      CoursDTO[]     = [];
+  allModules: ModuleDTO[] = [];
 
-  get filteredModules(): ModuleDTO[] {
-    return this.activeCatId
-      ? this.modules.filter(m => m.categorieId === this.activeCatId)
-      : [];
+  /** Modules actifs uniquement (actif === true) */
+  get activeModules(): ModuleDTO[] {
+    return this.allModules.filter(m => m.actif && (!m.statut || m.statut === 'ACTIF'));
   }
 
-  get filteredCours(): CoursDTO[] {
-    return this.activeModId
-      ? this.cours.filter(c => c.moduleId === this.activeModId)
-      : [];
+  /** Modules actifs filtrés par catégorie sélectionnée */
+  get filteredModules(): ModuleDTO[] {
+    if (!this.activeCatId) return [];
+    return this.activeModules.filter(m => m.categorieId === this.activeCatId);
   }
 
   get activeCategoryName(): string {
     return this.categories.find(c => c.id === this.activeCatId)?.nom ?? '';
-  }
-
-  get activeModuleName(): string {
-    return this.modules.find(m => m.id === this.activeModId)?.nom ?? '';
   }
 
   /* ── Hero Slider ────────────────────────────────────────── */
@@ -56,10 +51,22 @@ export class HomeComponent implements OnInit, OnDestroy {
   currentSlide = 0;
   private slideInterval?: ReturnType<typeof setInterval>;
 
-  /* ── Réclamation ────────────────────────────────────────── */
-  claim = { email: '', message: '' };
-  claimSent    = false;
-  claimLoading = false;
+  /* ── Feedback / Réclamation ─────────────────────────────── */
+  feedbackEmail   = '';
+  feedbackType: TypeAvis | '' = '';
+  feedbackMessage = '';
+  claimSent       = false;
+  claimLoading    = false;
+  claimError      = '';
+
+  readonly typesAvis: { value: TypeAvis; label: string }[] = [
+    { value: 'RECLAMATION',         label: 'Réclamation' },
+    { value: 'FEEDBACK_PLATEFORME', label: 'Feedback sur la plateforme' },
+    { value: 'SUGGESTION',          label: "Suggestion d'amélioration" },
+    { value: 'BUG',                 label: 'Signalement de bug' },
+    { value: 'AVIS_COURS',          label: 'Avis sur un cours' },
+    { value: 'AUTRE',               label: 'Autre' },
+  ];
 
   /* ── Testimonials ───────────────────────────────────────── */
   testimonials = [
@@ -92,7 +99,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   ];
 
   footerCols = [
-    { title: 'Plateforme',   links: ['Catalogue', 'Catégories', 'Modules', 'Cours'] },
+    { title: 'Plateforme',   links: ['Catalogue', 'Catégories', 'Modules'] },
     { title: 'Compte',       links: ['Connexion', 'Inscription', 'Mon profil', 'Tableau de bord'] },
     { title: 'Informations', links: ['À propos', 'Témoignages', 'Réclamation', 'Confidentialité'] },
   ];
@@ -106,11 +113,16 @@ export class HomeComponent implements OnInit, OnDestroy {
   constructor(
     private catalogue: CatalogueService,
     private auth: AuthService,
+    private userStateService: UserStateService,
     private router: Router,
+    private feedbackService: FeedbackService,
   ) {}
 
   ngOnInit(): void {
     this.isLoggedIn = this.auth.isLoggedIn();
+    this.userStateService.user$.subscribe(u => {
+      this.isLoggedIn = !!u && this.auth.isLoggedIn();
+    });
     this.loadCatalogue();
     this.startSlider();
   }
@@ -121,25 +133,16 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   loadCatalogue(): void {
     this.catalogue.getAllCategories().subscribe({ next: c => this.categories = c });
-    this.catalogue.getAllModules().subscribe({    next: m => this.modules    = m });
-    this.catalogue.getAllCours().subscribe({      next: c => this.cours      = c });
+    this.catalogue.getAllModules().subscribe({ next: m => this.allModules = m });
   }
 
   setCategory(id: number): void {
     this.activeCatId = this.activeCatId === id ? null : id;
-    this.activeModId = null;
   }
 
-  setModule(id: number): void {
-    this.activeModId = this.activeModId === id ? null : id;
-  }
-
-  getModulesFor(catId: number): number {
-    return this.modules.filter(m => m.categorieId === catId).length;
-  }
-
-  getCoursFor(modId: number): number {
-    return this.cours.filter(c => c.moduleId === modId).length;
+  /** Nombre de modules ACTIFS pour une catégorie donnée */
+  getActiveModulesCount(catId: number): number {
+    return this.activeModules.filter(m => m.categorieId === catId).length;
   }
 
   startSlider(): void {
@@ -156,19 +159,51 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.startSlider();
   }
 
+  /** CTA → login si non connecté, sinon dashboard selon rôle */
   ctaAction(): void {
-    this.router.navigate(this.isLoggedIn ? ['/categories'] : ['/login']);
+    if (!this.isLoggedIn) {
+      this.router.navigate(['/login']);
+    } else {
+      this.router.navigate(['/categories']);
+    }
   }
 
+  /** Accéder aux modules d'une catégorie (nécessite authentification) */
+  goToModules(catId: number, catNom: string): void {
+    if (!this.isLoggedIn) {
+      this.router.navigate(['/login']);
+      return;
+    }
+    this.router.navigate(['/modules'], { queryParams: { categorieId: catId, categorieNom: catNom } });
+  }
+
+  /** Soumission du feedback anonyme depuis la page Home */
   submitClaim(): void {
-    if (!this.claim.email || !this.claim.message) return;
+    if (!this.feedbackEmail || !this.feedbackMessage || !this.feedbackType) return;
+
     this.claimLoading = true;
-    setTimeout(() => {
-      this.claimLoading = false;
-      this.claimSent    = true;
-      this.claim        = { email: '', message: '' };
-      setTimeout(() => this.claimSent = false, 4000);
-    }, 1200);
+    this.claimError   = '';
+
+    const dto: FeedbackDTO = {
+      email:    this.feedbackEmail,
+      typeAvis: this.feedbackType as TypeAvis,
+      message:  this.feedbackMessage,
+    };
+
+    this.feedbackService.soumettreAnonyme(dto).subscribe({
+      next: () => {
+        this.claimLoading   = false;
+        this.claimSent      = true;
+        this.feedbackEmail   = '';
+        this.feedbackType    = '';
+        this.feedbackMessage = '';
+        setTimeout(() => this.claimSent = false, 5000);
+      },
+      error: (err: Error) => {
+        this.claimLoading = false;
+        this.claimError   = err.message;
+      }
+    });
   }
 
   @HostListener('window:scroll')
@@ -179,15 +214,5 @@ export class HomeComponent implements OnInit, OnDestroy {
   scrollTo(id: string): void {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
     this.navOpen = false;
-  }
-
-  niveauLabel(n: string): string {
-    const map: Record<string, string> = { DEBUTANT: 'Débutant', INTERMEDIAIRE: 'Intermédiaire', AVANCE: 'Avancé' };
-    return map[n] ?? n;
-  }
-
-  niveauColor(n: string): string {
-    const map: Record<string, string> = { DEBUTANT: 'b-green', INTERMEDIAIRE: 'b-brand', AVANCE: 'b-red' };
-    return map[n] ?? 'b-blue';
   }
 }

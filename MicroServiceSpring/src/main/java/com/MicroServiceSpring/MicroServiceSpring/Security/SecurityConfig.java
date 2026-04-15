@@ -1,5 +1,4 @@
 package com.MicroServiceSpring.MicroServiceSpring.Security;
-
 import com.MicroServiceSpring.MicroServiceSpring.Filters.JwtAuthenticationFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,14 +32,27 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 .authorizeHttpRequests(auth -> auth
-                        // ADMIN : accès total
-//                        .requestMatchers("/**").hasRole("ADMIN")
 
-                        // ENSEIGNANT : lecture + écriture
-                        .requestMatchers(HttpMethod.GET,    "/api/categories/**").hasAnyRole("ENSEIGNANT", "APPRENANT", "ADMIN")
-                        .requestMatchers(HttpMethod.GET,    "/api/modules/**").hasAnyRole("ENSEIGNANT", "APPRENANT", "ADMIN")
-                        .requestMatchers(HttpMethod.GET,    "/api/cours/**").hasAnyRole("ENSEIGNANT", "APPRENANT", "ADMIN")
+                        // ── PUBLIC : catalogue visible sans connexion ─────────
+                        .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/modules/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/cours/**").permitAll()
 
+                        // ── PUBLIC : soumission anonyme de feedback (page Home) ─
+                        .requestMatchers(HttpMethod.POST, "/api/feedbacks/anonyme").permitAll()
+
+                        // ── APPRENANT + ENSEIGNANT : soumettre un feedback ─────
+                        .requestMatchers(HttpMethod.POST, "/api/feedbacks")
+                                .hasAnyRole("APPRENANT", "ENSEIGNANT")
+
+                        // ── ENSEIGNANT : consulter les avis sur ses cours ───────
+                        .requestMatchers(HttpMethod.GET, "/api/feedbacks/cours/**")
+                                .hasAnyRole("ENSEIGNANT", "ADMIN")
+
+                        // ── ADMIN : gestion complète des feedbacks ─────────────
+                        .requestMatchers("/api/feedbacks/**").hasRole("ADMIN")
+
+                        // ── ENSEIGNANT / ADMIN : écriture catalogue ────────────
                         .requestMatchers(HttpMethod.POST,   "/api/categories/**").hasAnyRole("ENSEIGNANT", "ADMIN")
                         .requestMatchers(HttpMethod.PUT,    "/api/categories/**").hasAnyRole("ENSEIGNANT", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/categories/**").hasAnyRole("ENSEIGNANT", "ADMIN")

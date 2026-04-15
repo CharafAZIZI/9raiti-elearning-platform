@@ -1,5 +1,7 @@
 version: "3.9"
 services:
+
+  # ── Frontend Angular ────────────────────────────────────────────────────────
   angular:
     build:
       context: ./9raiti
@@ -8,10 +10,12 @@ services:
     ports:
       - "4200:80"
     depends_on:
-      - api-gateway
+      api-gateway:
+        condition: service_started
     networks:
       - elearning-net
 
+  # ── API Gateway ─────────────────────────────────────────────────────────────
   api-gateway:
     build:
       context: ./ApiGateway/ApiGateway
@@ -20,38 +24,77 @@ services:
     ports:
       - "9000:9000"
     depends_on:
-      - dotnet-service
-      - spring-service
+      dotnet-service:
+        condition: service_started
+      spring-service:
+        condition: service_started
     networks:
       - elearning-net
 
+  # ── Microservice .NET (Utilisateurs) ────────────────────────────────────────
   dotnet-service:
     build:
       context: ./MicroServiceDotNet/MicroServiceDotNet
       dockerfile: Dockerfile
     container_name: dotnet-service
+    restart: on-failure
     environment:
       - ASPNETCORE_URLS=http://+:5000
       - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=GestionUtilisateurs;User Id=sa;Password=REMOVED_PASSWORD;TrustServerCertificate=True;
     depends_on:
-      - sqlserver
+      sqlserver:
+        condition: service_healthy
     networks:
       - elearning-net
 
+  # ── Microservice Spring Boot (Cours) ────────────────────────────────────────
   spring-service:
     build:
       context: ./MicroServiceSpring
       dockerfile: Dockerfile
     container_name: spring-service
+    restart: on-failure
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/GestionCours
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=REMOVED_PASSWORD
+      # MinIO : surcharge l'application.properties
+      - MINIO_URL=http://minio-service:9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=REMOVED_PASSWORD
+      - MINIO_BUCKET=cours
+      - MINIO_PUBLIC_URL=http://localhost:9002
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+      minio-service:
+        condition: service_healthy
     networks:
       - elearning-net
 
+  # ── MinIO (Object Storage) ───────────────────────────────────────────────────
+  minio-service:
+    image: minio/minio:latest
+    container_name: minio-service
+    command: server /data --console-address ":9001"
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=REMOVED_PASSWORD
+    ports:
+      - "9002:9000"    # API S3 (accès depuis l'hôte pour debug)
+      - "9003:9001"    # Console web MinIO (http://localhost:9003)
+    volumes:
+      - minio-data:/data
+    networks:
+      - elearning-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # ── SQL Server (Utilisateurs) ────────────────────────────────────────────────
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: sqlserver
@@ -66,7 +109,14 @@ services:
       - sqlserver-data:/var/opt/mssql
     networks:
       - elearning-net
+    healthcheck:
+      test: ["CMD", "/opt/mssql-tools18/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "REMOVED_PASSWORD", "-Q", "SELECT 1", "-No"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
+  # ── PostgreSQL (Cours) ───────────────────────────────────────────────────────
   postgres:
     image: postgres:15
     container_name: postgres
@@ -80,6 +130,12 @@ services:
       - postgres-data:/var/lib/postgresql/data
     networks:
       - elearning-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
 networks:
   elearning-net:
@@ -88,3 +144,4 @@ networks:
 volumes:
   sqlserver-data:
   postgres-data:
+  minio-data:     # Volume persistant pour les fichiers MinIO

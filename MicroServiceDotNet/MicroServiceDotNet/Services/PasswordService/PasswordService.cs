@@ -12,13 +12,19 @@ namespace MicroServiceDotNet.Services.PasswordService
         private readonly AppDbContext _context;
         private readonly IResetService _emailService;
         private readonly ITemplateService _templateService;
+        private readonly IConfiguration _configuration; // ← Ajouté
 
-        public PasswordService(AppDbContext context, IResetService emailService, ITemplateService templateService)
+        public PasswordService(
+            AppDbContext context,
+            IResetService emailService,
+            ITemplateService templateService,
+            IConfiguration configuration) // ← Ajouté
         {
             _hasher = new PasswordHasher<User>();
             _context = context;
             _emailService = emailService;
             _templateService = templateService;
+            _configuration = configuration; // ← Ajouté
         }
 
         public string HashPassword(User user, string password)
@@ -46,18 +52,16 @@ namespace MicroServiceDotNet.Services.PasswordService
 
             var rawToken = Guid.NewGuid().ToString();
             var hashedToken = HashToken(rawToken);
-
             user.PasswordResetToken = hashedToken;
             user.PasswordResetTokenExpiry = DateTime.UtcNow.AddMinutes(30);
-
             _context.SaveChanges();
 
-            string resetLink = $"http://localhost:4200/reinitialiser-mot-de-passe?token={rawToken}";
-            var body = _templateService.GetResetPasswordEmail(resetLink);
+            // ← URL lue depuis appsettings.json
+            string frontendUrl = _configuration["AppSettings:FrontendUrl"];
+            string resetLink = $"{frontendUrl}/reinitialiser-mot-de-passe?token={rawToken}";
 
-            _emailService.EnvoyerEmail(user.email,
-                "Réinitialisation de mot de passe",
-                body);
+            var body = _templateService.GetResetPasswordEmail(resetLink);
+            _emailService.EnvoyerEmail(user.email, "Réinitialisation de mot de passe", body);
 
             return true;
         }
@@ -65,7 +69,6 @@ namespace MicroServiceDotNet.Services.PasswordService
         public bool ConfirmerReinitialisation(string token, string nouveauMotDePasse)
         {
             var hashedToken = HashToken(token);
-
             var user = _context.Users.FirstOrDefault(u =>
                 u.PasswordResetToken == hashedToken &&
                 u.PasswordResetTokenExpiry > DateTime.UtcNow);
@@ -75,8 +78,8 @@ namespace MicroServiceDotNet.Services.PasswordService
             user.mot_de_passe = HashPassword(user, nouveauMotDePasse);
             user.PasswordResetToken = null;
             user.PasswordResetTokenExpiry = null;
-
             _context.SaveChanges();
+
             return true;
         }
     }

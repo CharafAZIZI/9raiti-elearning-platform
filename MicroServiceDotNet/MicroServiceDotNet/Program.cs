@@ -65,9 +65,10 @@
         options.AddDefaultPolicy(policy =>
         {
             policy.WithOrigins(
-                    "http://localhost:4200",   // Angular
-                    "http://localhost:5000"    // API Gateway
-                )
+            "http://localhost:4200",
+            "http://localhost:9000",
+            "http://api-gateway:9000"
+        )
                 .AllowAnyHeader()
                 .AllowAnyMethod();
         });
@@ -88,8 +89,8 @@
     using (var scope = app.Services.CreateScope())
     {
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        db.Database.EnsureCreated();
-    }
+        db.Database.Migrate();
+}
 
     // 🔹 Run
     app.Run();  

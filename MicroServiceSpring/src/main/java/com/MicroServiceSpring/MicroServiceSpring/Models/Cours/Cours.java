@@ -1,11 +1,11 @@
-package com.MicroServiceSpring.MicroServiceSpring.Models;
+package com.MicroServiceSpring.MicroServiceSpring.Models.Cours;
 
+import com.MicroServiceSpring.MicroServiceSpring.Models.Modules.Module;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
-
 import java.time.LocalDateTime;
 
 @Entity

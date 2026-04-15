@@ -1,5 +1,7 @@
-package com.MicroServiceSpring.MicroServiceSpring.Models;
+package com.MicroServiceSpring.MicroServiceSpring.Models.Modules;
 
+import com.MicroServiceSpring.MicroServiceSpring.Models.Cetagories.Categories;
+import com.MicroServiceSpring.MicroServiceSpring.Models.Cours.Cours;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
