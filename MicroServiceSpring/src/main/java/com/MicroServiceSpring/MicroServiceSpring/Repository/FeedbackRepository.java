@@ -24,4 +24,6 @@ public interface FeedbackRepository extends JpaRepository<Feedback, Long> {
 
     // Admin : feedbacks par type ET statut (filtres combinés)
     List<Feedback> findByTypeAvisAndStatut(TypeAvis typeAvis, StatutFeedback statut);
+    // Ajouter cette méthode dans l'interface
+    List<Feedback> findByEmailOrderByDateCreationDesc(String email);
 }

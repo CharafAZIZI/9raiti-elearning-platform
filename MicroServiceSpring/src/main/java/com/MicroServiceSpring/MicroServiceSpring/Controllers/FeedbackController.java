@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -129,5 +130,12 @@ public class FeedbackController {
     public ResponseEntity<Void> supprimer(@PathVariable Long id) {
         feedbackService.supprimer(id);
         return ResponseEntity.noContent().build();
+    }
+    // FeedbackController.java
+    @GetMapping("/mes-feedbacks")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<FeedbackDTO>> getMesFeedbacks(Authentication auth) {
+        String email = auth.getName(); // extrait automatiquement du JWT
+        return ResponseEntity.ok(feedbackService.getFeedbacksByEmail(email));
     }
 }

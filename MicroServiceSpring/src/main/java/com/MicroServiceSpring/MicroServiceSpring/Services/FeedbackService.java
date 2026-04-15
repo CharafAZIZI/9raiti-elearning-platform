@@ -27,4 +27,7 @@ public interface FeedbackService {
 
     // ── Suppression Admin ─────────────────────────────────────────────────────
     void supprimer(Long id);
+
+    // Ajouter la méthode dans l'interface ou directement dans l'impl
+    List<FeedbackDTO> getFeedbacksByEmail(String email);
 }

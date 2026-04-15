@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -124,5 +125,14 @@ public class FeedbackServiceImpl implements FeedbackService {
             throw new ResourceNotFoundException("Feedback introuvable avec l'id : " + id);
         }
         feedbackRepository.deleteById(id);
+    }
+
+    @Override
+    public List<FeedbackDTO> getFeedbacksByEmail(String email) {
+        return feedbackRepository
+                .findByEmailOrderByDateCreationDesc(email)
+                .stream()
+                .map(feedbackMapper::toDTO)  // ou votre méthode de conversion
+                .collect(Collectors.toList());
     }
 }
