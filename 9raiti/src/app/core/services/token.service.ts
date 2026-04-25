@@ -34,6 +34,25 @@ export class TokenService {
 
   getRole(): string | null { return this.getUser()?.role ?? null; }
 
+  /**
+   * Extrait l'ID de l'enseignant connecté depuis le claim NameIdentifier du JWT .NET.
+   * ClaimTypes.NameIdentifier = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"
+   */
+  getEnseignantId(): number | null {
+    const token = this.getToken();
+    if (!token) return null;
+    const payload = this.decodeJwt(token);
+    if (!payload) return null;
+    const raw =
+      payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'] ??
+      payload['nameid'] ??
+      payload['sub'] ??
+      null;
+    if (raw === null) return null;
+    const id = Number(raw);
+    return isNaN(id) ? null : id;
+  }
+
   private decodeJwt(token: string): any {
     try {
       const base64Url = token.split('.')[1];

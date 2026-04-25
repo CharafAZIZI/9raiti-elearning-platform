@@ -22,12 +22,9 @@ public class CoursDTO {
     @NotNull(message = "Le niveau est obligatoire")
     private Niveau niveau;
 
-    // CORRECTION : statut manquait dans le DTO d'origine → impossible de créer/filtrer par statut
     private StatutCours statut;
 
     private LocalDateTime dateCreation;
-
-    private Integer nombreInscrits;
 
     private Integer dureeMinutes;
 
@@ -35,4 +32,7 @@ public class CoursDTO {
 
     @NotNull(message = "Le module est obligatoire")
     private Long moduleId;
+
+    /** ID de l'enseignant propriétaire — renvoyé au frontend pour filtrer les actions CRUD */
+    private Long enseignantId;
 }

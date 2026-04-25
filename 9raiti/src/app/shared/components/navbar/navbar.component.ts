@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 import { TokenService } from '../../../core/services/token.service';
@@ -11,13 +11,13 @@ import { environment } from '../../../../environments/environment';
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './navbar.component.html',
 })
 export class NavbarComponent implements OnInit, OnDestroy {
-  email = '';
-  role = '';
-  initials = '?';
+  email       = '';
+  role        = '';
+  initials    = '?';
   displayName = '';
   logoutLoading = false;
   isDark = true;
@@ -25,15 +25,14 @@ export class NavbarComponent implements OnInit, OnDestroy {
   private subs: Subscription[] = [];
 
   constructor(
-    private tokenService: TokenService,
+    private tokenService:   TokenService,
     private userStateService: UserStateService,
-    private themeService: ThemeService,
-    private router: Router,
-    private http: HttpClient
+    private themeService:   ThemeService,
+    private router:         Router,
+    private http:           HttpClient
   ) {}
 
   ngOnInit(): void {
-    // Subscribe to user state (fixes Google Login refresh bug)
     this.subs.push(
       this.userStateService.user$.subscribe(user => {
         if (user) {
@@ -44,7 +43,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
         }
       })
     );
-    // Subscribe to theme state
     this.subs.push(
       this.themeService.theme$.subscribe(t => this.isDark = t === 'dark')
     );
@@ -56,6 +54,33 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   navigateToProfile(): void { this.router.navigate(['/profil']); }
 
+  /** Retourne la route du dashboard selon le rôle */
+  getDashboardRoute(): string {
+    const r = this.role?.toLowerCase();
+    if (r === 'apprenant')  return '/dashboard-apprenant';
+    if (r === 'enseignant') return '/dashboard-enseignant';
+    if (r === 'admin')      return '/dashboard-admin';
+    return '/home';
+  }
+
+  /** Badge couleur selon le rôle */
+  getRoleBadgeClass(): string {
+    const r = this.role?.toLowerCase();
+    if (r === 'admin')      return 'b-purple';
+    if (r === 'enseignant') return 'b-green';
+    if (r === 'apprenant')  return 'b-blue';
+    return 'b-brand';
+  }
+
+  /** Libellé français du rôle */
+  getRoleLabel(): string {
+    const r = this.role?.toLowerCase();
+    if (r === 'admin')      return 'Administrateur';
+    if (r === 'enseignant') return 'Enseignant';
+    if (r === 'apprenant')  return 'Apprenant';
+    return this.role;
+  }
+
   private computeInitials(user: any): void {
     if (user.prenom && user.nom) {
       this.initials = (user.prenom[0] + user.nom[0]).toUpperCase();
@@ -64,7 +89,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
     } else if (user.displayName) {
       const parts = user.displayName.trim().split(' ');
       this.initials = parts.length >= 2
-        ? (parts[0][0] + parts[parts.length-1][0]).toUpperCase()
+        ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
         : user.displayName.substring(0, 2).toUpperCase();
     } else if (user.email) {
       this.initials = user.email.substring(0, 2).toUpperCase();
@@ -73,7 +98,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   logout(): void {
     this.logoutLoading = true;
-    const token = this.tokenService.getToken();
+    const token   = this.tokenService.getToken();
     const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
     this.http.post(`${environment.apiUrl}/auth/logout`, {}, { headers, responseType: 'text' as const }).subscribe({
       next:  () => { this.userStateService.clearUser(); this.router.navigate(['/login']); },

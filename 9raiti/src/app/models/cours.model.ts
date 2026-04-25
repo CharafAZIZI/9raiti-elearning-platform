@@ -13,4 +13,5 @@ export interface CoursDTO {
   dureeMinutes?:   number;
   filePath?:       string;
   moduleId?:       number;
+  enseignantId?:   number;      // ID du propriétaire (renvoyé par le backend)
 }

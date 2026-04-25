@@ -1,123 +1,65 @@
-﻿{
+{
   "Routes": [
     {
       "DownstreamPathTemplate": "/api/cours/{everything}",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "spring-service",
-          "Port": 8080
-        }
-      ],
-      "UpstreamPathTemplate": "/spring-api/cours/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "OPTIONS" ]
-    },
-    {
-      "DownstreamPathTemplate": "/api/modules/{everything}",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "spring-service",
-          "Port": 8080
-        }
-      ],
-      "UpstreamPathTemplate": "/spring-api/modules/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "OPTIONS" ]
-    },
-    {
-      "DownstreamPathTemplate": "/api/categories/{everything}",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "spring-service",
-          "Port": 8080
-        }
-      ],
-      "UpstreamPathTemplate": "/spring-api/categories/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "OPTIONS" ]
-    },
-    {
-      "DownstreamPathTemplate": "/api/cours/{everything}",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "spring-service",
-          "Port": 8080
-        }
-      ],
+      "DownstreamHostAndPorts": [{ "Host": "spring-service", "Port": 8080 }],
       "UpstreamPathTemplate": "/api/cours/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "OPTIONS" ]
     },
     {
       "DownstreamPathTemplate": "/api/modules/{everything}",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "spring-service",
-          "Port": 8080
-        }
-      ],
+      "DownstreamHostAndPorts": [{ "Host": "spring-service", "Port": 8080 }],
       "UpstreamPathTemplate": "/api/modules/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "OPTIONS" ]
     },
     {
       "DownstreamPathTemplate": "/api/categories/{everything}",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "spring-service",
-          "Port": 8080
-        }
-      ],
+      "DownstreamHostAndPorts": [{ "Host": "spring-service", "Port": 8080 }],
       "UpstreamPathTemplate": "/api/categories/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "OPTIONS" ]
     },
     {
+      "DownstreamPathTemplate": "/api/inscriptions/mes-apprenants",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [{ "Host": "spring-service", "Port": 8080 }],
+      "UpstreamPathTemplate": "/api/inscriptions/mes-apprenants",
+      "UpstreamHttpMethod": [ "GET", "OPTIONS" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/inscriptions/module/{moduleId}/apprenants",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [{ "Host": "spring-service", "Port": 8080 }],
+      "UpstreamPathTemplate": "/api/inscriptions/module/{moduleId}/apprenants",
+      "UpstreamHttpMethod": [ "GET", "OPTIONS" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/inscriptions/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [{ "Host": "spring-service", "Port": 8080 }],
+      "UpstreamPathTemplate": "/api/inscriptions/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "DELETE", "OPTIONS" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/inscriptions",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [{ "Host": "spring-service", "Port": 8080 }],
+      "UpstreamPathTemplate": "/api/inscriptions",
+      "UpstreamHttpMethod": [ "GET", "POST", "DELETE", "OPTIONS" ]
+    },
+    {
       "DownstreamPathTemplate": "/{everything}",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "dotnet-service",
-          "Port": 5000
-        }
-      ],
+      "DownstreamHostAndPorts": [{ "Host": "dotnet-service", "Port": 5000 }],
       "UpstreamPathTemplate": "/dotnet-api/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS" ]
     },
     {
-      "DownstreamPathTemplate": "/api/feedbacks/{everything}",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "spring-service",
-          "Port": 8080
-        }
-      ],
-      "UpstreamPathTemplate": "/api/feedbacks/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "OPTIONS" ]
-    },
-    // endpoint sans evrything ( verfication )
-    {
-      "DownstreamPathTemplate": "/api/feedbacks",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "spring-service",
-          "Port": 8080
-        }
-      ],
-      "UpstreamPathTemplate": "/api/feedbacks",
-      "UpstreamHttpMethod": [ "GET", "POST", "OPTIONS" ]
-    },
-    {
       "DownstreamPathTemplate": "/api/{everything}",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "dotnet-service",
-          "Port": 5000
-        }
-      ],
+      "DownstreamHostAndPorts": [{ "Host": "dotnet-service", "Port": 5000 }],
       "UpstreamPathTemplate": "/api/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS" ]
     }

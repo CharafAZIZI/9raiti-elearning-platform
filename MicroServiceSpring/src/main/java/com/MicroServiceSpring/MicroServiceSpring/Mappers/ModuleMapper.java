@@ -27,6 +27,7 @@ public class ModuleMapper {
         dto.setDescription(module.getDescription());
         dto.setCode(module.getCode());
         dto.setActif(module.isActif());
+        dto.setEnseignantId(module.getEnseignantId()); // ← propriétaire
         if (module.getCategorie() != null) {
             dto.setCategorieId(module.getCategorie().getId());
         }
@@ -47,6 +48,7 @@ public class ModuleMapper {
         module.setDescription(dto.getDescription());
         module.setCode(dto.getCode());
         module.setActif(dto.isActif());
+        // enseignantId est injecté par le service, pas par le DTO entrant
         if (dto.getCategorieId() != null) {
             Categories categorie = categoriesRepository.findById(dto.getCategorieId())
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -60,7 +62,6 @@ public class ModuleMapper {
         module.setNom(dto.getNom());
         module.setDescription(dto.getDescription());
         module.setActif(dto.isActif());
-        // Le code est unique et ne doit pas être modifié après création
         if (dto.getCategorieId() != null) {
             Categories categorie = categoriesRepository.findById(dto.getCategorieId())
                 .orElseThrow(() -> new ResourceNotFoundException(

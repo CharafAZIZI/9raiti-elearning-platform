@@ -1,10 +1,11 @@
 <div class="min-h-screen" style="background:var(--bg);">
   <app-navbar></app-navbar>
   <div class="flex h-[calc(100vh-64px)] overflow-hidden">
-    <!-- SIDEBAR -->
+
+    <!-- ── SIDEBAR ─────────────────────────────────────────────────────── -->
     <aside class="hidden md:flex flex-col w-64 flex-shrink-0 overflow-y-auto"
            style="background:var(--surface);border-right:1px solid var(--border);padding:20px 14px;">
-      
+
       <!-- User card -->
       <div class="p-4 rounded-2xl mb-5" style="background:var(--green-dim);border:1px solid rgba(16,185,129,.2);">
         <div class="flex items-center gap-3">
@@ -18,42 +19,47 @@
           </div>
         </div>
       </div>
-      <p class="text-xs font-bold uppercase tracking-widest px-2 mb-2" style="color:var(--text-4);">Catalogue</p>
+
+      <p class="text-xs font-bold uppercase tracking-widest px-2 mb-2" style="color:var(--text-4);">Navigation</p>
       <nav class="space-y-1 flex-1">
-        <button *ngFor="let item of [
-          {id:'accueil', icon:'🏠', label:'Tableau de bord'},
-          {id:'contenu', icon:'🗂', label:'Contenu'},
-          {id:'categories', icon:'📂', label:'Catégories'},
-          {id:'modules', icon:'📦', label:'Modules'},
-          {id:'cours', icon:'📘', label:'Cours'}
-        ]" (click)="item.id==='contenu' ? ouvrirContenu() : setSection(item.id)" class="nav-item" [class.active]="activeSection===item.id">
-          <span class="text-base">{{item.icon}}</span>
-          <span>{{item.label}}</span>
+        <button (click)="setSection('accueil')" class="nav-item" [class.active]="activeSection==='accueil'">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          <span>Tableau de bord</span>
         </button>
+        <button (click)="ouvrirContenu()" class="nav-item" [class.active]="activeSection==='contenu'">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+          <span>Mon contenu</span>
+        </button>
+        <button (click)="setSection('apprenants'); loadMesApprenants()" class="nav-item" [class.active]="activeSection==='apprenants'">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+          <span>Mes apprenants</span>
+          <span *ngIf="mesApprenants.length > 0"
+                class="ml-auto text-xs font-bold px-1.5 py-0.5 rounded-full"
+                style="background:var(--brand-dim);color:var(--brand);">
+            {{ mesApprenants.length }}
+          </span>
+        </button>
+
       </nav>
-      <!-- Quick create -->
+
+      <!-- Actions rapides -->
       <div class="mt-4 space-y-2 pt-4" style="border-top:1px solid var(--border);">
-        <button (click)="setSection('categories');openCreateCat()" class="btn btn-ghost w-full" style="font-size:12px;padding:8px 12px;justify-content:flex-start;">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Nouvelle catégorie
-        </button>
-        <button (click)="setSection('modules');openCreateMod()" class="btn btn-ghost w-full" style="font-size:12px;padding:8px 12px;justify-content:flex-start;">
+        <p class="text-xs font-bold uppercase tracking-widest px-2 mb-2" style="color:var(--text-4);">Créer</p>
+        <button (click)="ouvrirContenu(); openCreateMod()" class="btn btn-ghost w-full" style="font-size:12px;padding:8px 12px;justify-content:flex-start;">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           Nouveau module
         </button>
-        <button (click)="setSection('cours');openCreateCours()" class="btn btn-brand w-full" style="font-size:12px;padding:9px 12px;">
+        <button (click)="ouvrirContenu(); openCreateCours()" class="btn btn-brand w-full" style="font-size:12px;padding:9px 12px;">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           Nouveau cours
         </button>
-        <!-- Feedback -->
-        <button (click)="ouvrirFeedbackGlobal()" class="btn btn-ghost w-full" style="font-size:12px;padding:8px 12px;justify-content:flex-start;">
-          💬 Envoyer un avis
-        </button>
       </div>
     </aside>
-    <!-- MAIN -->
+
+    <!-- ── MAIN ─────────────────────────────────────────────────────────── -->
     <main class="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-6 space-y-5">
-      <!-- Feedback -->
+
+      <!-- Alerts globales -->
       <div *ngIf="successMsg" class="alert alert-green animate-fade-in">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="flex-shrink-0"><polyline points="20 6 9 17 4 12"/></svg>
         {{successMsg}}
@@ -62,840 +68,794 @@
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="flex-shrink-0"><circle cx="12" cy="12" r="10"/></svg>
         {{errorMsg}}
       </div>
-      <!-- ACCUEIL -->
+
+      <!-- ══ SECTION : Accueil ══ -->
       <ng-container *ngIf="activeSection==='accueil'">
-        <div class="relative overflow-hidden rounded-2xl p-6 sm:p-8 animate-fade-in"
-             style="background:linear-gradient(135deg,var(--surface),var(--surface-2));border:1px solid rgba(16,185,129,.25);">
-          <div class="absolute top-0 left-0 right-0 h-0.5 rounded-t-2xl" style="background:linear-gradient(90deg,transparent,var(--green),transparent);"></div>
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <p class="text-xs font-bold uppercase tracking-[3px] mb-2" style="color:var(--green);">Espace Enseignant</p>
-              <h1 class="text-2xl sm:text-3xl font-bold mb-2" style="font-family:'Syne',sans-serif;color:var(--text);">
-                Bonjour, <span style="color:var(--green);">{{ userName }}</span> 👋
-              </h1>
-              <p class="text-sm" style="color:var(--text-2);">Gérez votre catalogue : catégories, modules et cours directement depuis cette interface.</p>
-            </div>
-            <button (click)="setSection('cours');openCreateCours()" class="btn btn-brand self-start sm:self-auto flex-shrink-0">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              Créer un cours
-            </button>
-          </div>
-        </div>
-        <!-- Stats -->
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div *ngFor="let s of stats; let i=index" class="glass glass-hover rounded-2xl p-5 relative overflow-hidden animate-slide-up" [class]="'d-'+i">
-            <div class="stat-accent" [style.background]="s.color"></div>
-            <div class="w-11 h-11 rounded-xl flex items-center justify-center text-xl mb-3" [style.background]="s.dim">{{s.icon}}</div>
-            <div class="text-2xl font-bold mb-0.5" style="font-family:'Syne',sans-serif;color:var(--text);">{{s.value}}</div>
-            <div class="text-xs" style="color:var(--text-3);">{{s.label}}</div>
-          </div>
-        </div>
-        <!-- Overview grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <!-- Categories preview -->
-          <div class="glass rounded-2xl p-5 animate-slide-up d-2">
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="font-bold text-sm" style="font-family:'Syne',sans-serif;color:var(--text);">Catégories <span class="badge b-blue ml-1">{{categories.length}}</span></h3>
-              <button (click)="setSection('categories')" class="text-xs font-semibold" style="color:var(--green);background:none;border:none;cursor:pointer;">Gérer →</button>
-            </div>
-            <div *ngIf="loadingCategories" class="flex justify-center py-4">
-              <svg class="animate-spin-slow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--brand);"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
-            </div>
-            <div *ngIf="!loadingCategories" class="space-y-2">
-              <div *ngFor="let c of categories.slice(0,4)" class="flex items-center justify-between p-2.5 rounded-xl" style="background:var(--surface-2);border:1px solid var(--border);">
-                <div class="text-sm font-semibold truncate" style="color:var(--text);">{{c.nom}}</div>
-                <span class="badge b-blue text-xs">ID {{c.id}}</span>
+        <div class="animate-fade-in space-y-5">
+
+          <!-- Hero -->
+          <div class="relative overflow-hidden rounded-2xl p-6 sm:p-8"
+               style="background:linear-gradient(135deg,var(--surface),var(--surface-2));border:1px solid rgba(16,185,129,.25);">
+            <div class="absolute top-0 left-0 right-0 h-0.5 rounded-t-2xl" style="background:linear-gradient(90deg,transparent,var(--green),transparent);"></div>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <p class="text-xs font-bold uppercase tracking-[3px] mb-2" style="color:var(--green);">Espace Enseignant</p>
+                <h1 class="text-2xl sm:text-3xl font-bold mb-2" style="font-family:'Syne',sans-serif;color:var(--text);">
+                  Bonjour, <span style="color:var(--green);">{{ userName }}</span> 👋
+                </h1>
+                <p class="text-sm" style="color:var(--text-2);">Gérez vos modules et cours depuis votre espace personnel.</p>
               </div>
-              <div *ngIf="categories.length===0" class="text-xs text-center py-3" style="color:var(--text-3);">Aucune catégorie</div>
+              <button (click)="ouvrirContenu(); openCreateCours()" class="btn btn-brand self-start sm:self-auto flex-shrink-0">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Créer un cours
+              </button>
             </div>
           </div>
-          <!-- Modules preview -->
-          <div class="glass rounded-2xl p-5 animate-slide-up d-3">
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="font-bold text-sm" style="font-family:'Syne',sans-serif;color:var(--text);">Modules <span class="badge b-brand ml-1">{{modules.length}}</span></h3>
-              <button (click)="setSection('modules')" class="text-xs font-semibold" style="color:var(--green);background:none;border:none;cursor:pointer;">Gérer →</button>
+
+          <!-- Stats -->
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div *ngFor="let s of stats; let i=index" class="glass glass-hover rounded-2xl p-5 relative overflow-hidden animate-slide-up" [class]="'d-'+i">
+              <div class="stat-accent" [style.background]="s.color"></div>
+              <div class="w-11 h-11 rounded-xl flex items-center justify-center text-xl mb-3" [style.background]="s.dim">{{s.icon}}</div>
+              <div class="text-2xl font-bold mb-0.5" style="font-family:'Syne',sans-serif;color:var(--text);">{{s.value}}</div>
+              <div class="text-xs" style="color:var(--text-3);">{{s.label}}</div>
             </div>
-            <div *ngIf="loadingModules" class="flex justify-center py-4">
-              <svg class="animate-spin-slow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--brand);"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
-            </div>
-            <div *ngIf="!loadingModules" class="space-y-2">
-              <div *ngFor="let m of modules.slice(0,4)" class="flex items-center justify-between p-2.5 rounded-xl" style="background:var(--surface-2);border:1px solid var(--border);">
-                <div class="min-w-0 flex-1">
-                  <div class="text-sm font-semibold truncate" style="color:var(--text);">{{m.nom}}</div>
-                  <div class="text-xs" style="color:var(--text-3);">{{m.code}}</div>
+          </div>
+
+          <!-- Aperçu modules & cours -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+            <!-- Mes modules -->
+            <div class="glass rounded-2xl p-5">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="font-bold text-sm" style="font-family:'Syne',sans-serif;color:var(--text);">
+                  Mes modules <span class="badge b-brand ml-1">{{modules.length}}</span>
+                </h3>
+                <button (click)="ouvrirContenu()" class="text-xs font-semibold" style="color:var(--green);background:none;border:none;cursor:pointer;">Gérer →</button>
+              </div>
+              <div *ngIf="loadingModules" class="flex justify-center py-4">
+                <svg class="animate-spin-slow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--brand);"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
+              </div>
+              <div *ngIf="!loadingModules" class="space-y-2">
+                <div *ngFor="let m of modules.slice(0,4)" class="flex items-center justify-between p-2.5 rounded-xl" style="background:var(--surface-2);border:1px solid var(--border);">
+                  <div class="min-w-0 flex-1">
+                    <div class="text-sm font-semibold truncate" style="color:var(--text);">{{m.nom}}</div>
+                    <div class="text-xs font-mono" style="color:var(--text-3);">{{m.code}}</div>
+                  </div>
+                  <span class="badge ml-2" [class.b-green]="m.actif" [class.b-red]="!m.actif">{{m.actif ? 'Actif' : 'Inactif'}}</span>
                 </div>
-                <span class="badge ml-2" [class.b-green]="m.actif" [class.b-red]="!m.actif">{{m.actif ? 'Actif' : 'Inactif'}}</span>
-              </div>
-              <div *ngIf="modules.length===0" class="text-xs text-center py-3" style="color:var(--text-3);">Aucun module</div>
-            </div>
-          </div>
-          <!-- Cours preview -->
-          <div class="glass rounded-2xl p-5 animate-slide-up d-4">
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="font-bold text-sm" style="font-family:'Syne',sans-serif;color:var(--text);">Cours <span class="badge b-green ml-1">{{cours.length}}</span></h3>
-              <button (click)="setSection('cours')" class="text-xs font-semibold" style="color:var(--green);background:none;border:none;cursor:pointer;">Gérer →</button>
-            </div>
-            <div *ngIf="loadingCours" class="flex justify-center py-4">
-              <svg class="animate-spin-slow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--brand);"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
-            </div>
-            <div *ngIf="!loadingCours" class="space-y-2">
-              <div *ngFor="let c of cours.slice(0,4)" class="p-2.5 rounded-xl" style="background:var(--surface-2);border:1px solid var(--border);">
-                <div class="flex items-center justify-between">
-                  <div class="text-sm font-semibold truncate flex-1 mr-2" style="color:var(--text);">{{c.titre}}</div>
-                  <span class="badge text-xs" [class]="getStatutCls(c.statut)">{{c.statut}}</span>
+                <div *ngIf="modules.length === 0" class="text-xs text-center py-3" style="color:var(--text-3);">
+                  Aucun module. <button (click)="ouvrirContenu(); openCreateMod()" style="background:none;border:none;cursor:pointer;color:var(--brand);font-weight:700;">Créer →</button>
                 </div>
-                <div class="text-xs mt-0.5" style="color:var(--text-3);">{{c.niveau}} · Module {{c.moduleId}}</div>
               </div>
-              <div *ngIf="cours.length===0" class="text-xs text-center py-3" style="color:var(--text-3);">Aucun cours</div>
             </div>
+
+            <!-- Mes cours récents -->
+            <div class="glass rounded-2xl p-5">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="font-bold text-sm" style="font-family:'Syne',sans-serif;color:var(--text);">
+                  Mes cours <span class="badge b-green ml-1">{{cours.length}}</span>
+                </h3>
+                <button (click)="ouvrirContenu()" class="text-xs font-semibold" style="color:var(--green);background:none;border:none;cursor:pointer;">Gérer →</button>
+              </div>
+              <div *ngIf="loadingCours" class="flex justify-center py-4">
+                <svg class="animate-spin-slow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--brand);"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
+              </div>
+              <div *ngIf="!loadingCours" class="space-y-2">
+                <div *ngFor="let c of cours.slice(0,4)" class="p-2.5 rounded-xl" style="background:var(--surface-2);border:1px solid var(--border);">
+                  <div class="flex items-center justify-between">
+                    <div class="text-sm font-semibold truncate flex-1 mr-2" style="color:var(--text);">{{c.titre}}</div>
+                    <span class="badge text-xs" [class]="getStatutCls(c.statut)">{{c.statut}}</span>
+                  </div>
+                  <div class="text-xs mt-0.5" style="color:var(--text-3);">{{c.niveau}} · {{getModName(c.moduleId)}}</div>
+                </div>
+                <div *ngIf="cours.length === 0" class="text-xs text-center py-3" style="color:var(--text-3);">
+                  Aucun cours. <button (click)="ouvrirContenu(); openCreateCours()" style="background:none;border:none;cursor:pointer;color:var(--brand);font-weight:700;">Créer →</button>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
       </ng-container>
 
-      <!-- ══ CONTENU – Navigation hiérarchique ══ -->
+      <!-- ══ SECTION : Mon contenu (hiérarchie Catégorie → Module → Cours) ══ -->
       <ng-container *ngIf="activeSection==='contenu'">
         <div class="animate-fade-in space-y-5">
 
-          <!-- Fil d'Ariane -->
-          <nav class="flex items-center gap-2 text-sm flex-wrap" style="color:var(--text-3);">
-            <button (click)="contenuRetourCategories()" class="font-semibold hover:underline" [style.color]="contenuNiveau>0 ? 'var(--brand)' : 'var(--text)'" style="background:none;border:none;cursor:pointer;padding:0;">
-              🗂 Catégories
-            </button>
-            <ng-container *ngIf="contenuNiveau >= 1 && contenuCategorieSelectee">
-              <span>›</span>
-              <button (click)="contenuRetourModules()" class="font-semibold hover:underline" [style.color]="contenuNiveau>1 ? 'var(--brand)' : 'var(--text)'" style="background:none;border:none;cursor:pointer;padding:0;">
-                📦 {{ contenuCategorieSelectee.nom }}
+          <!-- Header + fil d'Ariane -->
+          <div class="flex items-center justify-between flex-wrap gap-3">
+            <div>
+              <h2 class="text-xl font-bold" style="font-family:'Syne',sans-serif;color:var(--text);">Mon contenu</h2>
+              <nav class="flex items-center gap-2 text-sm mt-1 flex-wrap" style="color:var(--text-3);">
+                <button (click)="contenuRetourCategories()" class="font-semibold hover:underline"
+                        [style.color]="contenuNiveau>0 ? 'var(--brand)' : 'var(--text)'"
+                        style="background:none;border:none;cursor:pointer;padding:0;">
+                  🗂 Catégories
+                </button>
+                <ng-container *ngIf="contenuNiveau >= 1 && contenuCategorieSelectee">
+                  <span>›</span>
+                  <button (click)="contenuRetourModules()" class="font-semibold hover:underline"
+                          [style.color]="contenuNiveau>1 ? 'var(--brand)' : 'var(--text)'"
+                          style="background:none;border:none;cursor:pointer;padding:0;">
+                    📦 {{ contenuCategorieSelectee.nom }}
+                  </button>
+                </ng-container>
+                <ng-container *ngIf="contenuNiveau === 2 && contenuModuleSelectionne">
+                  <span>›</span>
+                  <span style="color:var(--text);">📘 {{ contenuModuleSelectionne.nom }}</span>
+                </ng-container>
+              </nav>
+            </div>
+            <!-- Actions contextuelles -->
+            <div class="flex gap-2 flex-wrap">
+              <button *ngIf="contenuNiveau > 0" (click)="contenuNiveau === 1 ? contenuRetourCategories() : contenuRetourModules()"
+                      class="btn btn-ghost btn-sm">← Retour</button>
+              <button *ngIf="contenuNiveau === 0" (click)="openCreateCat()" class="btn btn-ghost btn-sm">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Catégorie
               </button>
-            </ng-container>
-            <ng-container *ngIf="contenuNiveau === 2 && contenuModuleSelectionne">
-              <span>›</span>
-              <span style="color:var(--text);">📘 {{ contenuModuleSelectionne.nom }}</span>
-            </ng-container>
-          </nav>
+              <button *ngIf="contenuNiveau >= 1" (click)="openCreateMod()" class="btn btn-ghost btn-sm">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Module
+              </button>
+              <button *ngIf="contenuNiveau >= 1" (click)="openCreateCours()" class="btn btn-brand btn-sm">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Cours
+              </button>
+            </div>
+          </div>
 
-          <!-- ── Niveau 0 : Catégories ── -->
+          <!-- ── Niveau 0 : Catégories (style carte catalogue) ── -->
           <ng-container *ngIf="contenuNiveau === 0">
-            <div class="flex items-center justify-between">
-              <div>
-                <h2 class="text-xl font-bold" style="font-family:'Syne',sans-serif;color:var(--text);">Catégories</h2>
-                <p class="text-sm mt-1" style="color:var(--text-3);">Cliquez sur une catégorie pour voir ses modules.</p>
+            <!-- Skeleton -->
+            <div *ngIf="loadingCategories" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div *ngFor="let s of [1,2,3,4,5,6]" class="glass rounded-2xl overflow-hidden">
+                <div class="h-24 skeleton"></div>
+                <div class="p-4 space-y-3">
+                  <div class="skeleton h-4 w-3/4 rounded-lg"></div>
+                  <div class="skeleton h-3 w-full rounded-lg"></div>
+                </div>
               </div>
-              <button (click)="setSection('categories');openCreateCat()" class="btn btn-ghost btn-sm">+ Nouvelle catégorie</button>
             </div>
-            <div *ngIf="loadingCategories" class="flex items-center gap-3 py-10 justify-center">
-              <div class="w-6 h-6 rounded-full border-2 animate-spin" style="border-color:var(--brand);border-top-color:transparent;"></div>
-              <span class="text-sm" style="color:var(--text-3);">Chargement…</span>
+            <!-- Vide -->
+            <div *ngIf="!loadingCategories && categories.length === 0"
+                 class="flex flex-col items-center justify-center py-14 rounded-2xl"
+                 style="background:var(--surface);border:1px dashed var(--border);">
+              <div class="text-4xl mb-3">📂</div>
+              <p class="font-semibold" style="color:var(--text);">Aucune catégorie</p>
+              <button (click)="openCreateCat()" class="btn btn-brand mt-4">Créer une catégorie</button>
             </div>
-            <div *ngIf="!loadingCategories && categories.length===0" class="flex flex-col items-center justify-center py-14 rounded-2xl" style="background:var(--surface);border:1px dashed var(--border);">
-              <div class="text-4xl mb-3">🗂</div>
-              <p class="text-base font-semibold" style="color:var(--text);">Aucune catégorie</p>
-              <button (click)="setSection('categories');openCreateCat()" class="btn btn-brand mt-4">Créer une catégorie</button>
-            </div>
-            <div *ngIf="!loadingCategories && categories.length>0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              <button *ngFor="let cat of categories" (click)="selectionnerCategorie(cat)"
-                      class="text-left rounded-2xl p-5 transition-all hover:scale-[1.02]"
-                      style="background:var(--surface);border:1px solid var(--border);cursor:pointer;width:100%;">
-                <div class="flex items-center gap-3 mb-3">
-                  <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0" style="background:var(--green-dim);">🗂</div>
-                  <span class="font-bold text-sm" style="color:var(--text);font-family:'Syne',sans-serif;">{{ cat.nom }}</span>
+            <!-- Grille style catalogue -->
+            <div *ngIf="!loadingCategories && categories.length > 0"
+                 class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+              <div *ngFor="let cat of categories; let i=index"
+                   class="glass glass-hover rounded-2xl overflow-hidden animate-slide-up flex flex-col"
+                   [class]="'d-' + (i % 5)"
+                   style="cursor:pointer;">
+                <!-- Bannière colorée cliquable vers les modules -->
+                <div (click)="selectionnerCategorie(cat)"
+                     class="h-28 flex flex-col items-center justify-center gap-2 relative"
+                     [style.background]="getCatStyle(i).dim">
+                  <div class="absolute inset-0 opacity-10"
+                       style="background:linear-gradient(135deg,transparent,rgba(0,0,0,.5));"></div>
+                  <span class="relative z-10 text-4xl">{{ getCatStyle(i).icon }}</span>
+                  <div class="absolute bottom-0 left-0 right-0 h-0.5"
+                       [style.background]="getCatStyle(i).color"></div>
                 </div>
-                <p class="text-xs line-clamp-2" style="color:var(--text-3);">{{ cat.description || 'Aucune description' }}</p>
-                <div class="mt-3 flex items-center gap-1" style="color:var(--brand);">
-                  <span class="text-xs font-semibold">Voir les modules</span>
-                  <span class="text-xs">→</span>
+                <!-- Contenu -->
+                <div class="p-4 flex-1 flex flex-col">
+                  <h3 (click)="selectionnerCategorie(cat)"
+                      class="font-bold text-base mb-1 clamp-2"
+                      style="font-family:'Syne',sans-serif;color:var(--text);">{{ cat.nom }}</h3>
+                  <p class="text-xs leading-relaxed clamp-2 mb-3 flex-1" style="color:var(--text-3);">
+                    {{ cat.description || 'Pas de description' }}
+                  </p>
+                  <!-- Actions -->
+                  <div class="flex items-center justify-between pt-3" style="border-top:1px solid var(--border);">
+                    <button (click)="selectionnerCategorie(cat)"
+                            class="badge text-xs"
+                            [style.background]="getCatStyle(i).dim"
+                            [style.border-color]="getCatStyle(i).color"
+                            [style.color]="getCatStyle(i).color"
+                            style="border:none;cursor:pointer;">
+                      Voir les modules →
+                    </button>
+                    <div class="flex gap-1">
+                      <button (click)="openEditCat(cat)" class="btn btn-ghost btn-sm" style="padding:4px 8px;" title="Modifier">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                      </button>
+                      <button (click)="confirmDelete('categorie', cat.id!, cat.nom)" class="btn btn-danger btn-sm" style="padding:4px 8px;" title="Supprimer">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
+                      </button>
+                    </div>
+                  </div>
                 </div>
-              </button>
+              </div>
             </div>
           </ng-container>
 
-          <!-- ── Niveau 1 : Modules de la catégorie ── -->
+          <!-- ── Niveau 1 : Modules (style carte catalogue) ── -->
           <ng-container *ngIf="contenuNiveau === 1">
-            <div class="flex items-center justify-between">
-              <div>
-                <h2 class="text-xl font-bold" style="font-family:'Syne',sans-serif;color:var(--text);">Modules — {{ contenuCategorieSelectee?.nom }}</h2>
-                <p class="text-sm mt-1" style="color:var(--text-3);">Cliquez sur un module pour voir ses cours.</p>
-              </div>
-              <div class="flex gap-2">
-                <button (click)="contenuRetourCategories()" class="btn btn-ghost btn-sm">← Retour</button>
-                <button (click)="setSection('modules');openCreateMod()" class="btn btn-ghost btn-sm">+ Nouveau module</button>
-              </div>
-            </div>
-            <div *ngIf="contenuLoadingModules" class="flex items-center gap-3 py-10 justify-center">
-              <div class="w-6 h-6 rounded-full border-2 animate-spin" style="border-color:var(--brand);border-top-color:transparent;"></div>
-              <span class="text-sm" style="color:var(--text-3);">Chargement des modules…</span>
-            </div>
-            <div *ngIf="!contenuLoadingModules && contenuModules.length===0" class="flex flex-col items-center justify-center py-14 rounded-2xl" style="background:var(--surface);border:1px dashed var(--border);">
-              <div class="text-4xl mb-3">📦</div>
-              <p class="text-base font-semibold" style="color:var(--text);">Aucun module dans cette catégorie</p>
-              <button (click)="setSection('modules');openCreateMod()" class="btn btn-brand mt-4">Créer un module</button>
-            </div>
-            <div *ngIf="!contenuLoadingModules && contenuModules.length>0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              <button *ngFor="let mod of contenuModules" (click)="selectionnerModule(mod)"
-                      class="text-left rounded-2xl p-5 transition-all hover:scale-[1.02]"
-                      style="background:var(--surface);border:1px solid var(--border);cursor:pointer;width:100%;">
-                <div class="flex items-center gap-3 mb-2">
-                  <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0" style="background:var(--brand-dim);">📦</div>
-                  <div class="min-w-0">
-                    <span class="font-bold text-sm block truncate" style="color:var(--text);font-family:'Syne',sans-serif;">{{ mod.nom }}</span>
-                    <span class="text-xs" style="color:var(--text-4);">{{ mod.code }}</span>
+            <!-- Skeleton -->
+            <div *ngIf="contenuLoadingModules" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              <div *ngFor="let s of [1,2,3,4,5,6]" class="glass rounded-2xl p-5 space-y-4">
+                <div class="flex gap-3">
+                  <div class="skeleton w-12 h-12 rounded-xl flex-shrink-0"></div>
+                  <div class="flex-1 space-y-2">
+                    <div class="skeleton h-4 w-3/4 rounded-lg"></div>
+                    <div class="skeleton h-3 w-1/2 rounded-lg"></div>
                   </div>
                 </div>
-                <p class="text-xs line-clamp-2" style="color:var(--text-3);">{{ mod.description || 'Aucune description' }}</p>
-                <div class="mt-3 flex items-center gap-1" style="color:var(--brand);">
-                  <span class="text-xs font-semibold">Voir les cours</span>
-                  <span class="text-xs">→</span>
+                <div class="skeleton h-3 w-full rounded-lg"></div>
+                <div class="skeleton h-8 w-full rounded-xl"></div>
+              </div>
+            </div>
+            <!-- Vide -->
+            <div *ngIf="!contenuLoadingModules && contenuModules.length === 0"
+                 class="flex flex-col items-center justify-center py-14 rounded-2xl"
+                 style="background:var(--surface);border:1px dashed var(--border);">
+              <div class="text-4xl mb-3">📦</div>
+              <p class="font-semibold" style="color:var(--text);">Aucun module dans cette catégorie</p>
+              <button (click)="openCreateMod()" class="btn btn-brand mt-4">Créer un module</button>
+            </div>
+            <!-- Grille style catalogue -->
+            <div *ngIf="!contenuLoadingModules && contenuModules.length > 0"
+                 class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              <div *ngFor="let mod of contenuModules; let i=index"
+                   class="glass glass-hover rounded-2xl p-5 animate-slide-up flex flex-col"
+                   [class]="'d-' + (i % 5)">
+                <!-- Header -->
+                <div class="flex items-start gap-3 mb-4">
+                  <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0"
+                       [style.background]="getModColor(i).dim">📦</div>
+                  <div class="flex-1 min-w-0">
+                    <h3 class="font-bold text-sm clamp-2 mb-1"
+                        style="font-family:'Syne',sans-serif;color:var(--text);">{{ mod.nom }}</h3>
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <span class="text-xs font-mono px-2 py-0.5 rounded-md"
+                            style="background:var(--surface-2);color:var(--brand);border:1px solid var(--border);">
+                        {{ mod.code }}
+                      </span>
+                      <span class="badge text-xs"
+                            [style.background]="getModStatutStyle(mod).bg"
+                            [style.border-color]="getModStatutStyle(mod).border"
+                            [style.color]="getModStatutStyle(mod).color">
+                        {{ getModStatutStyle(mod).label }}
+                      </span>
+                      <!-- Badge propriétaire -->
+                      <span *ngIf="isMonModule(mod)" class="badge b-green text-xs" style="font-size:9px;">✅ Mon module</span>
+                      <span *ngIf="!isMonModule(mod)" class="badge text-xs" style="background:var(--surface-3);color:var(--text-3);font-size:9px;">👤 Autre</span>
+                    </div>
+                  </div>
                 </div>
+                <!-- Description -->
+                <p class="text-xs leading-relaxed mb-4 flex-1 clamp-2" style="color:var(--text-3);">
+                  {{ mod.description || 'Aucune description' }}
+                </p>
+                <div style="border-top:1px solid var(--border);margin-bottom:12px;"></div>
+                <!-- Actions -->
+                <div class="flex gap-2">
+                  <button (click)="selectionnerModule(mod)"
+                          class="btn btn-brand btn-sm flex-1"
+                          style="display:flex;align-items:center;justify-content:center;gap:6px;">
+                    <span>📘</span> Voir les cours
+                  </button>
+                  <button *ngIf="isMonModule(mod)" (click)="openEditMod(mod)" class="btn btn-ghost btn-sm" title="Modifier">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  </button>
+                  <button *ngIf="isMonModule(mod)" (click)="confirmDelete('module', mod.id!, mod.nom)" class="btn btn-danger btn-sm" title="Supprimer">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+
+          <!-- ── Niveau 2 : Cours (style carte catalogue) ── -->
+          <ng-container *ngIf="contenuNiveau === 2">
+            <!-- Skeleton -->
+            <div *ngIf="contenuLoadingCours" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+              <div *ngFor="let s of [1,2,3,4,5,6]" class="glass rounded-2xl overflow-hidden">
+                <div class="skeleton h-28"></div>
+                <div class="p-4 space-y-3">
+                  <div class="skeleton h-4 w-3/4 rounded-lg"></div>
+                  <div class="skeleton h-3 w-full rounded-lg"></div>
+                  <div class="grid grid-cols-2 gap-2">
+                    <div class="skeleton h-10 rounded-lg"></div>
+                    <div class="skeleton h-10 rounded-lg"></div>
+                  </div>
+                  <div class="skeleton h-9 rounded-xl"></div>
+                </div>
+              </div>
+            </div>
+            <!-- Vide -->
+            <div *ngIf="!contenuLoadingCours && contenuCours.length === 0"
+                 class="flex flex-col items-center justify-center py-14 rounded-2xl"
+                 style="background:var(--surface);border:1px dashed var(--border);">
+              <div class="text-4xl mb-3">📘</div>
+              <p class="font-semibold" style="color:var(--text);">Aucun cours dans ce module</p>
+              <button (click)="openCreateCours()" class="btn btn-brand mt-4">Créer un cours</button>
+            </div>
+            <!-- Grille style catalogue -->
+            <div *ngIf="!contenuLoadingCours && contenuCours.length > 0"
+                 class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+              <div *ngFor="let c of contenuCours; let i=index"
+                   class="glass glass-hover rounded-2xl overflow-hidden animate-slide-up flex flex-col"
+                   [class]="'d-' + (i % 5)">
+                <!-- Bannière -->
+                <div class="h-28 flex items-center justify-center text-4xl relative"
+                     [style.background]="getModColor(i).dim">
+                  <div class="absolute inset-0 opacity-10"
+                       style="background:linear-gradient(135deg,transparent,rgba(0,0,0,.5));"></div>
+                  <span class="relative z-10">📖</span>
+                  <!-- Statut top-right -->
+                  <div class="absolute top-3 right-3">
+                    <span class="badge text-xs"
+                          [style.background]="getCoursStatutStyle(c.statut ?? '').bg"
+                          [style.border-color]="getCoursStatutStyle(c.statut ?? '').border"
+                          [style.color]="getCoursStatutStyle(c.statut ?? '').color">
+                      {{ getCoursStatutStyle(c.statut ?? '').label }}
+                    </span>
+                  </div>
+                  <!-- Niveau top-left -->
+                  <div *ngIf="c.niveau" class="absolute top-3 left-3">
+                    <span class="badge text-xs"
+                          style="background:rgba(0,0,0,.45);border-color:transparent;color:white;">
+                      {{ getNiveauStyle(c.niveau).label }}
+                    </span>
+                  </div>
+                  <!-- Fichier bottom-right -->
+                  <div *ngIf="c.filePath" class="absolute bottom-3 right-3">
+                    <span class="badge text-xs" style="background:rgba(0,0,0,.5);border-color:transparent;color:white;">
+                      {{ isPdf(c.filePath) ? '📄 PDF' : '🎬 Vidéo' }}
+                    </span>
+                  </div>
+                  <!-- Badge propriétaire bottom-left -->
+                  <div class="absolute bottom-3 left-3">
+                    <span *ngIf="isMonCours(c)" class="badge b-green" style="font-size:9px;">✅ Mon cours</span>
+                    <span *ngIf="!isMonCours(c)" class="badge" style="background:rgba(0,0,0,.4);border-color:transparent;color:white;font-size:9px;">👤 Autre</span>
+                  </div>
+                  <div class="absolute bottom-0 left-0 right-0 h-0.5"
+                       [style.background]="getModColor(i).color"></div>
+                </div>
+                <!-- Contenu -->
+                <div class="p-4 flex flex-col flex-1">
+                  <h3 class="font-bold text-sm mb-1 clamp-2"
+                      style="font-family:'Syne',sans-serif;color:var(--text);">{{ c.titre }}</h3>
+                  <p class="text-xs leading-relaxed mb-4 clamp-2" style="color:var(--text-3);">{{ c.description }}</p>
+                  <!-- Métadonnées -->
+                  <div class="grid grid-cols-2 gap-2 mb-4 mt-auto">
+                    <div class="flex items-center gap-1.5 p-2 rounded-lg"
+                         style="background:var(--surface-2);border:1px solid var(--border);">
+                      <span>⏱️</span>
+                      <span class="text-xs" style="color:var(--text-3);">{{ formatDureeEns(c.dureeMinutes) }}</span>
+                    </div>
+                    <div class="flex items-center gap-1.5 p-2 rounded-lg"
+                         style="background:var(--surface-2);border:1px solid var(--border);">
+                      <span>👥</span>
+                    </div>
+                    <div class="col-span-2 flex items-center gap-1.5 p-2 rounded-lg"
+                         style="background:var(--surface-2);border:1px solid var(--border);">
+                      <span>📅</span>
+                      <span class="text-xs" style="color:var(--text-3);">Créé le {{ formatDateEns(c.dateCreation) }}</span>
+                    </div>
+                  </div>
+                  <!-- Actions -->
+                  <div class="flex gap-2">
+                    <a [routerLink]="['/cours', c.idCours]" class="btn btn-brand btn-sm flex-1"
+                       style="text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px;">
+                      ▶ Voir le cours
+                    </a>
+
+                    <button *ngIf="isMonCours(c)" (click)="openEditCours(c)" class="btn btn-ghost btn-sm" title="Modifier">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </button>
+                    <button *ngIf="isMonCours(c)" (click)="confirmDelete('cours', c.idCours!, c.titre)" class="btn btn-danger btn-sm" title="Supprimer">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
+                    </button>
+                    <button *ngIf="isMonCours(c)" (click)="openUpload(c)" class="btn btn-ghost btn-sm"
+                            [disabled]="uploadLoading && uploadingId===c.idCours" title="Uploader un fichier">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+
+        </div>
+      </ng-container>
+
+      <!-- ════════════════════════════════════════════════════════════════════ -->
+      <!-- SECTION : Mes Apprenants                                            -->
+      <!-- ════════════════════════════════════════════════════════════════════ -->
+      <ng-container *ngIf="activeSection==='apprenants'">
+        <div class="animate-fade-in space-y-5">
+
+          <!-- En-tete -->
+          <div class="glass rounded-2xl p-5 sm:p-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
+              <div>
+                <h2 class="text-xl font-bold" style="font-family:'Syne',sans-serif;color:var(--text);">Mes Apprenants</h2>
+                <p class="text-sm mt-1" style="color:var(--text-3);">
+                  {{ mesApprenants.length }} inscription(s) au total — {{ modules.length }} module(s)
+                </p>
+              </div>
+              <button (click)="loadMesApprenants()" class="btn btn-ghost btn-sm flex items-center gap-2">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="23 4 23 10 17 10"/>
+                  <path d="M20.49 15a9 9 0 1 1-.57-5.01"/>
+                </svg>
+                Actualiser
               </button>
             </div>
-          </ng-container>
 
-          <!-- ── Niveau 2 : Cours du module ── -->
-          <ng-container *ngIf="contenuNiveau === 2">
-            <div class="flex items-center justify-between">
-              <div>
-                <h2 class="text-xl font-bold" style="font-family:'Syne',sans-serif;color:var(--text);">Cours — {{ contenuModuleSelectionne?.nom }}</h2>
-                <p class="text-sm mt-1" style="color:var(--text-3);">Cours appartenant à ce module.</p>
+            <!-- Barre de recherche -->
+            <div class="relative max-w-sm">
+              <svg class="absolute left-3 top-1/2 -translate-y-1/2" width="13" height="13"
+                   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                   style="color:var(--text-3);">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              <input type="text" [(ngModel)]="apprenantSearch"
+                     placeholder="Rechercher par ID ou module..."
+                     class="inp" style="padding-left:36px;font-size:13px;"/>
+            </div>
+
+            <!-- Erreur -->
+            <div *ngIf="apprenantError" class="alert alert-red rounded-xl mt-4 text-sm">
+              ⚠️ {{ apprenantError }}
+            </div>
+          </div>
+
+          <!-- ── Vue par MODULE (grille des modules avec compteur) ── -->
+          <ng-container *ngIf="!moduleSelectionneId">
+
+            <!-- Skeleton -->
+            <div *ngIf="loadingApprenants" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div *ngFor="let s of [1,2,3]" class="glass rounded-2xl p-5 space-y-3">
+                <div class="skeleton h-5 w-2/3 rounded-lg"></div>
+                <div class="skeleton h-3 w-1/3 rounded-lg"></div>
+                <div class="skeleton h-10 w-full rounded-xl mt-3"></div>
               </div>
-              <div class="flex gap-2">
-                <button (click)="contenuRetourModules()" class="btn btn-ghost btn-sm">← Retour</button>
-                <button (click)="setSection('cours');openCreateCours()" class="btn btn-brand btn-sm">+ Nouveau cours</button>
-              </div>
             </div>
-            <div *ngIf="contenuLoadingCours" class="flex items-center gap-3 py-10 justify-center">
-              <div class="w-6 h-6 rounded-full border-2 animate-spin" style="border-color:var(--brand);border-top-color:transparent;"></div>
-              <span class="text-sm" style="color:var(--text-3);">Chargement des cours…</span>
+
+            <!-- Aucun module -->
+            <div *ngIf="!loadingApprenants && modules.length === 0"
+                 class="glass rounded-2xl flex flex-col items-center justify-center py-16 gap-3 text-center">
+              <span style="font-size:48px;">📦</span>
+              <p class="font-semibold" style="color:var(--text);">Vous n'avez pas encore de modules.</p>
+              <button (click)="ouvrirContenu(); openCreateMod()" class="btn btn-brand btn-sm mt-2">
+                Créer un module
+              </button>
             </div>
-            <div *ngIf="!contenuLoadingCours && contenuCours.length===0" class="flex flex-col items-center justify-center py-14 rounded-2xl" style="background:var(--surface);border:1px dashed var(--border);">
-              <div class="text-4xl mb-3">📘</div>
-              <p class="text-base font-semibold" style="color:var(--text);">Aucun cours dans ce module</p>
-              <button (click)="setSection('cours');openCreateCours()" class="btn btn-brand mt-4">Créer un cours</button>
-            </div>
-            <div *ngIf="!contenuLoadingCours && contenuCours.length>0" class="space-y-3">
-              <div *ngFor="let c of contenuCours"
-                   class="flex items-center gap-4 rounded-2xl p-4"
-                   style="background:var(--surface);border:1px solid var(--border);">
-                <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0" style="background:var(--blue-dim);">📘</div>
-                <div class="flex-1 min-w-0">
-                  <p class="font-semibold text-sm truncate" style="color:var(--text);">{{ c.titre }}</p>
-                  <div class="flex items-center gap-3 mt-1 flex-wrap">
-                    <span class="text-xs" style="color:var(--text-3);">{{ c.niveau }}</span>
-                    <span *ngIf="c.dureeMinutes" class="text-xs" style="color:var(--text-3);">⏱ {{ c.dureeMinutes }} min</span>
-                    <span class="text-xs font-semibold px-2 py-0.5 rounded-full" [class]="getStatutCls(c.statut)"
-                          style="font-size:10px;">{{ c.statut }}</span>
+
+            <!-- Grille modules -->
+            <div *ngIf="!loadingApprenants && modules.length > 0"
+                 class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div *ngFor="let mod of modules; let i=index"
+                   class="glass glass-hover rounded-2xl p-5 flex flex-col"
+                   style="cursor:pointer;"
+                   (click)="chargerApprenantsDuModule(mod.id!, mod.nom)">
+
+                <!-- Header carte -->
+                <div class="flex items-start gap-3 mb-4">
+                  <div class="w-12 h-12 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
+                       [style.background]="getModColor(i).dim">
+                    📦
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <h4 class="font-bold text-sm truncate"
+                        style="font-family:'Syne',sans-serif;color:var(--text);">
+                      {{ mod.nom }}
+                    </h4>
+                    <span class="text-xs font-mono px-2 py-0.5 rounded-md"
+                          style="background:var(--surface-2);color:var(--brand);border:1px solid var(--border);">
+                      {{ mod.code }}
+                    </span>
                   </div>
                 </div>
-                <div class="flex gap-2 flex-shrink-0">
-                  <a [href]="getViewUrl(c)" target="_blank" class="btn btn-ghost btn-sm">👁 Voir</a>
-                  <button (click)="openEditCours(c)" class="btn btn-ghost btn-sm">✏️</button>
+
+                <!-- Footer carte -->
+                <div class="flex items-center justify-between mt-auto pt-3"
+                     style="border-top:1px solid var(--border);">
+                  <div class="flex items-center gap-2">
+                    <div class="w-9 h-9 rounded-xl flex items-center justify-center"
+                         style="background:var(--brand-dim);">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                           stroke="currentColor" stroke-width="2" style="color:var(--brand);">
+                        <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <span class="text-2xl font-bold"
+                            style="font-family:'Syne',sans-serif;color:var(--text);">
+                        {{ getNbApprenantsDuModule(mod.id!) }}
+                      </span>
+                      <span class="text-xs ml-1" style="color:var(--text-3);">apprenant(s)</span>
+                    </div>
+                  </div>
+                  <span class="text-xs font-semibold flex items-center gap-1"
+                        style="color:var(--brand);">
+                    Voir la liste
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2">
+                      <polyline points="9 18 15 12 9 6"/>
+                    </svg>
+                  </span>
                 </div>
               </div>
             </div>
           </ng-container>
 
-        </div>
-      </ng-container>
+          <!-- ── Vue DETAIL : liste apprenants d'un module ── -->
+          <div *ngIf="moduleSelectionneId" class="glass rounded-2xl overflow-hidden">
 
-      <!-- ══ CATÉGORIES CRUD ══ -->
-      <ng-container *ngIf="activeSection==='categories'">
-        <div class="animate-fade-in space-y-4">
-          <div class="flex items-center justify-between">
-            <div>
-              <h2 class="text-2xl font-bold" style="font-family:'Syne',sans-serif;color:var(--text);">Catégories</h2>
-              <p class="text-sm mt-0.5" style="color:var(--text-2);">
-                <strong style="color:var(--text);">{{categories.length}}</strong> catégorie(s) · API : <code style="color:var(--green);font-size:11px;">GET /api/categories</code>
-              </p>
-            </div>
-            <button (click)="openCreateCat()" class="btn btn-brand">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              Nouvelle catégorie
-            </button>
-          </div>
-          <div *ngIf="loadingCategories" class="glass rounded-2xl flex justify-center py-12">
-            <div class="flex items-center gap-3">
-              <svg class="animate-spin-slow" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--green);"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
-              <span style="color:var(--text-3);">Chargement...</span>
-            </div>
-          </div>
-          <div *ngIf="!loadingCategories" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div *ngFor="let cat of categories; let i=index"
-                 class="glass glass-hover rounded-2xl p-5 relative overflow-hidden animate-slide-up" [class]="'d-'+(i%5)">
-              <div class="stat-accent" style="background:var(--green)"></div>
-              <div class="flex items-start justify-between mb-3">
-                <div class="w-11 h-11 rounded-xl flex items-center justify-center text-xl flex-shrink-0" style="background:var(--green-dim);">🗂</div>
-                <span class="badge b-blue" style="font-size:10px;">ID {{cat.id}}</span>
+            <!-- Header -->
+            <div class="flex items-center gap-3 px-5 py-4"
+                 style="border-bottom:1px solid var(--border);">
+              <button (click)="fermerDetailApprenants()" class="btn btn-ghost btn-sm">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="15 18 9 12 15 6"/>
+                </svg>
+                Retour
+              </button>
+              <div class="flex-1 min-w-0">
+                <h3 class="font-bold text-base truncate"
+                    style="font-family:'Syne',sans-serif;color:var(--text);">
+                  {{ moduleSelectionneNom }}
+                </h3>
+                <p class="text-xs" style="color:var(--text-3);">
+                  {{ apprenantsFiltres.length }} apprenant(s) inscrit(s)
+                </p>
               </div>
-              <h3 class="font-bold text-base mb-1" style="color:var(--text);">{{cat.nom}}</h3>
-              <p class="text-xs mb-4 clamp-2" style="color:var(--text-3);">{{cat.description || 'Aucune description'}}</p>
-              <div class="flex gap-2 pt-3" style="border-top:1px solid var(--border);">
-                <button (click)="openEditCat(cat)" class="btn btn-ghost btn-sm flex-1">
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                  Modifier
-                </button>
-                <button (click)="confirmDelete('categorie', cat.id!, cat.nom)" class="btn btn-danger btn-sm flex-1">
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
-                  Supprimer
-                </button>
+              <button (click)="chargerApprenantsDuModule(moduleSelectionneId!, moduleSelectionneNom)"
+                      class="btn btn-ghost btn-sm" title="Actualiser">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="23 4 23 10 17 10"/>
+                  <path d="M20.49 15a9 9 0 1 1-.57-5.01"/>
+                </svg>
+              </button>
+            </div>
+
+            <!-- Skeleton -->
+            <div *ngIf="loadingApprenants" class="p-4 space-y-3">
+              <div *ngFor="let s of [1,2,3,4]"
+                   class="flex items-center gap-4 p-3 rounded-xl"
+                   style="background:var(--surface-2);">
+                <div class="skeleton w-10 h-10 rounded-full flex-shrink-0"></div>
+                <div class="flex-1 space-y-2">
+                  <div class="skeleton h-4 w-1/3 rounded-lg"></div>
+                  <div class="skeleton h-3 w-1/4 rounded-lg"></div>
+                </div>
               </div>
             </div>
-            <div *ngIf="categories.length===0" class="col-span-full glass rounded-2xl py-16 text-center">
-              <div class="text-4xl mb-3 opacity-30">🗂</div>
-              <p class="font-semibold" style="color:var(--text-2);">Aucune catégorie</p>
-              <p class="text-sm mt-1 mb-4" style="color:var(--text-3);">Créez votre première catégorie pour organiser vos modules.</p>
-              <button (click)="openCreateCat()" class="btn btn-brand btn-sm">Créer une catégorie</button>
-            </div>
-          </div>
-        </div>
-      </ng-container>
 
-      <!-- ══ MODULES CRUD ══ -->
-      <ng-container *ngIf="activeSection==='modules'">
-        <div class="animate-fade-in space-y-4">
-          <div class="flex items-center justify-between">
-            <div>
-              <h2 class="text-2xl font-bold" style="font-family:'Syne',sans-serif;color:var(--text);">Modules</h2>
-              <p class="text-sm mt-0.5" style="color:var(--text-2);">
-                <strong style="color:var(--text);">{{modules.length}}</strong> module(s) · API : <code style="color:var(--green);font-size:11px;">GET /api/modules</code>
+            <!-- Vide -->
+            <div *ngIf="!loadingApprenants && apprenantsFiltres.length === 0"
+                 class="flex flex-col items-center justify-center py-16 gap-3 text-center">
+              <span style="font-size:44px;">👥</span>
+              <p class="font-semibold" style="color:var(--text);">
+                Aucun apprenant inscrit à ce module.
               </p>
             </div>
-            <button (click)="openCreateMod()" class="btn btn-brand">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              Nouveau module
-            </button>
-          </div>
-          <div *ngIf="loadingModules" class="glass rounded-2xl flex justify-center py-12">
-            <svg class="animate-spin-slow" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--brand);"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
-          </div>
-          <div *ngIf="!loadingModules" class="glass rounded-2xl overflow-hidden">
-            <div class="scroll-x">
-              <table class="tbl">
-                <thead>
-                  <tr>
-                    <th>Module</th>
-                    <th>Code</th>
-                    <th>Description</th>
-                    <th>Catégorie</th>
-                    <th>Statut</th>
-                    <th>Cours</th>
-                    <th class="text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let m of modules" class="tbl-row">
-                    <td>
-                      <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-xl flex items-center justify-center text-lg flex-shrink-0" style="background:var(--brand-dim);">📦</div>
-                        <div>
-                          <div class="text-sm font-semibold" style="color:var(--text);">{{m.nom}}</div>
-                          <div class="text-xs" style="color:var(--text-3);">ID #{{m.id}}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td><code class="text-xs px-2 py-1 rounded-lg" style="background:var(--surface-2);color:var(--green);">{{m.code}}</code></td>
-                    <td><span class="text-xs clamp-2" style="color:var(--text-2);max-width:200px;display:block;">{{m.description}}</span></td>
-                    <td><span class="text-sm" style="color:var(--text-2);">{{getCatName(m.categorieId)}}</span></td>
-                    <td><span class="badge" [class.b-green]="m.actif" [class.b-red]="!m.actif">{{m.actif ? 'Actif' : 'Inactif'}}</span></td>
-                    <td><span class="badge b-blue">{{ m.cours ? m.cours.length : 0 }} cours</span></td>
-                    <td>
-                      <div class="flex items-center justify-end gap-1.5">
-                        <button (click)="openEditMod(m)" class="btn btn-ghost btn-sm">
-                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                          Modifier
-                        </button>
-                        <button (click)="confirmDelete('module', m.id!, m.nom)" class="btn btn-danger btn-sm">
-                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr *ngIf="modules.length===0">
-                    <td colspan="7">
-                      <div class="flex flex-col items-center py-12 gap-2">
-                        <div class="text-3xl opacity-30">📦</div>
-                        <p style="color:var(--text-2);">Aucun module. <button (click)="openCreateMod()" style="background:none;border:none;cursor:pointer;color:var(--brand);font-weight:700;">Créer →</button></p>
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+
+            <!-- Liste -->
+            <div *ngIf="!loadingApprenants && apprenantsFiltres.length > 0">
+              <div *ngFor="let a of apprenantsFiltres; let i=index"
+                   class="flex items-center gap-4 px-5 py-4"
+                   [style.border-bottom]="i < apprenantsFiltres.length - 1 ? '1px solid var(--border)' : 'none'">
+
+                <!-- Avatar -->
+                <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
+                     style="background:linear-gradient(135deg,var(--brand),var(--blue));color:white;">
+                  {{ 'A' + (i + 1) }}
+                </div>
+
+                <!-- Infos -->
+                <div class="flex-1 min-w-0">
+                  <div class="font-semibold text-sm" style="color:var(--text);">
+                    Apprenant #{{ a.apprenantId }}
+                  </div>
+                  <div class="flex items-center gap-3 mt-0.5 flex-wrap">
+                    <span class="text-xs" style="color:var(--text-3);">
+                      Inscrit le {{ formatDateEns(a.dateInscription) }}
+                    </span>
+                    <span class="text-xs px-2 py-0.5 rounded-md font-mono"
+                          style="background:var(--surface-2);color:var(--text-3);border:1px solid var(--border);">
+                      Inscription #{{ a.inscriptionId }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Badge statut -->
+                <span class="badge text-xs flex-shrink-0"
+                      style="background:var(--green-dim);color:var(--green);border:1px solid var(--green);">
+                  ✓ Inscrit
+                </span>
+
+              </div>
             </div>
           </div>
+
         </div>
       </ng-container>
+      <!-- FIN SECTION : Mes Apprenants -->
 
-      <!-- ══ COURS CRUD ══ -->
-      <ng-container *ngIf="activeSection==='cours'">
-        <div class="animate-fade-in space-y-4">
-          <div class="flex items-center justify-between">
-            <div>
-              <h2 class="text-2xl font-bold" style="font-family:'Syne',sans-serif;color:var(--text);">Cours</h2>
-              <p class="text-sm mt-0.5" style="color:var(--text-2);">
-                <strong style="color:var(--text);">{{cours.length}}</strong> cours · API : <code style="color:var(--green);font-size:11px;">GET /api/cours</code>
-              </p>
-            </div>
-            <button (click)="openCreateCours()" class="btn btn-brand">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              Nouveau cours
-            </button>
-          </div>
-          <div *ngIf="loadingCours" class="glass rounded-2xl flex justify-center py-12">
-            <svg class="animate-spin-slow" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--brand);"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
-          </div>
-          <div *ngIf="!loadingCours" class="glass rounded-2xl overflow-hidden">
-            <div class="scroll-x">
-              <table class="tbl">
-                <thead>
-                  <tr>
-                    <th>Cours</th>
-                    <th>Module</th>
-                    <th>Niveau</th>
-                    <th>Statut</th>
-                    <th>Durée</th>
-                    <!-- ✅ MODIFIÉ : "Fichier PDF" → "Fichier" (PDF + vidéo) -->
-                    <th>Fichier</th>
-                    <th>Créé le</th>
-                    <th class="text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let c of cours" class="tbl-row">
-                    <td>
-                      <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
-                             [style.background]="getNiveauDim(c.niveau)">📘</div>
-                        <div>
-                          <div class="text-sm font-semibold clamp-2" style="color:var(--text);max-width:180px;">{{c.titre}}</div>
-                          <div class="text-xs" style="color:var(--text-3);">ID #{{c.idCours}}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td><span class="text-sm" style="color:var(--text-2);">{{getModName(c.moduleId)}}</span></td>
-                    <td>
-                      <span class="badge text-xs"
-                            [style.background]="getNiveauDim(c.niveau)"
-                            [style.color]="getNiveauColor(c.niveau)"
-                            style="border:none;">
-                        {{c.niveau}}
-                      </span>
-                    </td>
-                    <td><span class="badge text-xs" [class]="getStatutCls(c.statut)">{{c.statut ?? '–'}}</span></td>
-                    <td>
-                      <span *ngIf="c.dureeMinutes" class="badge b-blue text-xs">{{c.dureeMinutes}} min</span>
-                      <span *ngIf="!c.dureeMinutes" style="color:var(--text-4);font-size:12px;">–</span>
-                    </td>
-
-                    <!-- ✅ MODIFIÉ : colonne fichier avec icône PDF/vidéo + lien vers cours-detail -->
-                    <td>
-                      <div class="flex items-center gap-2 flex-wrap">
-                        <span *ngIf="!c.filePath" class="text-xs" style="color:var(--text-4);">Aucun fichier</span>
-                        <span *ngIf="c.filePath" class="badge text-xs"
-                              [class.b-green]="isPdf(c.filePath)"
-                              [class.b-blue]="!isPdf(c.filePath)">
-                          {{ getFileIcon(c) }}
-                        </span>
-                        <a *ngIf="c.filePath" [routerLink]="['/cours', c.idCours]"
-                           class="btn btn-ghost btn-sm" style="padding:4px 8px;font-size:10px;">
-                          Voir
-                        </a>
-                        <button (click)="openUpload(c)" [disabled]="uploadLoading && uploadingId===c.idCours"
-                                class="btn btn-ghost btn-sm" style="padding:4px 8px;font-size:10px;"
-                                [title]="c.filePath ? 'Remplacer le fichier' : 'Uploader un fichier'">
-                          <svg *ngIf="!(uploadLoading && uploadingId===c.idCours)" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                          <svg *ngIf="uploadLoading && uploadingId===c.idCours" class="animate-spin-slow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
-                        </button>
-                      </div>
-                    </td>
-
-                    <td><span class="text-xs" style="color:var(--text-3);">{{c.dateCreation ? (c.dateCreation | date:'dd/MM/yy') : '–'}}</span></td>
-                    <td>
-                      <div class="flex items-center justify-end gap-1.5">
-                        <!-- <button (click)="chargerAvisCours(c.idCours!)" class="btn btn-ghost btn-sm" title="Voir les avis des apprenants">
-                          ⭐ Avis
-                        </button> -->
-                        <button (click)="openEditCours(c)" class="btn btn-ghost btn-sm">
-                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                          Modifier
-                        </button>
-                        <button (click)="confirmDelete('cours', c.idCours!, c.titre)" class="btn btn-danger btn-sm">
-                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr *ngIf="cours.length===0">
-                    <td colspan="8">
-                      <div class="flex flex-col items-center py-12 gap-2">
-                        <div class="text-3xl opacity-30">📘</div>
-                        <p style="color:var(--text-2);">Aucun cours. <button (click)="openCreateCours()" style="background:none;border:none;cursor:pointer;color:var(--brand);font-weight:700;">Créer →</button></p>
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </ng-container>
     </main>
   </div>
+</div>
 
-  <!-- ══ MODAL Catégorie ══ -->
-  <div *ngIf="showCatModal" class="overlay" (click)="showCatModal=false">
-    <div class="modal" style="max-width:460px;" (click)="$event.stopPropagation()">
-      <div class="flex items-center justify-between mb-5">
-        <div>
-          <h3 class="text-lg font-bold" style="font-family:'Syne',sans-serif;color:var(--text);">
-            {{editingCat ? 'Modifier la catégorie' : 'Nouvelle catégorie'}}
-          </h3>
-          <p class="text-xs mt-0.5" style="color:var(--text-3);">
-            {{ editingCat ? ('PUT /api/categories/' + editingCat.id) : 'POST /api/categories' }}
-          </p>
-        </div>
-        <button (click)="showCatModal=false" style="background:none;border:none;cursor:pointer;color:var(--text-3);font-size:22px;">✕</button>
-      </div>
-      <form [formGroup]="catForm" (ngSubmit)="submitCat()" novalidate class="space-y-4">
-        <div>
-          <label class="block text-xs font-bold uppercase tracking-wider mb-1.5" style="color:var(--text-3);">NOM *</label>
-          <input type="text" formControlName="nom" placeholder="ex: Mathématiques" class="inp"
-                 [class.err]="cf['nom'].invalid && cf['nom'].touched"/>
-          <p *ngIf="cf['nom'].invalid && cf['nom'].touched" class="text-xs mt-1" style="color:var(--red);">
-            <ng-container *ngIf="cf['nom'].errors?.['required']">Requis.</ng-container>
-            <ng-container *ngIf="cf['nom'].errors?.['minlength']">Min. 2 caractères.</ng-container>
-          </p>
-        </div>
-        <div>
-          <label class="block text-xs font-bold uppercase tracking-wider mb-1.5" style="color:var(--text-3);">DESCRIPTION</label>
-          <textarea formControlName="description" rows="3" placeholder="Description de la catégorie..."
-                    class="inp" style="resize:vertical;"></textarea>
-        </div>
-        <div class="flex gap-3 pt-2" style="border-top:1px solid var(--border);">
-          <button type="button" (click)="showCatModal=false" class="btn btn-ghost flex-1">Annuler</button>
-          <button type="submit" [disabled]="catLoading" class="btn btn-brand flex-1">
-            <svg *ngIf="catLoading" class="animate-spin-slow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
-            {{catLoading ? 'Enregistrement...' : (editingCat ? 'Mettre à jour' : 'Créer')}}
-          </button>
-        </div>
-      </form>
+<!-- ══ MODALS CRUD ══ -->
+
+<!-- Modal Catégorie -->
+<div *ngIf="showCatModal" class="overlay" (click)="showCatModal=false">
+  <div class="modal" style="max-width:460px;" (click)="$event.stopPropagation()">
+    <div class="flex items-center justify-between mb-5">
+      <h3 class="font-bold text-base" style="font-family:'Syne',sans-serif;color:var(--text);">
+        {{ editingCat ? 'Modifier la catégorie' : 'Nouvelle catégorie' }}
+      </h3>
+      <button (click)="showCatModal=false" style="background:none;border:none;cursor:pointer;color:var(--text-3);font-size:22px;">✕</button>
     </div>
-  </div>
-
-  <!-- ══ MODAL Module ══ -->
-  <div *ngIf="showModModal" class="overlay" (click)="showModModal=false">
-    <div class="modal" style="max-width:520px;" (click)="$event.stopPropagation()">
-      <div class="flex items-center justify-between mb-5">
-        <div>
-          <h3 class="text-lg font-bold" style="font-family:'Syne',sans-serif;color:var(--text);">
-            {{editingMod ? 'Modifier le module' : 'Nouveau module'}}
-          </h3>
-          <p class="text-xs mt-0.5" style="color:var(--text-3);">
-            {{editingMod ? 'PUT /api/modules/'+editingMod.id : 'POST /api/modules'}}
-          </p>
-        </div>
-        <button (click)="showModModal=false" style="background:none;border:none;cursor:pointer;color:var(--text-3);font-size:22px;">✕</button>
+    <form [formGroup]="catForm" (ngSubmit)="submitCat()" novalidate class="space-y-4">
+      <div>
+        <label class="text-xs font-semibold uppercase tracking-wider mb-1 block" style="color:var(--text-3);">Nom *</label>
+        <input class="inp" formControlName="nom" placeholder="Nom de la catégorie" [class.err]="cf['nom'].invalid && cf['nom'].touched"/>
+        <div *ngIf="cf['nom'].invalid && cf['nom'].touched" class="text-xs mt-1" style="color:var(--red);">Nom requis (min. 2 caractères)</div>
       </div>
-      <form [formGroup]="modForm" (ngSubmit)="submitMod()" novalidate class="space-y-4">
-        <div class="grid grid-cols-2 gap-3">
-          <div class="col-span-2 sm:col-span-1">
-            <label class="block text-xs font-bold uppercase tracking-wider mb-1.5" style="color:var(--text-3);">NOM *</label>
-            <input type="text" formControlName="nom" placeholder="ex: Algèbre linéaire" class="inp"
-                   [class.err]="mf['nom'].invalid && mf['nom'].touched"/>
-            <p *ngIf="mf['nom'].invalid && mf['nom'].touched" class="text-xs mt-1" style="color:var(--red);">Requis.</p>
-          </div>
-          <div>
-            <label class="block text-xs font-bold uppercase tracking-wider mb-1.5" style="color:var(--text-3);">CODE * <span style="color:var(--text-4);font-weight:400;">(ex: SPR-1, ML-2, DOT-10)</span></label>
-            <input type="text" formControlName="code" placeholder="ex: SPR-1" class="inp" style="text-transform:uppercase;"
-                   [class.err]="mf['code'].invalid && mf['code'].touched"
-                   (input)="mf['code'].setValue(mf['code'].value?.toUpperCase())"/>
-            <p *ngIf="mf['code'].invalid && mf['code'].touched" class="text-xs mt-1" style="color:var(--red);">
-              <ng-container *ngIf="mf['code'].errors?.['required']">Requis.</ng-container>
-              <ng-container *ngIf="mf['code'].errors?.['pattern']">Format : 2–10 lettres majuscules, tiret, chiffre(s). Ex: SPR-1, ML-2, DOT-10</ng-container>
-            </p>
-          </div>
+      <div>
+        <label class="text-xs font-semibold uppercase tracking-wider mb-1 block" style="color:var(--text-3);">Description</label>
+        <textarea class="inp" formControlName="description" rows="3" placeholder="Description…" style="resize:vertical;"></textarea>
+      </div>
+      <div class="flex gap-3 pt-2">
+        <button type="button" (click)="showCatModal=false" class="btn btn-ghost flex-1">Annuler</button>
+        <button type="submit" [disabled]="catLoading" class="btn btn-brand flex-1">
+          <svg *ngIf="catLoading" class="animate-spin-slow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
+          {{ editingCat ? 'Mettre à jour' : 'Créer' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Module -->
+<div *ngIf="showModModal" class="overlay" (click)="showModModal=false">
+  <div class="modal" style="max-width:520px;" (click)="$event.stopPropagation()">
+    <div class="flex items-center justify-between mb-5">
+      <h3 class="font-bold text-base" style="font-family:'Syne',sans-serif;color:var(--text);">
+        {{ editingMod ? 'Modifier le module' : 'Nouveau module' }}
+      </h3>
+      <button (click)="showModModal=false" style="background:none;border:none;cursor:pointer;color:var(--text-3);font-size:22px;">✕</button>
+    </div>
+    <form [formGroup]="modForm" (ngSubmit)="submitMod()" novalidate class="space-y-4">
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="text-xs font-semibold uppercase tracking-wider mb-1 block" style="color:var(--text-3);">Nom *</label>
+          <input class="inp" formControlName="nom" placeholder="Nom du module" [class.err]="mf['nom'].invalid && mf['nom'].touched"/>
         </div>
         <div>
-          <label class="block text-xs font-bold uppercase tracking-wider mb-1.5" style="color:var(--text-3);">DESCRIPTION *</label>
-          <textarea formControlName="description" rows="3" placeholder="Description du module..."
-                    class="inp" style="resize:vertical;" [class.err]="mf['description'].invalid && mf['description'].touched"></textarea>
-          <p *ngIf="mf['description'].invalid && mf['description'].touched" class="text-xs mt-1" style="color:var(--red);">Requis.</p>
+          <label class="text-xs font-semibold uppercase tracking-wider mb-1 block" style="color:var(--text-3);">Code *</label>
+          <input class="inp" formControlName="code" placeholder="ex: INF-01" [class.err]="mf['code'].invalid && mf['code'].touched"/>
+          <div *ngIf="mf['code'].invalid && mf['code'].touched" class="text-xs mt-1" style="color:var(--red);">Format : XX-00</div>
         </div>
+      </div>
+      <div>
+        <label class="text-xs font-semibold uppercase tracking-wider mb-1 block" style="color:var(--text-3);">Description *</label>
+        <textarea class="inp" formControlName="description" rows="2" placeholder="Description…" style="resize:vertical;"></textarea>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
         <div>
-          <label class="block text-xs font-bold uppercase tracking-wider mb-1.5" style="color:var(--text-3);">CATÉGORIE</label>
-          <select formControlName="categorieId" class="inp" style="cursor:pointer;">
-            <option [value]="null">— Sans catégorie —</option>
+          <label class="text-xs font-semibold uppercase tracking-wider mb-1 block" style="color:var(--text-3);">Catégorie</label>
+          <select class="inp" formControlName="categorieId">
+            <option [value]="null">Aucune</option>
             <option *ngFor="let cat of categories" [value]="cat.id">{{cat.nom}}</option>
           </select>
         </div>
         <div>
-          <label class="block text-xs font-bold uppercase tracking-wider mb-1.5" style="color:var(--text-2);">Statut du module</label>
-          <select formControlName="statut" class="inp" style="cursor:pointer;">
-            <option value="ACTIF">Actif – visible par les apprenants</option>
-            <option value="BROUILLON">Brouillon – masqué aux apprenants</option>
-            <option value="ARCHIVE">Archivé – masqué aux apprenants</option>
+          <label class="text-xs font-semibold uppercase tracking-wider mb-1 block" style="color:var(--text-3);">Statut</label>
+          <select class="inp" formControlName="statut">
+            <option value="ACTIF">Actif</option>
+            <option value="BROUILLON">Brouillon</option>
+            <option value="ARCHIVE">Archivé</option>
           </select>
         </div>
-        <div class="flex gap-3 pt-2" style="border-top:1px solid var(--border);">
-          <button type="button" (click)="showModModal=false" class="btn btn-ghost flex-1">Annuler</button>
-          <button type="submit" [disabled]="modLoading" class="btn btn-brand flex-1">
-            <svg *ngIf="modLoading" class="animate-spin-slow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
-            {{modLoading ? 'Enregistrement...' : (editingMod ? 'Mettre à jour' : 'Créer')}}
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- ══ MODAL Cours ══ -->
-  <div *ngIf="showCoursModal" class="overlay" (click)="showCoursModal=false">
-    <div class="modal" style="max-width:560px;" (click)="$event.stopPropagation()">
-      <div class="flex items-center justify-between mb-5">
-        <div>
-          <h3 class="text-lg font-bold" style="font-family:'Syne',sans-serif;color:var(--text);">
-            {{editingCours ? 'Modifier le cours' : 'Nouveau cours'}}
-          </h3>
-          <p class="text-xs mt-0.5" style="color:var(--text-3);">
-            {{editingCours ? 'PUT /api/cours/'+editingCours.idCours : 'POST /api/cours'}}
-          </p>
-        </div>
-        <button (click)="showCoursModal=false" style="background:none;border:none;cursor:pointer;color:var(--text-3);font-size:22px;">✕</button>
       </div>
-      <form [formGroup]="coursForm" (ngSubmit)="submitCours()" novalidate class="space-y-4">
-        <div>
-          <label class="block text-xs font-bold uppercase tracking-wider mb-1.5" style="color:var(--text-3);">TITRE *</label>
-          <input type="text" formControlName="titre" placeholder="ex: Algèbre linéaire – Niveau L1" class="inp"
-                 [class.err]="ff['titre'].invalid && ff['titre'].touched"/>
-          <p *ngIf="ff['titre'].invalid && ff['titre'].touched" class="text-xs mt-1" style="color:var(--red);">Requis (min. 3 car.).</p>
-        </div>
-        <div>
-          <label class="block text-xs font-bold uppercase tracking-wider mb-1.5" style="color:var(--text-3);">DESCRIPTION *</label>
-          <textarea formControlName="description" rows="3" placeholder="Description du cours..."
-                    class="inp" style="resize:vertical;" [class.err]="ff['description'].invalid && ff['description'].touched"></textarea>
-          <p *ngIf="ff['description'].invalid && ff['description'].touched" class="text-xs mt-1" style="color:var(--red);">Requis.</p>
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-bold uppercase tracking-wider mb-1.5" style="color:var(--text-3);">NIVEAU * <span style="color:var(--text-4);font-weight:400;">(enum)</span></label>
-            <select formControlName="niveau" class="inp" style="cursor:pointer;" [class.err]="ff['niveau'].invalid && ff['niveau'].touched">
-              <option *ngFor="let n of niveaux" [value]="n">{{n}}</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-xs font-bold uppercase tracking-wider mb-1.5" style="color:var(--text-3);">STATUT</label>
-            <select formControlName="statut" class="inp" style="cursor:pointer;">
-              <option *ngFor="let s of statuts" [value]="s">{{s}}</option>
-            </select>
-          </div>
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-bold uppercase tracking-wider mb-1.5" style="color:var(--text-3);">MODULE * <span style="color:var(--text-4);font-weight:400;">(moduleId)</span></label>
-            <select formControlName="moduleId" class="inp" style="cursor:pointer;" [class.err]="ff['moduleId'].invalid && ff['moduleId'].touched">
-              <option [value]="null">— Sélectionner un module —</option>
-              <option *ngFor="let m of modules" [value]="m.id">{{m.nom}} ({{m.code}})</option>
-            </select>
-            <p *ngIf="ff['moduleId'].invalid && ff['moduleId'].touched" class="text-xs mt-1" style="color:var(--red);">Requis.</p>
-          </div>
-          <div>
-            <label class="block text-xs font-bold uppercase tracking-wider mb-1.5" style="color:var(--text-3);">DURÉE (minutes)</label>
-            <input type="number" formControlName="dureeMinutes" min="1" placeholder="ex: 90" class="inp"/>
-          </div>
-        </div>
-
-        <!-- ✅ MODIFIÉ : section upload accepte PDF + vidéo -->
-        <div class="p-3 rounded-xl" style="background:var(--surface-2);border:1px solid var(--border);">
-          <label class="block text-xs font-bold uppercase tracking-wider mb-2" style="color:var(--text-3);">
-            FICHIER DU COURS
-            <span style="color:var(--text-4);font-weight:400;">(PDF ou vidéo — optionnel)</span>
-          </label>
-          <div class="flex items-center gap-3 flex-wrap">
-            <label class="btn btn-ghost btn-sm cursor-pointer" style="padding:8px 14px;">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-              Choisir un fichier
-              <input type="file"
-                     accept="application/pdf,video/mp4,video/webm,video/ogg,video/avi"
-                     class="sr-only"
-                     (change)="onFileSelected($event)"/>
-            </label>
-            <span *ngIf="selectedFile" class="text-xs" style="color:var(--green);">
-              ✅ {{selectedFile.name}}
-              <span class="ml-1 opacity-60">({{ selectedFile.type.startsWith('video/') ? 'Vidéo' : 'PDF' }})</span>
-            </span>
-            <span *ngIf="!selectedFile && !editingCours?.filePath" class="text-xs" style="color:var(--text-3);">Aucun fichier sélectionné</span>
-            <span *ngIf="!selectedFile && editingCours?.filePath" class="text-xs" style="color:var(--text-3);">
-              Fichier actuel : {{ getFileIcon(editingCours!) }}
-              <span class="opacity-60 ml-1">(laisser vide pour conserver)</span>
-            </span>
-          </div>
-          <p class="text-xs mt-2" style="color:var(--text-4);">Formats : PDF · MP4 · WEBM · OGG · AVI — max 500 MB</p>
-          <p *ngIf="!editingCours" class="text-xs mt-1" style="color:var(--text-3);">Le fichier sera uploadé automatiquement après la création du cours.</p>
-        </div>
-
-        <div class="flex gap-3 pt-2" style="border-top:1px solid var(--border);">
-          <button type="button" (click)="showCoursModal=false" class="btn btn-ghost flex-1">Annuler</button>
-          <button type="submit" [disabled]="coursLoading" class="btn btn-brand flex-1">
-            <svg *ngIf="coursLoading" class="animate-spin-slow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
-            {{coursLoading ? 'Enregistrement...' : (editingCours ? 'Mettre à jour' : 'Créer le cours')}}
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- ══ MODAL Confirmation suppression ══ -->
-  <div *ngIf="deleteTarget" class="overlay" (click)="cancelDelete()">
-    <div class="modal" style="max-width:380px;" (click)="$event.stopPropagation()">
-      <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4" style="background:var(--red-dim);">🗑</div>
-      <h3 class="text-lg font-bold text-center mb-2" style="font-family:'Syne',sans-serif;color:var(--text);">Confirmer la suppression</h3>
-      <p class="text-sm text-center mb-2" style="color:var(--text-2);">
-        Supprimer <strong style="color:var(--text);">{{deleteTarget.name}}</strong> ?
-      </p>
-      <p class="text-xs text-center mb-6 p-3 rounded-xl" style="color:var(--red);background:var(--red-dim);">
-        Action irréversible ·
-        <code style="font-size:10px;">
-          DELETE /api/{{ (deleteTarget.type === 'categorie' ? 'categories' : (deleteTarget.type === 'module' ? 'modules' : 'cours')) }}/{{deleteTarget.id}}
-        </code>
-      </p>
-      <div class="flex gap-3">
-        <button (click)="cancelDelete()" class="btn btn-ghost flex-1">Annuler</button>
-        <button (click)="executeDelete()" class="btn btn-danger flex-1" style="font-size:14px;padding:11px;">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
-          Supprimer
+      <div class="flex gap-3 pt-2">
+        <button type="button" (click)="showModModal=false" class="btn btn-ghost flex-1">Annuler</button>
+        <button type="submit" [disabled]="modLoading" class="btn btn-brand flex-1">
+          <svg *ngIf="modLoading" class="animate-spin-slow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
+          {{ editingMod ? 'Mettre à jour' : 'Créer' }}
         </button>
       </div>
-    </div>
+    </form>
   </div>
+</div>
 
-  <!-- ══════════════════════════════════════════════════════════════════════ -->
-  <!-- SECTION : Avis reçus sur mes cours                                     -->
-  <!-- ══════════════════════════════════════════════════════════════════════ -->
-  <ng-container *ngIf="activeSection==='avis-cours'">
-    <div class="animate-fade-in space-y-5 px-4 sm:px-6 lg:px-8 py-6">
-
-      <!-- En-tête -->
-      <div class="flex items-center justify-between">
-        <div>
-          <h2 class="text-xl font-bold" style="font-family:'Syne',sans-serif;color:var(--text);">
-            ⭐ Avis des apprenants — cours #{{ avisCoursCourant }}
-          </h2>
-          <p class="text-sm mt-1" style="color:var(--text-3);">
-            {{ avisCoursListe.length }} avis reçu(s) pour ce cours
-          </p>
-        </div>
-        <button (click)="setSection('cours')" class="btn btn-ghost btn-sm">← Retour aux cours</button>
-      </div>
-
-      <!-- Chargement -->
-      <div *ngIf="avisCoursLoading" class="flex justify-center py-16">
-        <div class="w-8 h-8 rounded-full border-2 animate-spin" style="border-color:var(--brand);border-top-color:transparent;"></div>
-      </div>
-
-      <!-- Aucun avis -->
-      <div *ngIf="!avisCoursLoading && avisCoursListe.length === 0"
-           class="glass p-12 rounded-2xl text-center">
-        <div class="text-5xl mb-4">💬</div>
-        <p class="font-semibold" style="color:var(--text);">Aucun avis pour l'instant</p>
-        <p class="text-sm mt-1" style="color:var(--text-3);">Les apprenants inscrits à ce cours n'ont pas encore soumis d'avis.</p>
-      </div>
-
-      <!-- Liste des avis -->
-      <div *ngIf="!avisCoursLoading && avisCoursListe.length > 0" class="space-y-4">
-        <div *ngFor="let avis of avisCoursListe"
-             class="glass p-5 rounded-2xl"
-             style="border:1px solid var(--border);">
-
-          <div class="flex items-start justify-between gap-3 mb-3">
-            <div class="flex items-center gap-3">
-              <div class="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold text-white flex-shrink-0"
-                   style="background:var(--brand);">
-                {{ avis.email.charAt(0).toUpperCase() }}
-              </div>
-              <div>
-                <p class="text-sm font-semibold" style="color:var(--text);">{{ avis.email }}</p>
-                <p class="text-xs" style="color:var(--text-3);">
-                  {{ avis.dateCreation | date:'dd/MM/yyyy à HH:mm' }}
-                </p>
-              </div>
-            </div>
-            <div class="flex items-center gap-2 flex-shrink-0">
-              <span class="badge text-xs"
-                    [style.background]="getStatutBadgeDim(avis.statut ?? '')"
-                    [style.color]="getStatutBadgeColor(avis.statut ?? '')">
-                {{ getStatutLabel(avis.statut ?? '') }}
-              </span>
-              <span class="badge b-brand text-xs">{{ getTypeLabel(avis.typeAvis) }}</span>
-            </div>
-          </div>
-
-          <div class="rounded-xl p-3 mb-3" style="background:var(--surface-2);border:1px solid var(--border);">
-            <p class="text-sm leading-relaxed" style="color:var(--text-2);">{{ avis.message }}</p>
-          </div>
-
-          <div *ngIf="avis.reponseAdmin"
-               class="rounded-xl p-3"
-               style="background:var(--green-dim);border-left:3px solid var(--green);">
-            <p class="text-xs font-bold mb-1" style="color:var(--green);">Réponse de l'équipe admin</p>
-            <p class="text-sm" style="color:var(--text-2);">{{ avis.reponseAdmin }}</p>
-          </div>
-
-        </div>
-      </div>
-
+<!-- Modal Cours -->
+<div *ngIf="showCoursModal" class="overlay" (click)="showCoursModal=false">
+  <div class="modal" style="max-width:560px;" (click)="$event.stopPropagation()">
+    <div class="flex items-center justify-between mb-5">
+      <h3 class="font-bold text-base" style="font-family:'Syne',sans-serif;color:var(--text);">
+        {{ editingCours ? 'Modifier le cours' : 'Nouveau cours' }}
+      </h3>
+      <button (click)="showCoursModal=false" style="background:none;border:none;cursor:pointer;color:var(--text-3);font-size:22px;">✕</button>
     </div>
-  </ng-container>
-
-  <!-- ══════════════════════════════════════════════════════════════════════ -->
-  <!-- MODAL FEEDBACK ENSEIGNANT                                               -->
-  <!-- ══════════════════════════════════════════════════════════════════════ -->
-  <div *ngIf="showFeedbackModal" class="overlay" (click)="fermerFeedback()">
-    <div class="modal" style="max-width:520px;" (click)="$event.stopPropagation()">
-
-      <div class="flex items-center justify-between mb-5">
-        <h3 class="font-bold text-base" style="font-family:'Syne',sans-serif;color:var(--text);">
-          💬 Soumettre un avis
-        </h3>
-        <button (click)="fermerFeedback()" style="background:none;border:none;cursor:pointer;color:var(--text-3);font-size:20px;">×</button>
+    <form [formGroup]="coursForm" (ngSubmit)="submitCours()" novalidate class="space-y-4">
+      <div>
+        <label class="text-xs font-semibold uppercase tracking-wider mb-1 block" style="color:var(--text-3);">Titre *</label>
+        <input class="inp" formControlName="titre" placeholder="Titre du cours" [class.err]="ff['titre'].invalid && ff['titre'].touched"/>
       </div>
-
-      <!-- Succès -->
-      <div *ngIf="fbSuccess" class="p-3 rounded-xl mb-4 flex items-center gap-2"
-           style="background:var(--green-dim);border:1px solid rgba(16,185,129,.3);color:var(--green);">
-        <span>✅</span><span class="text-sm">{{ fbSuccess }}</span>
+      <div>
+        <label class="text-xs font-semibold uppercase tracking-wider mb-1 block" style="color:var(--text-3);">Description *</label>
+        <textarea class="inp" formControlName="description" rows="3" placeholder="Description du cours…" style="resize:vertical;"></textarea>
       </div>
-
-      <!-- Erreur -->
-      <div *ngIf="fbError" class="p-3 rounded-xl mb-4 flex items-center gap-2"
-           style="background:var(--red-dim);border:1px solid rgba(239,68,68,.3);color:var(--red);">
-        <span>⚠️</span><span class="text-sm">{{ fbError }}</span>
-      </div>
-
-      <div *ngIf="!fbSuccess" class="space-y-4">
+      <div class="grid grid-cols-2 gap-4">
         <div>
-          <label class="block text-xs font-semibold uppercase tracking-wider mb-1" style="color:var(--text-3);">Email</label>
-          <input type="email" [(ngModel)]="fbEmail" class="inp" [attr.disabled]="userEmail ? '' : null" />
-        </div>
-        <div>
-          <label class="block text-xs font-semibold uppercase tracking-wider mb-1" style="color:var(--text-3);">Type d'avis <span style="color:var(--red);">*</span></label>
-          <select [(ngModel)]="fbType" class="inp" style="cursor:pointer;">
-            <option value="" disabled selected>— Choisir —</option>
-            <option *ngFor="let t of typesAvis" [value]="t.value">{{ t.label }}</option>
+          <label class="text-xs font-semibold uppercase tracking-wider mb-1 block" style="color:var(--text-3);">Module *</label>
+          <select class="inp" formControlName="moduleId" [class.err]="ff['moduleId'].invalid && ff['moduleId'].touched">
+            <option [value]="null">Sélectionner…</option>
+            <option *ngFor="let m of modules" [value]="m.id">{{m.nom}}</option>
           </select>
         </div>
         <div>
-          <label class="block text-xs font-semibold uppercase tracking-wider mb-1" style="color:var(--text-3);">Message <span style="color:var(--red);">*</span></label>
-          <textarea [(ngModel)]="fbMessage" rows="5" class="inp resize-none"
-                    placeholder="Décrivez votre avis..." maxlength="2000" style="min-height:120px;"></textarea>
-          <p class="text-xs text-right mt-1" style="color:var(--text-3);">{{ fbMessage.length }} / 2000</p>
-        </div>
-        <div class="flex gap-3 pt-1">
-          <button (click)="fermerFeedback()" class="btn btn-ghost flex-1">Annuler</button>
-          <button (click)="soumettreFeedback()"
-                  [disabled]="fbLoading || !fbEmail || !fbType || fbMessage.length < 10"
-                  class="btn btn-brand flex-1">
-            <span *ngIf="!fbLoading">Envoyer →</span>
-            <span *ngIf="fbLoading">Envoi...</span>
-          </button>
+          <label class="text-xs font-semibold uppercase tracking-wider mb-1 block" style="color:var(--text-3);">Niveau *</label>
+          <select class="inp" formControlName="niveau">
+            <option *ngFor="let n of niveaux" [value]="n">{{n}}</option>
+          </select>
         </div>
       </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="text-xs font-semibold uppercase tracking-wider mb-1 block" style="color:var(--text-3);">Statut</label>
+          <select class="inp" formControlName="statut">
+            <option *ngFor="let s of statuts" [value]="s">{{s}}</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs font-semibold uppercase tracking-wider mb-1 block" style="color:var(--text-3);">Durée (min)</label>
+          <input class="inp" type="number" formControlName="dureeMinutes" placeholder="ex: 45"/>
+        </div>
+      </div>
+      <!-- Upload fichier -->
+      <div>
+        <label class="text-xs font-semibold uppercase tracking-wider mb-1 block" style="color:var(--text-3);">Fichier (PDF / vidéo)</label>
+        <input type="file" accept="application/pdf,video/mp4,video/webm,video/ogg" (change)="onFileSelected($event)"
+               class="inp" style="padding:8px;cursor:pointer;"/>
+        <p *ngIf="selectedFile" class="text-xs mt-1" style="color:var(--brand);">📎 {{ selectedFile.name }}</p>
+      </div>
+      <div class="flex gap-3 pt-2">
+        <button type="button" (click)="showCoursModal=false" class="btn btn-ghost flex-1">Annuler</button>
+        <button type="submit" [disabled]="coursLoading" class="btn btn-brand flex-1">
+          <svg *ngIf="coursLoading" class="animate-spin-slow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
+          {{ editingCours ? 'Mettre à jour' : 'Créer' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
 
+<!-- Modal Suppression -->
+<div *ngIf="deleteTarget" class="overlay" (click)="cancelDelete()">
+  <div class="modal" style="max-width:380px;" (click)="$event.stopPropagation()">
+    <div class="flex items-center gap-3 mb-3">
+      <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl" style="background:var(--red-dim);">🗑️</div>
+      <div>
+        <p class="font-bold text-sm" style="color:var(--text);">Confirmer la suppression</p>
+        <p class="text-xs" style="color:var(--text-3);">Cette action est irréversible.</p>
+      </div>
+    </div>
+    <p class="text-sm mb-4" style="color:var(--text-2);">
+      Supprimer <strong style="color:var(--text);">{{deleteTarget.name}}</strong> ?
+    </p>
+    <div class="flex gap-3">
+      <button (click)="cancelDelete()" class="btn btn-ghost flex-1">Annuler</button>
+      <button (click)="executeDelete()" class="btn btn-danger flex-1">Supprimer</button>
     </div>
   </div>
-
 </div>
+

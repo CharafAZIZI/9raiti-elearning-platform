@@ -5,12 +5,18 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ModuleRepository extends JpaRepository<Module, Long> {
 
     boolean existsByCode(String code);
 
-    // Spring Data navigue la relation @ManyToOne avec underscore
     List<Module> findByCategorie_Id(Long categorieId);
+
+    /** Modules appartenant à un enseignant donné */
+    List<Module> findByEnseignantId(Long enseignantId);
+
+    /** Sécuriser update/delete : module doit appartenir à l'enseignant */
+    Optional<Module> findByIdAndEnseignantId(Long id, Long enseignantId);
 }

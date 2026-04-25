@@ -22,5 +22,8 @@ public class ModuleDTO {
 
     private Long categorieId;
 
+    /** ID de l'enseignant propriétaire — renvoyé au frontend pour filtrer les actions CRUD */
+    private Long enseignantId;
+
     private List<CoursDTO> cours;
 }

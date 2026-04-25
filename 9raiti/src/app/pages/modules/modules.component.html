@@ -3,65 +3,55 @@
 
   <div class="px-4 sm:px-6 lg:px-8 py-8 max-w-7xl mx-auto">
 
-    <!-- En-tête -->
+    <!-- En-tete -->
     <div class="mb-8 animate-fade-in">
       <a routerLink="/categories"
          style="color:var(--brand);text-decoration:none;font-size:13px;font-weight:600;">
-        ← Catégories
+        Retour aux Categories
       </a>
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-2">
         <div>
           <h1 class="text-3xl font-bold" style="font-family:'Syne',sans-serif;color:var(--text);">
             Modules
             <span *ngIf="categorieNom" class="text-lg font-normal" style="color:var(--text-3);">
-              — {{ categorieNom }}
+              - {{ categorieNom }}
             </span>
           </h1>
           <p class="text-sm mt-1" style="color:var(--text-3);">
-            {{ filtered.length }} module(s) affiché(s)
+            {{ filtered.length }} module(s) affiche(s)
           </p>
         </div>
       </div>
 
-      <!-- Recherche + Filtres -->
+      <!-- Recherche -->
       <div class="flex flex-col sm:flex-row gap-3 mt-5">
         <div class="relative flex-1 max-w-md">
           <span class="absolute left-3 top-1/2 -translate-y-1/2 text-base pointer-events-none">🔍</span>
           <input type="text" class="inp" style="padding-left:40px;padding-right:36px;"
-                 placeholder="Rechercher un module…"
+                 placeholder="Rechercher un module..."
                  [(ngModel)]="searchQuery" (ngModelChange)="onSearch()" />
           <button *ngIf="searchQuery" (click)="clearSearch()"
                   class="absolute right-3 top-1/2 -translate-y-1/2"
-                  style="background:none;border:none;cursor:pointer;color:var(--text-3);">✕</button>
+                  style="background:none;border:none;cursor:pointer;color:var(--text-3);">X</button>
         </div>
 
-        <!-- Filtres actif/inactif -->
-        <div class="flex gap-2">
-          <button (click)="setFiltre('tous')"
-                  class="btn btn-sm"
-                  [class.btn-brand]="filtre==='tous'"
-                  [class.btn-ghost]="filtre!=='tous'">
-            Tous ({{ modules.length }})
-          </button>
-          <button (click)="setFiltre('actif')"
-                  class="btn btn-sm"
-                  [class.btn-success]="filtre==='actif'"
-                  [class.btn-ghost]="filtre!=='actif'">
-            ✅ Actifs ({{ actifCount }})
-          </button>
-          <button (click)="setFiltre('brouillon')"
-                  class="btn btn-sm"
-                  [class.btn-brand]="filtre==='brouillon'"
-                  [class.btn-ghost]="filtre!=='brouillon'">
-            📝 Brouillons ({{ brouillonCount }})
-          </button>
-          <button (click)="setFiltre('archive')"
-                  class="btn btn-sm"
-                  [class.btn-danger]="filtre==='archive'"
-                  [class.btn-ghost]="filtre!=='archive'">
-            📦 Archivés ({{ archiveCount }})
-          </button>
+        <!-- Filtres statut (non-apprenants) -->
+        <div *ngIf="!isApprenant" class="flex gap-2 flex-wrap">
+          <button (click)="setFiltre('tous')"      class="btn btn-sm" [class.btn-brand]="filtre==='tous'"      [class.btn-ghost]="filtre!=='tous'">Tous ({{ modules.length }})</button>
+          <button (click)="setFiltre('actif')"     class="btn btn-sm" [class.btn-success]="filtre==='actif'"   [class.btn-ghost]="filtre!=='actif'">Actifs ({{ actifCount }})</button>
+          <button (click)="setFiltre('brouillon')" class="btn btn-sm" [class.btn-brand]="filtre==='brouillon'" [class.btn-ghost]="filtre!=='brouillon'">Brouillons ({{ brouillonCount }})</button>
+          <button (click)="setFiltre('archive')"   class="btn btn-sm" [class.btn-danger]="filtre==='archive'"  [class.btn-ghost]="filtre!=='archive'">Archives ({{ archiveCount }})</button>
         </div>
+      </div>
+
+      <!-- Toast inscription -->
+      <div *ngIf="toast"
+           class="mt-4 flex items-center gap-3 px-4 py-3 rounded-xl animate-fade-in"
+           [style.background]="toast.type==='success' ? 'var(--green-dim)' : 'rgba(239,68,68,.12)'"
+           [style.border]="toast.type==='success' ? '1px solid var(--green)' : '1px solid var(--red)'"
+           [style.color]="toast.type==='success' ? 'var(--green)' : 'var(--red)'">
+        <span>{{ toast.type==='success' ? '✅' : '⚠️' }}</span>
+        <span class="text-sm font-medium">{{ toast.text }}</span>
       </div>
     </div>
 
@@ -76,7 +66,6 @@
           </div>
         </div>
         <div class="skeleton h-3 w-full rounded-lg"></div>
-        <div class="skeleton h-3 w-4/5 rounded-lg"></div>
         <div class="skeleton h-8 w-full rounded-xl"></div>
       </div>
     </div>
@@ -95,13 +84,13 @@
          class="flex flex-col items-center justify-center py-20 gap-3 animate-fade-in">
       <span style="font-size:48px;">📦</span>
       <p class="font-semibold" style="color:var(--text);">
-        {{ searchQuery ? 'Aucun résultat pour "' + searchQuery + '"' : 'Aucun module disponible' }}
+        {{ searchQuery ? 'Aucun resultat' : 'Aucun module disponible' }}
       </p>
       <button *ngIf="searchQuery || filtre!=='tous'" (click)="clearSearch(); setFiltre('tous')"
-              class="btn btn-ghost btn-sm">Réinitialiser les filtres</button>
+              class="btn btn-ghost btn-sm">Reinitialiser</button>
     </div>
 
-    <!-- Grille modules -->
+    <!-- Grille -->
     <div *ngIf="!loading && !errorMsg && filtered.length > 0"
          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
 
@@ -116,11 +105,16 @@
             📦
           </div>
           <div class="flex-1 min-w-0">
-            <div class="flex items-center gap-2 flex-wrap mb-0.5">
-              <h3 class="font-bold text-sm clamp-2"
-                  style="font-family:'Syne',sans-serif;color:var(--text);">
+            <div class="flex items-center gap-2 flex-wrap mb-1">
+              <h3 class="font-bold text-sm" style="font-family:'Syne',sans-serif;color:var(--text);">
                 {{ mod.nom }}
               </h3>
+              <!-- Badge "Inscrit" pour apprenant -->
+              <span *ngIf="isApprenant && estInscrit(mod.id!)"
+                    class="text-xs font-bold px-2 py-0.5 rounded-full"
+                    style="background:var(--green-dim);color:var(--green);border:1px solid var(--green);">
+                ✓ Inscrit
+              </span>
             </div>
             <div class="flex items-center gap-2">
               <span class="text-xs font-mono px-2 py-0.5 rounded-md"
@@ -138,18 +132,52 @@
         </div>
 
         <!-- Description -->
-        <p class="text-xs leading-relaxed mb-4 flex-1 clamp-2" style="color:var(--text-3);">
+        <p class="text-xs leading-relaxed mb-4 flex-1" style="color:var(--text-3);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">
           {{ mod.description }}
         </p>
 
         <div style="border-top:1px solid var(--border);margin-bottom:12px;"></div>
 
-        <!-- Action -->
-        <a [routerLink]="['/cours']"
+        <!-- Actions apprenant -->
+        <div *ngIf="isApprenant" class="flex flex-col gap-2">
+
+          <!-- Bouton S inscrire / Se desinscrire -->
+          <button
+            (click)="toggleInscription(mod)"
+            [disabled]="isLoading(mod.id!)"
+            class="btn btn-sm w-full"
+            [style.background]="estInscrit(mod.id!) ? 'rgba(239,68,68,.1)' : 'var(--green-dim)'"
+            [style.color]="estInscrit(mod.id!) ? 'var(--red)' : 'var(--green)'"
+            [style.border]="estInscrit(mod.id!) ? '1px solid var(--red)' : '1px solid var(--green)'"
+            style="font-weight:600;gap:6px;display:flex;align-items:center;justify-content:center;transition:all .2s;">
+            <ng-container *ngIf="isLoading(mod.id!)">
+              <svg class="animate-spin-slow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
+              Chargement...
+            </ng-container>
+            <ng-container *ngIf="!isLoading(mod.id!) && !estInscrit(mod.id!)">
+              🎓 S'inscrire
+            </ng-container>
+            <ng-container *ngIf="!isLoading(mod.id!) && estInscrit(mod.id!)">
+              ❌ Se desinscrire
+            </ng-container>
+          </button>
+
+          <!-- Voir les cours -->
+          <a [routerLink]="['/cours']"
+             [queryParams]="{moduleId: mod.id, moduleNom: mod.nom}"
+             class="btn btn-brand btn-sm w-full"
+             style="text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px;">
+            📖 Voir les cours
+          </a>
+        </div>
+
+        <!-- Action enseignant / admin -->
+        <a *ngIf="!isApprenant"
+           [routerLink]="['/cours']"
            [queryParams]="{moduleId: mod.id, moduleNom: mod.nom}"
            class="btn btn-brand btn-sm w-full"
            style="text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px;">
-          <span>🎓</span> Voir les cours
+          🎓 Voir les cours
         </a>
       </div>
     </div>

@@ -1,35 +1,7 @@
 <div class="min-h-screen" style="background:var(--bg);">
 
-  <!-- ══════════════════════════════════════════════════════════════════════ -->
-  <!-- TOP NAVBAR                                                             -->
-  <!-- ══════════════════════════════════════════════════════════════════════ -->
-  <nav class="navbar flex items-center justify-between px-4 lg:px-8">
-    <div class="flex items-center gap-3">
-      <div class="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-lg"
-           style="background:linear-gradient(135deg,#F59E0B,#D97706);color:white;font-family:'Syne',sans-serif;">9</div>
-      <span class="text-lg font-bold" style="color:var(--text);font-family:'Syne',sans-serif;">9raiti</span>
-      <span class="badge b-purple">Admin</span>
-    </div>
-    <div class="flex items-center gap-2">
-      <!-- Theme toggle -->
-      <button (click)="themeService.toggle()" class="btn btn-ghost" style="padding:8px 10px;" title="Changer de thème">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-      </button>
-      <div class="hidden sm:flex items-center gap-2">
-        <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm"
-             style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);color:white;">{{initials}}</div>
-        <div>
-          <div class="text-sm font-semibold" style="color:var(--text);">{{displayName}}</div>
-          <div class="text-xs" style="color:var(--text-3);">Administrateur</div>
-        </div>
-      </div>
-      <button (click)="logout()" [disabled]="logoutLoading" class="btn btn-ghost" style="padding:8px 14px;font-size:13px;">
-        <svg *ngIf="!logoutLoading" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
-        <svg *ngIf="logoutLoading" class="animate-spin-slow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
-        <span class="hidden sm:inline">Déconnexion</span>
-      </button>
-    </div>
-  </nav>
+  <!-- ── Navbar partagée (gère logout, thème, profil, rôle) ── -->
+  <app-navbar></app-navbar>
 
   <div class="flex h-[calc(100vh-64px)] overflow-hidden">
 
@@ -60,19 +32,13 @@
           {id:'dashboard', icon:'dashboard', label:'Vue d\'ensemble'},
           {id:'users',     icon:'users',     label:'Utilisateurs'},
           {id:'content',   icon:'content',   label:'Contenu pédagogique'},
-          {id:'feedbacks', icon:'feedbacks', label:'Avis & Feedbacks'},
-          {id:'notifs',    icon:'notifs',    label:'Notifications'}
-        ]" (click)="activeTab=item.id; item.id==='feedbacks' ? loadFeedbacks() : null" class="nav-item" [class.active]="activeTab===item.id">
+]" (click)="activeTab=item.id" class="nav-item" [class.active]="activeTab===item.id">
           <!-- Dashboard icon -->
           <svg *ngIf="item.icon==='dashboard'" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
           <!-- Users icon -->
           <svg *ngIf="item.icon==='users'" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
           <!-- Content icon -->
-          <svg *ngIf="item.icon==='content'" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
-          <!-- Feedbacks icon -->
-          <svg *ngIf="item.icon==='feedbacks'" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-          <!-- Notifs icon -->
-          <svg *ngIf="item.icon==='notifs'" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+          <svg *ngIf="item.icon==='content'" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg><!-- Notifs icon -->
           <span>{{item.label}}</span>
         </button>
       </nav>
@@ -88,15 +54,15 @@
       <!-- Quick actions -->
       <div class="mt-auto space-y-2 pt-4" style="border-top:1px solid var(--border);">
         <p class="text-xs font-bold uppercase tracking-widest px-2 mb-2" style="color:var(--text-4);">Actions rapides</p>
-        <button (click)="activeTab='content'; contentTab='categories'; openCreateCat()" class="btn btn-ghost w-full" style="font-size:12px;padding:8px 12px;justify-content:flex-start;">
+        <button (click)="activeTab='content'; openCreateCat()" class="btn btn-ghost w-full" style="font-size:12px;padding:8px 12px;justify-content:flex-start;">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           Nouvelle catégorie
         </button>
-        <button (click)="activeTab='content'; contentTab='modules'; openCreateMod()" class="btn btn-ghost w-full" style="font-size:12px;padding:8px 12px;justify-content:flex-start;">
+        <button (click)="activeTab='content'; openCreateMod()" class="btn btn-ghost w-full" style="font-size:12px;padding:8px 12px;justify-content:flex-start;">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           Nouveau module
         </button>
-        <button (click)="activeTab='content'; contentTab='cours'; openCreateCours()" class="btn btn-brand w-full" style="font-size:12px;padding:9px 12px;">
+        <button (click)="activeTab='content'; openCreateCours()" class="btn btn-brand w-full" style="font-size:12px;padding:9px 12px;">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           Nouveau cours
         </button>
@@ -170,7 +136,7 @@
             {label:'Modules',     val:contentStats.totalModules,    icon:'📦', color:'var(--brand)',  dim:'var(--brand-dim)',  tab:'modules'},
             {label:'Cours',       val:contentStats.totalCours,      icon:'📚', color:'var(--blue)',   dim:'var(--blue-dim)',   tab:'cours'}
           ]" class="glass glass-hover rounded-2xl p-5 flex items-center gap-4 cursor-pointer animate-slide-up"
-             (click)="activeTab='content'; contentTab=item.tab">
+             (click)="activeTab='content'">
             <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0" [style.background]="item.dim">{{item.icon}}</div>
             <div>
               <div class="text-2xl font-bold" style="font-family:'Syne',sans-serif;color:var(--text);">{{item.val}}</div>
@@ -387,6 +353,22 @@
             </div>
           </div>
 
+          <!-- Action rapide créer -->
+          <div class="flex justify-end gap-2">
+            <button (click)="openCreateCat()" class="btn btn-ghost btn-sm">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Catégorie
+            </button>
+            <button (click)="openCreateMod()" class="btn btn-ghost btn-sm">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Module
+            </button>
+            <button (click)="openCreateCours()" class="btn btn-brand btn-sm">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Cours
+            </button>
+          </div>
+
           <!-- Content stats -->
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div *ngFor="let s of [
@@ -401,286 +383,64 @@
             </div>
           </div>
 
-          <!-- Sub-tabs -->
-          <div class="flex gap-1.5 p-1.5 rounded-2xl" style="background:var(--surface-2);width:fit-content;flex-wrap:wrap;">
-            <button *ngFor="let tab of [
-              {id:'categories', label:'Catégories', icon:'🏷️', count:contentStats.totalCategories},
-              {id:'modules',    label:'Modules',    icon:'📦', count:contentStats.totalModules},
-              {id:'cours',      label:'Cours',      icon:'📚', count:contentStats.totalCours},
-              {id:'hierarchy',  label:'Hiérarchie', icon:'🌳', count:null}
-            ]" (click)="contentTab=tab.id" class="btn btn-sm"
-               [style.background]="contentTab===tab.id ? (tab.id==='hierarchy' ? 'var(--purple)' : 'var(--brand)') : 'transparent'"
-               [style.color]="contentTab===tab.id ? 'white' : 'var(--text-3)'">
-              {{tab.icon}} {{tab.label}}
-              <span *ngIf="tab.count !== null" class="ml-1 text-xs opacity-70">({{tab.count}})</span>
-            </button>
-          </div>
-
-          <!-- ── CATEGORIES sub-tab ── -->
-          <ng-container *ngIf="contentTab==='categories'">
-            <div class="flex items-center justify-between mb-1">
-              <h3 class="font-bold text-base" style="color:var(--text);">Catégories ({{categories.length}})</h3>
-              <button (click)="openCreateCat()" class="btn btn-brand btn-sm">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                Nouvelle catégorie
-              </button>
-            </div>
-
-            <div *ngIf="loadingCategories" class="text-center py-8" style="color:var(--text-3);">
-              <svg class="animate-spin-slow mx-auto mb-2" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--brand);"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
-              Chargement…
-            </div>
-
-            <div *ngIf="!loadingCategories && categories.length===0" class="glass rounded-2xl p-10 text-center">
-              <div class="text-4xl mb-3">🏷️</div>
-              <div class="font-semibold mb-1" style="color:var(--text);">Aucune catégorie</div>
-              <div class="text-sm mb-4" style="color:var(--text-3);">Commencez par créer une catégorie pédagogique.</div>
-              <button (click)="openCreateCat()" class="btn btn-brand">Créer la première catégorie</button>
-            </div>
-
-            <div *ngIf="!loadingCategories && categories.length > 0" class="space-y-2">
-              <div *ngFor="let cat of categories" class="glass rounded-2xl overflow-hidden">
-                <div class="flex items-center justify-between px-5 py-4">
-                  <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-xl flex items-center justify-center text-lg" style="background:var(--green-dim);">🏷️</div>
-                    <div>
-                      <div class="font-semibold text-sm" style="color:var(--text);">{{cat.nom}}</div>
-                      <div class="text-xs" style="color:var(--text-3);">{{cat.description || 'Aucune description'}} · {{getModulesForCat(cat.id!).length}} module(s)</div>
-                    </div>
-                  </div>
-                  <div class="flex items-center gap-2">
-                    <button (click)="openEditCat(cat)" class="btn btn-ghost btn-sm" title="Modifier">
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                    </button>
-                    <button (click)="confirmDeleteContent('categorie', cat.id!, cat.nom)" class="btn btn-ghost btn-sm" title="Supprimer" style="color:var(--red);">
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
-                    </button>
-                  </div>
+            <!-- Vue hiérarchique : Catégories → Modules → Cours (style cartes catalogue) -->
+            <div *ngIf="loadingCategories || loadingModules || loadingCours"
+                 class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-2">
+              <div *ngFor="let s of [1,2,3,4,5,6]" class="glass rounded-2xl overflow-hidden">
+                <div class="h-20 skeleton"></div>
+                <div class="p-4 space-y-2">
+                  <div class="skeleton h-4 w-3/4 rounded-lg"></div>
+                  <div class="skeleton h-3 w-full rounded-lg"></div>
                 </div>
               </div>
             </div>
-          </ng-container>
 
-          <!-- ── MODULES sub-tab ── -->
-          <ng-container *ngIf="contentTab==='modules'">
-            <div class="flex items-center justify-between mb-1">
-              <h3 class="font-bold text-base" style="color:var(--text);">Modules ({{modules.length}})</h3>
-              <button (click)="openCreateMod()" class="btn btn-brand btn-sm">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                Nouveau module
-              </button>
-            </div>
+            <div *ngIf="!loadingCategories" class="space-y-8 mt-2">
 
-            <div *ngIf="loadingModules" class="text-center py-8" style="color:var(--text-3);">
-              <svg class="animate-spin-slow mx-auto mb-2" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--brand);"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
-              Chargement…
-            </div>
+              <!-- ── Catégories (cartes style catalogue) ── -->
+              <div *ngFor="let cat of categories; let ci=index" class="space-y-4">
 
-            <div *ngIf="!loadingModules && modules.length===0" class="glass rounded-2xl p-10 text-center">
-              <div class="text-4xl mb-3">📦</div>
-              <div class="font-semibold mb-1" style="color:var(--text);">Aucun module</div>
-              <div class="text-sm mb-4" style="color:var(--text-3);">Créez des modules dans vos catégories.</div>
-              <button (click)="openCreateMod()" class="btn btn-brand">Créer le premier module</button>
-            </div>
-
-            <div *ngIf="!loadingModules && modules.length > 0" class="glass rounded-2xl overflow-hidden">
-              <div class="scroll-x">
-                <table class="tbl">
-                  <thead>
-                    <tr>
-                      <th>Module</th>
-                      <th>Code</th>
-                      <th>Catégorie</th>
-                      <th>Statut</th>
-                      <th>Cours</th>
-                      <th class="text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr *ngFor="let mod of modules" class="tbl-row">
-                      <td>
-                        <div class="flex items-center gap-3">
-                          <div class="w-8 h-8 rounded-xl flex items-center justify-center text-base" style="background:var(--brand-dim);">📦</div>
-                          <div>
-                            <div class="text-sm font-semibold" style="color:var(--text);">{{mod.nom}}</div>
-                            <div class="text-xs line-clamp-1" style="color:var(--text-3);max-width:200px;">{{mod.description}}</div>
+                <!-- Carte Catégorie -->
+                <div class="glass glass-hover rounded-2xl overflow-hidden"
+                     [class]="'d-' + (ci % 5)">
+                  <div class="flex items-stretch">
+                    <!-- Bannière colorée latérale cliquable pour expand -->
+                    <button (click)="toggleCatExpand(cat.id!)"
+                            class="w-24 flex flex-col items-center justify-center gap-1 flex-shrink-0 transition-all"
+                            [style.background]="getCatStyleAdmin(ci).dim"
+                            style="border:none;cursor:pointer;position:relative;">
+                      <span class="text-3xl">{{ getCatStyleAdmin(ci).icon }}</span>
+                      <span class="text-xs font-bold" [style.color]="getCatStyleAdmin(ci).color">
+                        {{ isCatExpanded(cat.id!) ? '▲' : '▼' }}
+                      </span>
+                      <div class="absolute right-0 top-0 bottom-0 w-0.5"
+                           [style.background]="getCatStyleAdmin(ci).color"></div>
+                    </button>
+                    <!-- Contenu -->
+                    <div class="flex-1 p-4">
+                      <div class="flex items-start justify-between gap-3">
+                        <div class="flex-1 min-w-0">
+                          <button (click)="toggleCatExpand(cat.id!)"
+                                  class="font-bold text-base mb-0.5 text-left w-full"
+                                  style="font-family:'Syne',sans-serif;color:var(--text);background:none;border:none;cursor:pointer;">
+                            {{ cat.nom }}
+                          </button>
+                          <p class="text-xs clamp-1" style="color:var(--text-3);">{{ cat.description || 'Aucune description' }}</p>
+                          <div class="flex items-center gap-2 mt-2">
+                            <span class="badge b-blue text-xs">{{ getModulesForCat(cat.id!).length }} module(s)</span>
+                            <span class="badge b-green text-xs">{{ getTotalCoursForCat(cat.id!) }} cours</span>
                           </div>
                         </div>
-                      </td>
-                      <td><span class="font-mono text-xs px-2 py-0.5 rounded" style="background:var(--surface-2);color:var(--text-2);border:1px solid var(--border);">{{mod.code}}</span></td>
-                      <td><span class="text-sm" style="color:var(--text-2);">{{getCatName(mod.categorieId)}}</span></td>
-                      <td>
-                        <span class="badge text-xs"
-                          [class.b-green]="mod.statut==='ACTIF' || (!mod.statut && mod.actif)"
-                          [class.b-red]="mod.statut==='ARCHIVE'"
-                          [class.b-orange]="mod.statut==='BROUILLON'">
-                          {{mod.statut === 'ACTIF' || (!mod.statut && mod.actif) ? 'Actif' : mod.statut === 'ARCHIVE' ? 'Archivé' : 'Brouillon'}}
-                        </span>
-                      </td>
-                      <td><span class="text-sm" style="color:var(--text-2);">{{getCoursForMod(mod.id!).length}}</span></td>
-                      <td>
-                        <div class="flex items-center justify-end gap-1.5">
-                          <button (click)="openEditMod(mod)" class="btn btn-ghost btn-sm" title="Modifier">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        <div class="flex gap-1.5 flex-shrink-0">
+                          <button (click)="openCreateMod(); modForm.patchValue({categorieId: cat.id})"
+                                  class="btn btn-ghost btn-sm" style="font-size:11px;" title="Ajouter un module">
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            Module
                           </button>
-                          <button (click)="confirmDeleteContent('module', mod.id!, mod.nom)" class="btn btn-ghost btn-sm" style="color:var(--red);">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </ng-container>
-
-          <!-- ── COURS sub-tab ── -->
-          <ng-container *ngIf="contentTab==='cours'">
-            <div class="flex items-center justify-between mb-1">
-              <h3 class="font-bold text-base" style="color:var(--text);">Cours ({{cours.length}})</h3>
-              <button (click)="openCreateCours()" class="btn btn-brand btn-sm">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                Nouveau cours
-              </button>
-            </div>
-
-            <div *ngIf="loadingCours" class="text-center py-8" style="color:var(--text-3);">
-              <svg class="animate-spin-slow mx-auto mb-2" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--brand);"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
-              Chargement…
-            </div>
-
-            <div *ngIf="!loadingCours && cours.length===0" class="glass rounded-2xl p-10 text-center">
-              <div class="text-4xl mb-3">📚</div>
-              <div class="font-semibold mb-1" style="color:var(--text);">Aucun cours</div>
-              <div class="text-sm mb-4" style="color:var(--text-3);">Ajoutez des cours dans vos modules.</div>
-              <button (click)="openCreateCours()" class="btn btn-brand">Créer le premier cours</button>
-            </div>
-
-            <div *ngIf="!loadingCours && cours.length > 0" class="glass rounded-2xl overflow-hidden">
-              <div class="scroll-x">
-                <table class="tbl">
-                  <thead>
-                    <tr>
-                      <th>Cours</th>
-                      <th>Niveau</th>
-                      <th>Module</th>
-                      <th>Statut</th>
-                      <th>Durée</th>
-                      <th class="text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr *ngFor="let c of cours" class="tbl-row">
-                      <td>
-                        <div class="flex items-center gap-3">
-                          <div class="w-8 h-8 rounded-xl flex items-center justify-center text-base" style="background:var(--blue-dim);">📚</div>
-                          <div>
-                            <div class="text-sm font-semibold" style="color:var(--text);">{{c.titre}}</div>
-                            <div class="text-xs line-clamp-1" style="color:var(--text-3);max-width:220px;">{{c.description}}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td><span class="badge text-xs" [class.b-green]="c.niveau==='DEBUTANT'" [class.b-orange]="c.niveau==='INTERMEDIAIRE'" [class.b-red]="c.niveau==='AVANCE'">{{getNiveauLabel(c.niveau)}}</span></td>
-                      <td><span class="text-sm" style="color:var(--text-2);">{{getModName(c.moduleId)}}</span></td>
-                      <td><span class="badge text-xs" [class]="getStatutCls(c.statut)">{{getStatutCours(c.statut)}}</span></td>
-                      <td><span class="text-sm" style="color:var(--text-2);">{{formatDuree(c.dureeMinutes)}}</span></td>
-                      <td>
-                        <div class="flex items-center justify-end gap-1.5">
-                          <button (click)="openEditCours(c)" class="btn btn-ghost btn-sm" title="Modifier">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                          </button>
-                          <button (click)="confirmDeleteContent('cours', c.idCours!, c.titre)" class="btn btn-ghost btn-sm" style="color:var(--red);">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </ng-container>
-
-          <!-- ── HIERARCHY sub-tab ── -->
-          <ng-container *ngIf="contentTab==='hierarchy'">
-            <h3 class="font-bold text-base mb-3" style="color:var(--text);">Vue hiérarchique du catalogue</h3>
-            <div *ngIf="loadingCategories || loadingModules || loadingCours" class="text-center py-8" style="color:var(--text-3);">Chargement…</div>
-
-            <div *ngIf="!loadingCategories" class="space-y-2">
-              <div *ngFor="let cat of categories" class="rounded-2xl overflow-hidden" style="border:1px solid var(--border);">
-                <div class="flex items-center justify-between px-4 py-3 cursor-pointer"
-                     style="background:var(--surface-2);"
-                     (click)="toggleCatExpand(cat.id!)">
-                  <div class="flex items-center gap-3">
-                    <span style="font-size:14px;transition:transform .2s;display:inline-block;" [style.transform]="isCatExpanded(cat.id!) ? 'rotate(90deg)' : 'rotate(0)'">▶</span>
-                    <div class="w-8 h-8 rounded-xl flex items-center justify-center" style="background:var(--green-dim);">🏷️</div>
-                    <div>
-                      <div class="font-bold text-sm" style="color:var(--text);">{{cat.nom}}</div>
-                      <div class="text-xs" style="color:var(--text-3);">{{getModulesForCat(cat.id!).length}} module(s)</div>
-                    </div>
-                  </div>
-                  <div class="flex items-center gap-2" (click)="$event.stopPropagation()">
-                    <button (click)="openCreateMod(); modForm.patchValue({categorieId: cat.id})" class="btn btn-ghost btn-sm" style="color:var(--brand);font-size:11px;">
-                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Module
-                    </button>
-                    <button (click)="openEditCat(cat)" class="btn btn-ghost btn-sm">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                    </button>
-                    <button (click)="confirmDeleteContent('categorie', cat.id!, cat.nom)" class="btn btn-ghost btn-sm" style="color:var(--red);">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
-                    </button>
-                  </div>
-                </div>
-
-                <div *ngIf="isCatExpanded(cat.id!)" class="border-t" style="border-color:var(--border);background:var(--bg);">
-                  <div *ngIf="getModulesForCat(cat.id!).length === 0" class="px-8 py-3 text-xs italic" style="color:var(--text-3);">Aucun module dans cette catégorie.</div>
-                  <div *ngFor="let mod of getModulesForCat(cat.id!)" class="border-b last:border-b-0" style="border-color:var(--border);">
-                    <div class="flex items-center justify-between px-7 py-3 cursor-pointer" style="background:var(--surface);" (click)="toggleModExpand(mod.id!)">
-                      <div class="flex items-center gap-3">
-                        <span style="font-size:12px;transition:transform .2s;display:inline-block;" [style.transform]="isModExpanded(mod.id!) ? 'rotate(90deg)' : 'rotate(0)'">▶</span>
-                        <div class="w-7 h-7 rounded-lg flex items-center justify-center text-sm" style="background:var(--brand-dim);">📦</div>
-                        <div class="flex items-center gap-2">
-                          <span class="font-semibold text-sm" style="color:var(--text);">{{mod.nom}}</span>
-                          <span class="text-xs font-mono px-1.5 py-0.5 rounded" style="background:var(--surface-2);color:var(--text-3);border:1px solid var(--border);">{{mod.code}}</span>
-                          <span class="badge text-xs"
-                            [class.b-green]="mod.statut==='ACTIF' || (!mod.statut && mod.actif)"
-                            [class.b-red]="mod.statut==='ARCHIVE'"
-                            [class.b-orange]="mod.statut==='BROUILLON'">
-                            {{mod.statut === 'ACTIF' || (!mod.statut && mod.actif) ? 'Actif' : mod.statut === 'ARCHIVE' ? 'Archivé' : 'Brouillon'}}
-                          </span>
-                        </div>
-                      </div>
-                      <div class="flex items-center gap-2" (click)="$event.stopPropagation()">
-                        <button (click)="openCreateCours(); coursForm.patchValue({moduleId: mod.id})" class="btn btn-ghost btn-sm" style="color:var(--blue);font-size:11px;">
-                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Cours
-                        </button>
-                        <button (click)="openEditMod(mod)" class="btn btn-ghost btn-sm">
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                        </button>
-                        <button (click)="confirmDeleteContent('module', mod.id!, mod.nom)" class="btn btn-ghost btn-sm" style="color:var(--red);">
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
-                        </button>
-                      </div>
-                    </div>
-                    <div *ngIf="isModExpanded(mod.id!)" style="background:var(--bg-2);">
-                      <div *ngIf="getCoursForMod(mod.id!).length === 0" class="px-14 py-2 text-xs italic" style="color:var(--text-3);">Aucun cours dans ce module.</div>
-                      <div *ngFor="let c of getCoursForMod(mod.id!)"
-                           class="flex items-center justify-between px-12 py-2.5 border-b last:border-b-0"
-                           style="border-color:var(--border);">
-                        <div class="flex items-center gap-3">
-                          <div class="w-6 h-6 rounded flex items-center justify-center text-xs" style="background:var(--blue-dim);">📚</div>
-                          <div class="flex items-center gap-2">
-                            <span class="text-sm font-medium" style="color:var(--text);">{{c.titre}}</span>
-                            <span class="badge text-xs" [class]="getStatutCls(c.statut)">{{getStatutCours(c.statut)}}</span>
-                            <span class="text-xs" style="color:var(--text-3);">{{getNiveauLabel(c.niveau)}}</span>
-                          </div>
-                        </div>
-                        <div class="flex items-center gap-1.5">
-                          <button (click)="openEditCours(c)" class="btn btn-ghost btn-sm">
+                          <button (click)="openEditCat(cat)" class="btn btn-ghost btn-sm" title="Modifier">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                           </button>
-                          <button (click)="confirmDeleteContent('cours', c.idCours!, c.titre)" class="btn btn-ghost btn-sm" style="color:var(--red);">
+                          <button (click)="confirmDeleteContent('categorie', cat.id!, cat.nom)" class="btn btn-ghost btn-sm" style="color:var(--red);" title="Supprimer">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
                           </button>
                         </div>
@@ -688,39 +448,158 @@
                     </div>
                   </div>
                 </div>
+
+                <!-- Modules de cette catégorie (visibles si expanded) -->
+                <div *ngIf="isCatExpanded(cat.id!)" class="pl-6 space-y-4">
+
+                  <div *ngIf="getModulesForCat(cat.id!).length === 0"
+                       class="text-sm italic py-3 px-4 rounded-xl"
+                       style="color:var(--text-3);background:var(--surface);border:1px dashed var(--border);">
+                    Aucun module dans cette catégorie.
+                  </div>
+
+                  <!-- Grille modules -->
+                  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div *ngFor="let mod of getModulesForCat(cat.id!); let mi=index"
+                         class="glass glass-hover rounded-2xl p-4 flex flex-col"
+                         [class]="'d-' + (mi % 5)">
+                      <!-- Header module -->
+                      <div class="flex items-start gap-3 mb-3">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
+                             [style.background]="getModColorAdmin(mi).dim">📦</div>
+                        <div class="flex-1 min-w-0">
+                          <h4 class="font-bold text-sm truncate mb-1"
+                              style="font-family:'Syne',sans-serif;color:var(--text);">{{ mod.nom }}</h4>
+                          <div class="flex items-center gap-1.5 flex-wrap">
+                            <span class="text-xs font-mono px-1.5 py-0.5 rounded"
+                                  style="background:var(--surface-2);color:var(--brand);border:1px solid var(--border);">
+                              {{ mod.code }}
+                            </span>
+                            <span class="badge text-xs"
+                                  [style.background]="getModStatutAdmin(mod).bg"
+                                  [style.border-color]="getModStatutAdmin(mod).border"
+                                  [style.color]="getModStatutAdmin(mod).color">
+                              {{ getModStatutAdmin(mod).label }}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <p class="text-xs clamp-2 mb-3 flex-1" style="color:var(--text-3);">{{ mod.description }}</p>
+                      <!-- Actions module -->
+                      <div class="flex gap-1.5 flex-wrap" style="border-top:1px solid var(--border);padding-top:10px;">
+                        <button (click)="toggleModExpand(mod.id!)"
+                                class="btn btn-brand btn-sm flex-1"
+                                style="display:flex;align-items:center;justify-content:center;gap:4px;font-size:11px;">
+                          📘 {{ isModExpanded(mod.id!) ? 'Masquer' : 'Voir' }} les cours
+                          <span class="badge" style="background:rgba(255,255,255,.2);color:white;font-size:9px;padding:1px 5px;">
+                            {{ getCoursForMod(mod.id!).length }}
+                          </span>
+                        </button>
+                        <button (click)="openCreateCours(); coursForm.patchValue({moduleId: mod.id})"
+                                class="btn btn-ghost btn-sm" style="font-size:11px;" title="Ajouter un cours">
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        </button>
+                        <button (click)="openEditMod(mod)" class="btn btn-ghost btn-sm" title="Modifier">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        </button>
+                        <button (click)="confirmDeleteContent('module', mod.id!, mod.nom)" class="btn btn-danger btn-sm" title="Supprimer">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+                        </button>
+                      </div>
+
+                      <!-- Cours de ce module (visibles si expanded) -->
+                      <div *ngIf="isModExpanded(mod.id!)" class="mt-4 space-y-3">
+                        <div *ngIf="getCoursForMod(mod.id!).length === 0"
+                             class="text-xs italic py-2 text-center" style="color:var(--text-3);">
+                          Aucun cours dans ce module.
+                        </div>
+                        <!-- Cartes cours -->
+                        <div *ngFor="let c of getCoursForMod(mod.id!); let cii=index"
+                             class="rounded-xl overflow-hidden"
+                             style="border:1px solid var(--border);">
+                          <!-- Mini bannière cours -->
+                          <div class="h-16 flex items-center justify-center relative text-2xl"
+                               [style.background]="getModColorAdmin(cii).dim">
+                            <span>📖</span>
+                            <div class="absolute top-2 right-2">
+                              <span class="badge text-xs"
+                                    [style.background]="getCoursStatutAdmin(c.statut).bg"
+                                    [style.border-color]="getCoursStatutAdmin(c.statut).border"
+                                    [style.color]="getCoursStatutAdmin(c.statut).color">
+                                {{ getCoursStatutAdmin(c.statut).label }}
+                              </span>
+                            </div>
+                            <div class="absolute top-2 left-2">
+                              <span *ngIf="c.niveau" class="badge text-xs"
+                                    style="background:rgba(0,0,0,.4);border-color:transparent;color:white;">
+                                {{ getNiveauAdmin(c.niveau) }}
+                              </span>
+                            </div>
+                            <div class="absolute bottom-0 left-0 right-0 h-0.5"
+                                 [style.background]="getModColorAdmin(cii).color"></div>
+                          </div>
+                          <!-- Infos cours -->
+                          <div class="p-3" style="background:var(--surface);">
+                            <p class="font-semibold text-xs clamp-2 mb-1" style="color:var(--text);">{{ c.titre }}</p>
+                            <div class="flex items-center gap-2 text-xs mb-2" style="color:var(--text-3);">
+                              <span>⏱ {{ formatDureeAdmin(c.dureeMinutes) }}</span>
+                              <span>📅 {{ formatDateAdmin(c.dateCreation) }}</span>
+                            </div>
+                            <div class="flex gap-1">
+                              <button (click)="openEditCours(c)" class="btn btn-ghost btn-sm flex-1" style="font-size:11px;">
+                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                Modifier
+                              </button>
+                              <button (click)="confirmDeleteContent('cours', c.idCours!, c.titre)" class="btn btn-danger btn-sm" style="font-size:11px;">
+                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <div *ngIf="getModulesWithoutCat().length > 0" class="rounded-2xl overflow-hidden" style="border:1px dashed var(--border);">
-                <div class="flex items-center gap-3 px-4 py-3" style="background:var(--surface-2);">
-                  <div class="w-8 h-8 rounded-xl flex items-center justify-center" style="background:var(--orange-dim);">📎</div>
+              <!-- Modules sans catégorie -->
+              <div *ngIf="getModulesWithoutCat().length > 0" class="space-y-4">
+                <div class="flex items-center gap-3 px-4 py-3 rounded-2xl"
+                     style="background:var(--orange-dim);border:1px dashed var(--border);">
+                  <span class="text-2xl">📎</span>
                   <div>
                     <div class="font-bold text-sm" style="color:var(--text);">Modules sans catégorie</div>
-                    <div class="text-xs" style="color:var(--text-3);">{{getModulesWithoutCat().length}} module(s) non classé(s)</div>
+                    <div class="text-xs" style="color:var(--text-3);">{{ getModulesWithoutCat().length }} module(s) non classé(s)</div>
                   </div>
                 </div>
-                <div *ngFor="let mod of getModulesWithoutCat()" class="flex items-center justify-between px-5 py-3 border-t" style="border-color:var(--border);">
-                  <div class="flex items-center gap-2">
-                    <span class="text-sm font-semibold" style="color:var(--text);">{{mod.nom}}</span>
-                    <span class="font-mono text-xs px-1.5 py-0.5 rounded" style="background:var(--surface);color:var(--text-3);border:1px solid var(--border);">{{mod.code}}</span>
-                  </div>
-                  <div class="flex gap-1.5">
-                    <button (click)="openEditMod(mod)" class="btn btn-ghost btn-sm">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                    </button>
-                    <button (click)="confirmDeleteContent('module', mod.id!, mod.nom)" class="btn btn-ghost btn-sm" style="color:var(--red);">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
-                    </button>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div *ngFor="let mod of getModulesWithoutCat(); let mi=index"
+                       class="glass rounded-2xl p-4 flex flex-col" [class]="'d-' + (mi % 5)">
+                    <div class="flex items-center gap-3 mb-3">
+                      <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl"
+                           [style.background]="getModColorAdmin(mi).dim">📦</div>
+                      <div class="min-w-0 flex-1">
+                        <h4 class="font-bold text-sm truncate" style="color:var(--text);">{{ mod.nom }}</h4>
+                        <span class="text-xs font-mono" style="color:var(--text-4);">{{ mod.code }}</span>
+                      </div>
+                    </div>
+                    <div class="flex gap-1.5 mt-auto">
+                      <button (click)="openEditMod(mod)" class="btn btn-ghost btn-sm flex-1">Modifier</button>
+                      <button (click)="confirmDeleteContent('module', mod.id!, mod.nom)" class="btn btn-danger btn-sm">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
 
+              <!-- Aucun contenu -->
               <div *ngIf="categories.length === 0" class="glass rounded-2xl p-10 text-center">
                 <div class="text-4xl mb-3">🌳</div>
                 <div class="font-semibold mb-1" style="color:var(--text);">Aucun contenu à afficher</div>
-                <button (click)="contentTab='categories'; openCreateCat()" class="btn btn-brand mt-3">Commencer par créer une catégorie</button>
+                <button (click)="openCreateCat()" class="btn btn-brand mt-3">Commencer par créer une catégorie</button>
               </div>
             </div>
-          </ng-container>
 
         </div>
       </ng-container>
@@ -873,485 +752,7 @@
       </ng-container>
 
       <!-- ================================================================== -->
-      <!-- FEEDBACKS TAB                                                        -->
-      <!-- ================================================================== -->
-      <ng-container *ngIf="activeTab==='feedbacks'">
-        <div class="animate-fade-in space-y-5">
-
-          <!-- En-tête -->
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h2 class="text-xl font-bold" style="font-family:'Syne',sans-serif;color:var(--text);">💬 Gestion des avis & feedbacks</h2>
-              <p class="text-sm mt-1" style="color:var(--text-3);">{{ feedbacks.length }} avis au total</p>
-            </div>
-            <button (click)="loadFeedbacks()" class="btn btn-ghost btn-sm">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
-                <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
-              </svg>
-              Actualiser
-            </button>
-          </div>
-
-          <!-- KPIs -->
-          <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div *ngFor="let kpi of [
-              {label:'En attente', statut:'EN_ATTENTE', color:'var(--orange)', dim:'var(--orange-dim)', icon:'⏳'},
-              {label:'En cours',   statut:'EN_COURS',   color:'var(--blue)',   dim:'var(--blue-dim)',   icon:'🔄'},
-              {label:'Résolus',    statut:'RESOLU',     color:'var(--green)',  dim:'var(--green-dim)',  icon:'✅'},
-              {label:'Rejetés',    statut:'REJETE',     color:'var(--red)',    dim:'var(--red-dim)',    icon:'❌'}
-            ]" class="glass p-4 rounded-2xl text-center">
-              <div class="text-2xl mb-1">{{ kpi.icon }}</div>
-              <div class="text-2xl font-bold" [style.color]="kpi.color" style="font-family:'Syne',sans-serif;">
-                {{ getFeedbackCountByStatut(kpi.statut) }}
-              </div>
-              <div class="text-xs mt-1" style="color:var(--text-3);">{{ kpi.label }}</div>
-            </div>
-          </div>
-
-          <!-- Erreur -->
-          <div *ngIf="feedbackError" class="p-3 rounded-xl flex items-center gap-3"
-               style="background:var(--red-dim);border:1px solid rgba(239,68,68,.3);color:var(--red);">
-            <span>⚠️</span><span class="text-sm flex-1">{{ feedbackError }}</span>
-            <button (click)="feedbackError=''" style="background:none;border:none;cursor:pointer;color:var(--red);font-size:18px;">×</button>
-          </div>
-
-          <!-- Filtres -->
-          <div class="glass p-4 rounded-2xl">
-            <div class="flex flex-wrap gap-3 items-end">
-              <div class="flex flex-col gap-1">
-                <label class="text-xs font-semibold uppercase tracking-wider" style="color:var(--text-3);">Type d'avis</label>
-                <select [(ngModel)]="fbFiltreType" class="inp" style="min-width:160px;padding:6px 10px;font-size:12px;">
-                  <option value="">— Tous les types —</option>
-                  <option *ngFor="let t of typesAvis" [value]="t.value">{{ t.label }}</option>
-                </select>
-              </div>
-              <div class="flex flex-col gap-1">
-                <label class="text-xs font-semibold uppercase tracking-wider" style="color:var(--text-3);">Statut</label>
-                <select [(ngModel)]="fbFiltreStatut" class="inp" style="min-width:140px;padding:6px 10px;font-size:12px;">
-                  <option value="">— Tous les statuts —</option>
-                  <option *ngFor="let s of statutsAvis" [value]="s.value">{{ s.label }}</option>
-                </select>
-              </div>
-              <button (click)="appliquerFiltresFeedback()" class="btn btn-brand btn-sm">Filtrer</button>
-              <button (click)="reinitialiserFiltresFeedback()" class="btn btn-ghost btn-sm">Réinitialiser</button>
-            </div>
-          </div>
-
-          <!-- Chargement -->
-          <div *ngIf="loadingFeedbacks" class="flex justify-center py-16">
-            <div class="w-8 h-8 rounded-full border-2 animate-spin" style="border-color:var(--brand);border-top-color:transparent;"></div>
-          </div>
-
-          <!-- Aucun résultat -->
-          <div *ngIf="!loadingFeedbacks && feedbacksFiltres.length === 0" class="glass p-12 rounded-2xl text-center">
-            <div class="text-5xl mb-4">📭</div>
-            <p class="font-semibold" style="color:var(--text);">Aucun feedback trouvé</p>
-            <p class="text-sm mt-1" style="color:var(--text-3);">Modifiez les filtres ou cliquez sur Actualiser.</p>
-          </div>
-
-          <!-- Table -->
-          <div *ngIf="!loadingFeedbacks && feedbacksFiltres.length > 0" class="glass rounded-2xl overflow-hidden">
-            <div class="scroll-x">
-              <table class="tbl">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Email</th>
-                    <th>Type</th>
-                    <th>Rôle</th>
-                    <th>Statut</th>
-                    <th>Date</th>
-                    <th style="text-align:center;">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let fb of feedbacksFiltres" class="tbl-row">
-
-                    <td><span class="text-xs font-mono" style="color:var(--text-3);">#{{ fb.idFeedback }}</span></td>
-
-                    <td>
-                      <div class="flex items-center gap-2">
-                        <div class="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
-                             style="background:var(--brand);">
-                          {{ fb.email.charAt(0).toUpperCase() }}
-                        </div>
-                        <span class="text-sm" style="color:var(--text);">{{ fb.email }}</span>
-                      </div>
-                    </td>
-
-                    <td>
-                      <span class="badge b-brand text-xs">{{ getTypeLabel(fb.typeAvis) }}</span>
-                    </td>
-
-                    <td><span class="text-xs" style="color:var(--text-2);">{{ fb.roleAuteur ?? 'Anonyme' }}</span></td>
-
-                    <td>
-                      <span class="badge text-xs"
-                            [style.background]="getStatutDim(fb.statut ?? '')"
-                            [style.color]="getStatutColor(fb.statut ?? '')">
-                        {{ getStatutLabel(fb.statut ?? '') }}
-                      </span>
-                    </td>
-
-                    <td><span class="text-xs" style="color:var(--text-3);">{{ fb.dateCreation | date:'dd/MM/yy HH:mm' }}</span></td>
-
-                    <td>
-                      <div class="flex items-center justify-center gap-1.5">
-                        <button (click)="ouvrirFeedback(fb)" class="btn btn-ghost btn-sm" style="font-size:11px;">
-                          ✏️ Répondre
-                        </button>
-                        <button (click)="supprimerFeedback(fb.idFeedback!)" class="btn btn-danger btn-sm" style="font-size:11px;" title="Supprimer">
-                          🗑️
-                        </button>
-                      </div>
-                    </td>
-
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-        </div>
-      </ng-container>
-
-      <!-- ================================================================== -->
-      <!-- MODAL DÉTAIL / RÉPONSE FEEDBACK                                      -->
-      <!-- ================================================================== -->
-      <div *ngIf="showFeedbackDetail && feedbackDetail" class="overlay" (click)="fermerFeedbackDetail()">
-        <div class="modal" style="max-width:580px;max-height:90vh;overflow-y:auto;" (click)="$event.stopPropagation()">
-
-          <!-- En-tête -->
-          <div class="flex items-start justify-between gap-3 mb-5">
-            <div>
-              <h4 class="font-bold text-base" style="font-family:'Syne',sans-serif;color:var(--text);">
-                Feedback #{{ feedbackDetail.idFeedback }}
-              </h4>
-              <p class="text-xs mt-0.5" style="color:var(--text-3);">{{ feedbackDetail.dateCreation | date:'dd/MM/yyyy à HH:mm' }}</p>
-            </div>
-            <button (click)="fermerFeedbackDetail()" style="background:none;border:none;cursor:pointer;color:var(--text-3);font-size:20px;">×</button>
-          </div>
-
-          <!-- Infos -->
-          <div class="rounded-2xl p-4 mb-4 space-y-2" style="background:var(--surface-2);border:1px solid var(--border);">
-            <div class="flex justify-between text-sm">
-              <span style="color:var(--text-3);">Email :</span>
-              <strong style="color:var(--text);">{{ feedbackDetail.email }}</strong>
-            </div>
-            <div class="flex justify-between text-sm">
-              <span style="color:var(--text-3);">Rôle :</span>
-              <span style="color:var(--text-2);">{{ feedbackDetail.roleAuteur ?? 'Anonyme' }}</span>
-            </div>
-            <div class="flex justify-between text-sm">
-              <span style="color:var(--text-3);">Type :</span>
-              <span class="badge b-brand text-xs">{{ getTypeLabel(feedbackDetail.typeAvis) }}</span>
-            </div>
-            <div *ngIf="feedbackDetail.coursId" class="flex justify-between text-sm">
-              <span style="color:var(--text-3);">Cours lié :</span>
-              <span style="color:var(--text-2);">#{{ feedbackDetail.coursId }}</span>
-            </div>
-          </div>
-
-          <!-- Message -->
-          <div class="mb-4">
-            <p class="text-xs font-bold uppercase tracking-wider mb-2" style="color:var(--text-3);">Message</p>
-            <div class="rounded-xl p-4" style="background:var(--surface-2);border:1px solid var(--border);">
-              <p class="text-sm leading-relaxed whitespace-pre-wrap" style="color:var(--text-2);">{{ feedbackDetail.message }}</p>
-            </div>
-          </div>
-
-          <!-- Succès réponse -->
-          <div *ngIf="reponseSuccess" class="p-3 rounded-xl mb-4 flex items-center gap-2"
-               style="background:var(--green-dim);border:1px solid rgba(16,185,129,.3);color:var(--green);">
-            <span>✅</span><span class="text-sm">{{ reponseSuccess }}</span>
-          </div>
-
-          <!-- Formulaire réponse -->
-          <div class="space-y-4">
-            <p class="text-xs font-bold uppercase tracking-wider" style="color:var(--text-3);">Traitement</p>
-
-            <div>
-              <label class="block text-xs font-semibold mb-1" style="color:var(--text-3);">Nouveau statut</label>
-              <select [(ngModel)]="reponseForm.statut" class="inp">
-                <option *ngFor="let s of statutsAvis" [value]="s.value">{{ s.label }}</option>
-              </select>
-            </div>
-
-            <div>
-              <label class="block text-xs font-semibold mb-1" style="color:var(--text-3);">
-                Réponse à l'utilisateur <span style="color:var(--text-4);">(optionnel)</span>
-              </label>
-              <textarea [(ngModel)]="reponseForm.reponseAdmin" rows="4" class="inp resize-none"
-                        placeholder="Votre réponse sera visible par l'utilisateur..."
-                        maxlength="2000" style="font-size:13px;"></textarea>
-              <div class="text-xs text-right mt-1" style="color:var(--text-3);">
-                {{ reponseForm.reponseAdmin.length }} / 2000
-              </div>
-            </div>
-          </div>
-
-          <div class="flex gap-3 justify-end mt-5">
-            <button (click)="fermerFeedbackDetail()" class="btn btn-ghost">Annuler</button>
-            <button (click)="envoyerReponse()" class="btn btn-brand"
-                    [disabled]="reponseLoading || !reponseForm.statut">
-              <span *ngIf="!reponseLoading">✅ Enregistrer</span>
-              <span *ngIf="reponseLoading" class="flex items-center gap-2">
-                <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                </svg>
-                Enregistrement...
-              </span>
-            </button>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- ================================================================== -->
-      <!-- NOTIFS TAB                                                           -->
-      <!-- ================================================================== -->
-      <ng-container *ngIf="activeTab==='notifs'">
-        <div class="animate-fade-in space-y-4">
-          <div class="flex items-center justify-between">
-            <div>
-              <h2 class="text-2xl font-bold" style="font-family:'Syne',sans-serif;color:var(--text);">Notifications</h2>
-              <p class="text-sm" style="color:var(--text-2);">Gérez les communications envoyées aux utilisateurs.</p>
-            </div>
-            <button class="btn btn-brand">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              Envoyer une notification
-            </button>
-          </div>
-          <div class="space-y-3">
-            <div *ngFor="let n of [
-              {icon:'🎉',title:'Nouveau cours disponible',msg:'Le cours Probabilités a été publié.',target:'Tous les apprenants', time:'Il y a 2h',   type:'info'},
-              {icon:'⚠️',title:'Validation requise',     msg:'3 enseignants attendent validation.', target:'Administrateurs',    time:'Il y a 5h',   type:'warning'},
-              {icon:'✅',title:'Compte validé',           msg:'Prof. Alaoui a été validé.',          target:'Enseignants',        time:'Hier',         type:'success'},
-              {icon:'📢',title:'Mise à jour plateforme', msg:'Nouvelles fonctionnalités disponibles.',target:'Tous',              time:'Il y a 2j',    type:'info'}
-            ]" class="glass rounded-2xl p-4 flex items-start gap-4">
-              <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
-                   [style.background]="n.type==='warning'?'var(--orange-dim)':n.type==='success'?'var(--green-dim)':'var(--blue-dim)'">{{n.icon}}</div>
-              <div class="flex-1">
-                <div class="font-semibold text-sm mb-0.5" style="color:var(--text);">{{n.title}}</div>
-                <div class="text-sm mb-2" style="color:var(--text-2);">{{n.msg}}</div>
-                <div class="flex items-center gap-3 text-xs" style="color:var(--text-3);">
-                  <span>👥 {{n.target}}</span>
-                  <span>🕐 {{n.time}}</span>
-                </div>
-              </div>
-              <button class="btn btn-ghost btn-sm flex-shrink-0">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-              </button>
-            </div>
-          </div>
-        </div>
-      </ng-container>
 
     </main>
   </div>
-
-  <!-- ══════════════════════════════════════════════════════════════════════ -->
-  <!-- MODALS                                                                  -->
-  <!-- ══════════════════════════════════════════════════════════════════════ -->
-
-  <!-- MODAL — Catégorie -->
-  <div *ngIf="showCatModal" class="fixed inset-0 z-50 flex items-center justify-center p-4"
-       style="background:rgba(0,0,0,.6);backdrop-filter:blur(8px);" (click)="showCatModal=false">
-    <div class="glass rounded-3xl p-6 w-full max-w-md animate-scale-in" style="max-height:90vh;overflow-y:auto;" (click)="$event.stopPropagation()">
-      <div class="flex items-center justify-between mb-5">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:var(--green-dim);">🏷️</div>
-          <div>
-            <h3 class="font-bold text-lg" style="font-family:'Syne',sans-serif;color:var(--text);">{{editingCat ? 'Modifier la catégorie' : 'Nouvelle catégorie'}}</h3>
-            <p class="text-xs" style="color:var(--text-3);">{{editingCat ? 'Mettez à jour les informations' : 'Ajoutez une nouvelle catégorie'}}</p>
-          </div>
-        </div>
-        <button (click)="showCatModal=false" class="btn btn-ghost btn-sm" style="padding:6px 10px;">✕</button>
-      </div>
-      <form [formGroup]="catForm" (ngSubmit)="submitCat()" class="space-y-4">
-        <div>
-          <label class="block text-sm font-semibold mb-1.5" style="color:var(--text-2);">Nom <span style="color:var(--red);">*</span></label>
-          <input formControlName="nom" type="text" class="inp" placeholder="Ex: Mathématiques" [class.err]="cf['nom'].invalid && cf['nom'].touched">
-          <div *ngIf="cf['nom'].invalid && cf['nom'].touched" class="text-xs mt-1" style="color:var(--red);">Nom requis (minimum 2 caractères)</div>
-        </div>
-        <div>
-          <label class="block text-sm font-semibold mb-1.5" style="color:var(--text-2);">Description</label>
-          <textarea formControlName="description" class="inp" rows="3" placeholder="Description de la catégorie…" style="resize:vertical;"></textarea>
-        </div>
-        <div class="flex gap-3 pt-2">
-          <button type="button" (click)="showCatModal=false" class="btn btn-ghost flex-1">Annuler</button>
-          <button type="submit" class="btn btn-brand flex-1" [disabled]="catLoading">
-            <svg *ngIf="catLoading" class="animate-spin-slow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
-            {{catLoading ? 'Sauvegarde…' : (editingCat ? 'Mettre à jour' : 'Créer la catégorie')}}
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- MODAL — Module -->
-  <div *ngIf="showModModal" class="fixed inset-0 z-50 flex items-center justify-center p-4"
-       style="background:rgba(0,0,0,.6);backdrop-filter:blur(8px);" (click)="showModModal=false">
-    <div class="glass rounded-3xl p-6 w-full max-w-md animate-scale-in" style="max-height:90vh;overflow-y:auto;" (click)="$event.stopPropagation()">
-      <div class="flex items-center justify-between mb-5">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:var(--brand-dim);">📦</div>
-          <div>
-            <h3 class="font-bold text-lg" style="font-family:'Syne',sans-serif;color:var(--text);">{{editingMod ? 'Modifier le module' : 'Nouveau module'}}</h3>
-            <p class="text-xs" style="color:var(--text-3);">{{editingMod ? 'Mettez à jour les informations' : 'Ajoutez un nouveau module'}}</p>
-          </div>
-        </div>
-        <button (click)="showModModal=false" class="btn btn-ghost btn-sm" style="padding:6px 10px;">✕</button>
-      </div>
-      <form [formGroup]="modForm" (ngSubmit)="submitMod()" class="space-y-4">
-        <div>
-          <label class="block text-sm font-semibold mb-1.5" style="color:var(--text-2);">Nom <span style="color:var(--red);">*</span></label>
-          <input formControlName="nom" type="text" class="inp" placeholder="Ex: Algèbre linéaire" [class.err]="mf['nom'].invalid && mf['nom'].touched">
-          <div *ngIf="mf['nom'].invalid && mf['nom'].touched" class="text-xs mt-1" style="color:var(--red);">Nom requis (minimum 2 caractères)</div>
-        </div>
-        <div>
-          <label class="block text-sm font-semibold mb-1.5" style="color:var(--text-2);">
-            Code <span style="color:var(--red);">*</span>
-            <span class="text-xs font-normal ml-1" style="color:var(--text-3);">(Ex: SPR-1, ML-2)</span>
-          </label>
-          <input formControlName="code" type="text" class="inp" placeholder="Ex: ALG-1"
-                 style="text-transform:uppercase;font-family:'JetBrains Mono',monospace;"
-                 (input)="mf['code'].setValue(mf['code'].value?.toUpperCase())"
-                 [class.err]="mf['code'].invalid && mf['code'].touched">
-          <div *ngIf="mf['code'].invalid && mf['code'].touched" class="text-xs mt-1" style="color:var(--red);">Format : 2–10 lettres majuscules, tiret, chiffre(s)</div>
-        </div>
-        <div>
-          <label class="block text-sm font-semibold mb-1.5" style="color:var(--text-2);">Description <span style="color:var(--red);">*</span></label>
-          <textarea formControlName="description" class="inp" rows="3" placeholder="Description du module…" style="resize:vertical;" [class.err]="mf['description'].invalid && mf['description'].touched"></textarea>
-          <div *ngIf="mf['description'].invalid && mf['description'].touched" class="text-xs mt-1" style="color:var(--red);">Description requise</div>
-        </div>
-        <div>
-          <label class="block text-sm font-semibold mb-1.5" style="color:var(--text-2);">Catégorie</label>
-          <select formControlName="categorieId" class="inp" style="cursor:pointer;">
-            <option [ngValue]="null">— Aucune catégorie —</option>
-            <option *ngFor="let cat of categories" [ngValue]="cat.id">{{cat.nom}}</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-sm font-semibold mb-1.5" style="color:var(--text-2);">Statut <span style="color:var(--red);">*</span></label>
-          <select formControlName="statut" class="inp" style="cursor:pointer;">
-            <option value="ACTIF">✅ Actif — visible par les apprenants</option>
-            <option value="BROUILLON">📝 Brouillon — masqué aux apprenants</option>
-            <option value="ARCHIVE">📦 Archivé — masqué aux apprenants</option>
-          </select>
-          <p class="text-xs mt-1" style="color:var(--text-3);">Un module en Brouillon ou Archivé masque aussi tous ses cours.</p>
-        </div>
-        <div class="flex gap-3 pt-2">
-          <button type="button" (click)="showModModal=false" class="btn btn-ghost flex-1">Annuler</button>
-          <button type="submit" class="btn btn-brand flex-1" [disabled]="modLoading">
-            <svg *ngIf="modLoading" class="animate-spin-slow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
-            {{modLoading ? 'Sauvegarde…' : (editingMod ? 'Mettre à jour' : 'Créer le module')}}
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- MODAL — Cours -->
-  <div *ngIf="showCoursModal" class="fixed inset-0 z-50 flex items-center justify-center p-4"
-       style="background:rgba(0,0,0,.6);backdrop-filter:blur(8px);" (click)="showCoursModal=false">
-    <div class="glass rounded-3xl p-6 w-full max-w-md animate-scale-in" style="max-height:90vh;overflow-y:auto;" (click)="$event.stopPropagation()">
-      <div class="flex items-center justify-between mb-5">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:var(--blue-dim);">📚</div>
-          <div>
-            <h3 class="font-bold text-lg" style="font-family:'Syne',sans-serif;color:var(--text);">{{editingCours ? 'Modifier le cours' : 'Nouveau cours'}}</h3>
-            <p class="text-xs" style="color:var(--text-3);">{{editingCours ? 'Mettez à jour les informations' : 'Ajoutez un nouveau cours'}}</p>
-          </div>
-        </div>
-        <button (click)="showCoursModal=false" class="btn btn-ghost btn-sm" style="padding:6px 10px;">✕</button>
-      </div>
-      <form [formGroup]="coursForm" (ngSubmit)="submitCours()" class="space-y-4">
-        <div>
-          <label class="block text-sm font-semibold mb-1.5" style="color:var(--text-2);">Titre <span style="color:var(--red);">*</span></label>
-          <input formControlName="titre" type="text" class="inp" placeholder="Ex: Introduction aux intégrales" [class.err]="ff['titre'].invalid && ff['titre'].touched">
-          <div *ngIf="ff['titre'].invalid && ff['titre'].touched" class="text-xs mt-1" style="color:var(--red);">Titre requis (minimum 3 caractères)</div>
-        </div>
-        <div>
-          <label class="block text-sm font-semibold mb-1.5" style="color:var(--text-2);">Description <span style="color:var(--red);">*</span></label>
-          <textarea formControlName="description" class="inp" rows="3" placeholder="Description du cours…" style="resize:vertical;" [class.err]="ff['description'].invalid && ff['description'].touched"></textarea>
-          <div *ngIf="ff['description'].invalid && ff['description'].touched" class="text-xs mt-1" style="color:var(--red);">Description requise</div>
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-sm font-semibold mb-1.5" style="color:var(--text-2);">Niveau <span style="color:var(--red);">*</span></label>
-            <select formControlName="niveau" class="inp" style="cursor:pointer;">
-              <option value="DEBUTANT">🟢 Débutant</option>
-              <option value="INTERMEDIAIRE">🟡 Intermédiaire</option>
-              <option value="AVANCE">🔴 Avancé</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-sm font-semibold mb-1.5" style="color:var(--text-2);">Statut</label>
-            <select formControlName="statut" class="inp" style="cursor:pointer;">
-              <option value="BROUILLON">📝 Brouillon</option>
-              <option value="PUBLIE">🟢 Publié</option>
-              <option value="ARCHIVE">📦 Archivé</option>
-            </select>
-          </div>
-        </div>
-        <div>
-          <label class="block text-sm font-semibold mb-1.5" style="color:var(--text-2);">Module <span style="color:var(--red);">*</span></label>
-          <select formControlName="moduleId" class="inp" style="cursor:pointer;" [class.err]="ff['moduleId'].invalid && ff['moduleId'].touched">
-            <option [ngValue]="null">— Sélectionner un module —</option>
-            <option *ngFor="let mod of modules" [ngValue]="mod.id">{{mod.nom}} ({{mod.code}})</option>
-          </select>
-          <div *ngIf="ff['moduleId'].invalid && ff['moduleId'].touched" class="text-xs mt-1" style="color:var(--red);">Module requis</div>
-        </div>
-        <div>
-          <label class="block text-sm font-semibold mb-1.5" style="color:var(--text-2);">Durée (minutes)</label>
-          <input formControlName="dureeMinutes" type="number" class="inp" placeholder="Ex: 90" min="1">
-        </div>
-        <div class="flex gap-3 pt-2">
-          <button type="button" (click)="showCoursModal=false" class="btn btn-ghost flex-1">Annuler</button>
-          <button type="submit" class="btn btn-brand flex-1" [disabled]="coursLoading">
-            <svg *ngIf="coursLoading" class="animate-spin-slow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
-            {{coursLoading ? 'Sauvegarde…' : (editingCours ? 'Mettre à jour' : 'Créer le cours')}}
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- MODAL — Confirmation suppression contenu -->
-  <div *ngIf="deleteTarget" class="fixed inset-0 z-50 flex items-center justify-center p-4"
-       style="background:rgba(0,0,0,.6);backdrop-filter:blur(8px);" (click)="cancelDeleteContent()">
-    <div class="glass rounded-3xl p-6 w-full max-w-sm text-center animate-scale-in" (click)="$event.stopPropagation()">
-      <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4" style="background:var(--red-dim);">🗑️</div>
-      <h3 class="font-bold text-lg mb-2" style="font-family:'Syne',sans-serif;color:var(--text);">Confirmer la suppression</h3>
-      <p class="text-sm mb-5" style="color:var(--text-2);">
-        Supprimer <strong style="color:var(--text);">{{deleteTarget.name}}</strong> ?<br>
-        <span style="color:var(--text-3);">Cette action est irréversible.</span>
-      </p>
-      <div class="flex gap-3">
-        <button (click)="cancelDeleteContent()" class="btn btn-ghost flex-1">Annuler</button>
-        <button (click)="executeDeleteContent()" class="btn flex-1" style="background:var(--red);color:white;">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
-          Supprimer
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL — Confirmation suppression utilisateur -->
-  <div *ngIf="deleteConfirmId!==null" class="fixed inset-0 z-50 flex items-center justify-center p-4"
-       style="background:rgba(0,0,0,.6);backdrop-filter:blur(8px);" (click)="cancelDelete()">
-    <div class="glass rounded-3xl p-6 w-full max-w-sm text-center animate-scale-in" (click)="$event.stopPropagation()">
-      <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4" style="background:var(--red-dim);">👤</div>
-      <h3 class="font-bold text-lg mb-2" style="font-family:'Syne',sans-serif;color:var(--text);">Supprimer cet utilisateur ?</h3>
-      <p class="text-sm mb-5" style="color:var(--text-2);">Cette action est irréversible. L'utilisateur sera définitivement supprimé de la plateforme.</p>
-      <div class="flex gap-3">
-        <button (click)="cancelDelete()" class="btn btn-ghost flex-1">Annuler</button>
-        <button (click)="deleteConfirmed()" class="btn btn-danger flex-1">Supprimer</button>
-      </div>
-    </div>
-  </div>
-
 </div>

@@ -6,13 +6,12 @@ import { NavbarComponent } from '../../shared/components/navbar/navbar.component
 import { TokenService } from '../../core/services/token.service';
 import { UserStateService } from '../../core/services/user-state.service';
 import { CatalogueService } from '../../core/services/catalogue.service';
-import { FeedbackService } from '../../core/services/feedback.service';
+import { InscriptionService } from '../../core/services/inscription.service';
 import { CategorieDTO } from '../../models/categorie.model';
 import { ModuleDTO, StatutModule } from '../../models/module.model';
 import { CoursDTO, Niveau, StatutCours } from '../../models/cours.model';
-import { FeedbackDTO, TypeAvis, TYPE_AVIS_LABELS, STATUT_LABELS, STATUT_BADGE } from '../../models/feedback.model';
+import { ApprenantInscritDTO } from '../../models/apprenant-inscrit.model';
 
-// Types de fichiers acceptés
 const ACCEPTED_MIME_TYPES = [
   'application/pdf',
   'video/mp4',
@@ -35,11 +34,13 @@ export class DashboardEnseignantComponent implements OnInit {
   userEmail     = '';
   activeSection = 'accueil';
 
+  enseignantConnecteId: number | null = null;
+
   stats = [
-    { icon: '📘', value: '0', label: 'Cours publiés',       color: 'var(--blue)',   dim: 'var(--blue-dim)'   },
-    { icon: '🗂',  value: '0', label: 'Catégories',          color: 'var(--green)',  dim: 'var(--green-dim)'  },
-    { icon: '📦', value: '0', label: 'Modules',             color: 'var(--brand)',  dim: 'var(--brand-dim)'  },
-    { icon: '👥', value: '–', label: 'Étudiants inscrits',  color: 'var(--orange)', dim: 'var(--orange-dim)' },
+    { icon: '📘', value: '0', label: 'Cours publiés',      color: 'var(--blue)',   dim: 'var(--blue-dim)'   },
+    { icon: '🗂',  value: '0', label: 'Catégories',         color: 'var(--green)',  dim: 'var(--green-dim)'  },
+    { icon: '📦', value: '0', label: 'Modules',            color: 'var(--brand)',  dim: 'var(--brand-dim)'  },
+    { icon: '👥', value: '–', label: 'Étudiants inscrits', color: 'var(--orange)', dim: 'var(--orange-dim)' },
   ];
 
   categories: CategorieDTO[] = [];
@@ -73,37 +74,15 @@ export class DashboardEnseignantComponent implements OnInit {
   coursForm!: FormGroup;
   coursLoading = false;
 
-  // ── Upload fichier (PDF ou vidéo) ──
+  // ── Upload fichier ──
   selectedFile: File | null = null;
   uploadingId: number | null = null;
   uploadLoading = false;
-  fileAcceptLabel = 'PDF ou vidéo (mp4, webm…)';
 
   niveaux:  Niveau[]      = ['DEBUTANT', 'INTERMEDIAIRE', 'AVANCE'];
   statuts:  StatutCours[] = ['BROUILLON', 'PUBLIE', 'ARCHIVE'];
 
-  // ── Feedback (envoi) ────────────────────────────────────────────────────────
-  showFeedbackModal   = false;
-  feedbackCoursId: number | null = null;
-  fbEmail   = '';
-  fbType: TypeAvis | '' = '';
-  fbMessage = '';
-  fbLoading = false;
-  fbSuccess = '';
-  fbError   = '';
-
-  readonly typesAvis: { value: TypeAvis; label: string }[] =
-    Object.entries(TYPE_AVIS_LABELS).map(([v, l]) => ({ value: v as TypeAvis, label: l }));
-
-  // ── Avis reçus (lecture) ───────────────────────────────────────────────────
-  avisCoursLoading  = false;
-  avisCoursListe:   FeedbackDTO[] = [];
-  avisCoursCourant: number | null = null;
-
-  // ── Section Contenu – Navigation hiérarchique ──────────────────────────────
-  // Niveau 0 : liste des catégories
-  // Niveau 1 : modules de la catégorie sélectionnée
-  // Niveau 2 : cours du module sélectionné
+  // ── Section Contenu ──
   contenuNiveau: 0 | 1 | 2 = 0;
   contenuCategorieSelectee: CategorieDTO | null = null;
   contenuModuleSelectionne: ModuleDTO | null    = null;
@@ -112,27 +91,40 @@ export class DashboardEnseignantComponent implements OnInit {
   contenuLoadingModules = false;
   contenuLoadingCours   = false;
 
+
+  // ── Mes Apprenants ──────────────────────────────────────────────────────────
+  mesApprenants:        ApprenantInscritDTO[] = [];
+  apprenantsDuModule:   ApprenantInscritDTO[] = [];
+  loadingApprenants     = false;
+  apprenantError        = '';
+  /** moduleId sélectionné pour voir ses apprenants */
+  moduleSelectionneId:  number | null = null;
+  moduleSelectionneNom: string = '';
+  /** Recherche dans la liste d'apprenants */
+  apprenantSearch       = '';
+
   constructor(
-    private tokenService: TokenService,
+    private tokenService:     TokenService,
     private userStateService: UserStateService,
     private catalogueService: CatalogueService,
-    private feedbackService: FeedbackService,
-    private fb: FormBuilder,
-    private cdr: ChangeDetectorRef
+    private fb:               FormBuilder,
+    private inscriptionService: InscriptionService,
+    private cdr:              ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
     this.userName  = this.tokenService.getDisplayName();
     this.userEmail = this.tokenService.getUser()?.email ?? '';
+    this.enseignantConnecteId = this.tokenService.getEnseignantId();
     this.userStateService.user$.subscribe(() => {
       this.userName  = this.userStateService.getDisplayName();
       this.userEmail = this.tokenService.getUser()?.email ?? '';
+      this.enseignantConnecteId = this.tokenService.getEnseignantId();
     });
     this.buildForms();
     this.loadAll();
+    this.loadMesApprenants();
   }
-
-  // ── Build forms ─────────────────────────────────────────────────────────────
 
   private buildForms(): void {
     this.catForm = this.fb.group({
@@ -153,13 +145,11 @@ export class DashboardEnseignantComponent implements OnInit {
       titre:        ['', [Validators.required, Validators.minLength(3)]],
       description:  ['', Validators.required],
       niveau:       ['DEBUTANT', Validators.required],
-      statut:       ['BROUILLON'],
+      statut:       ['PUBLIE'],
       dureeMinutes: [null, [Validators.min(1)]],
       moduleId:     [null, Validators.required],
     });
   }
-
-  // ── Load data ────────────────────────────────────────────────────────────────
 
   loadAll(): void {
     this.loadCategories();
@@ -182,7 +172,7 @@ export class DashboardEnseignantComponent implements OnInit {
 
   loadModules(): void {
     this.loadingModules = true;
-    this.catalogueService.getAllModules().subscribe({
+    this.catalogueService.getMesModules().subscribe({
       next: (data) => {
         this.modules = data;
         this.stats[2].value = String(data.length);
@@ -196,7 +186,7 @@ export class DashboardEnseignantComponent implements OnInit {
   loadCours(): void {
     this.loadingCours = true;
     this.catalogueService.clearCache();
-    this.catalogueService.getAllCours().subscribe({
+    this.catalogueService.getMesCours().subscribe({
       next: (data) => {
         this.cours = data;
         this.stats[0].value = String(data.filter(c => c.statut === 'PUBLIE').length);
@@ -268,7 +258,7 @@ export class DashboardEnseignantComponent implements OnInit {
 
   openCreateCours(): void {
     this.editingCours = null;
-    this.coursForm.reset({ titre: '', description: '', niveau: 'DEBUTANT', statut: 'BROUILLON', dureeMinutes: null, moduleId: null });
+    this.coursForm.reset({ titre: '', description: '', niveau: 'DEBUTANT', statut: 'PUBLIE', dureeMinutes: null, moduleId: null });
     this.selectedFile = null;
     this.showCoursModal = true;
   }
@@ -362,10 +352,6 @@ export class DashboardEnseignantComponent implements OnInit {
     return '📎 Fichier';
   }
 
-  isPdf(filePath?: string): boolean {
-    return !!filePath && filePath.toLowerCase().endsWith('.pdf');
-  }
-
   getViewUrl(cours: CoursDTO): string {
     return cours.idCours ? `/cours/${cours.idCours}` : '#';
   }
@@ -397,89 +383,7 @@ export class DashboardEnseignantComponent implements OnInit {
     });
   }
 
-  // ── Feedback : envoi ────────────────────────────────────────────────────────
-
-  ouvrirFeedbackGlobal(): void {
-    this.feedbackCoursId = null;
-    this._resetFeedbackForm();
-    this.showFeedbackModal = true;
-  }
-
-  fermerFeedback(): void {
-    this.showFeedbackModal = false;
-    this.feedbackCoursId   = null;
-    this._resetFeedbackForm();
-  }
-
-  soumettreFeedback(): void {
-    if (!this.fbEmail || !this.fbType || !this.fbMessage) return;
-    this.fbLoading = true;
-    this.fbError   = '';
-
-    const dto: FeedbackDTO = {
-      email:    this.userEmail || this.fbEmail,
-      typeAvis: this.fbType as TypeAvis,
-      message:  this.fbMessage,
-      coursId:  this.feedbackCoursId ?? undefined,
-    };
-
-    this.feedbackService.soumettreAuthentifie(dto).subscribe({
-      next: () => {
-        this.fbLoading = false;
-        this.fbSuccess = 'Votre avis a bien été envoyé. Merci !';
-        setTimeout(() => this.fermerFeedback(), 2500);
-      },
-      error: (err: Error) => {
-        this.fbLoading = false;
-        this.fbError   = err.message;
-      }
-    });
-  }
-
-  private _resetFeedbackForm(): void {
-    this.fbEmail   = this.userEmail;
-    this.fbType    = '';
-    this.fbMessage = '';
-    this.fbLoading = false;
-    this.fbSuccess = '';
-    this.fbError   = '';
-  }
-
-  // ── Avis reçus sur un cours ─────────────────────────────────────────────────
-
-  chargerAvisCours(coursId: number): void {
-    this.avisCoursCourant = coursId;
-    this.avisCoursLoading = true;
-    this.avisCoursListe   = [];
-    this.feedbackService.getByCours(coursId).subscribe({
-      next: (liste) => {
-        this.avisCoursListe   = liste;
-        this.avisCoursLoading = false;
-        this.setSection('avis-cours');
-        this.cdr.detectChanges();
-      },
-      error: () => { this.avisCoursLoading = false; }
-    });
-  }
-
-  getTypeLabel(type: string): string   { return (TYPE_AVIS_LABELS as any)[type] ?? type; }
-  getStatutLabel(s: string): string    { return (STATUT_LABELS as any)[s] ?? s; }
-  getStatutBadgeColor(s: string): string {
-    const map: Record<string, string> = {
-      EN_ATTENTE: 'var(--orange)', EN_COURS: 'var(--blue)',
-      RESOLU: 'var(--green)',      REJETE:  'var(--red)',
-    };
-    return map[s] ?? 'var(--text-3)';
-  }
-  getStatutBadgeDim(s: string): string {
-    const map: Record<string, string> = {
-      EN_ATTENTE: 'var(--orange-dim)', EN_COURS: 'var(--blue-dim)',
-      RESOLU: 'var(--green-dim)',      REJETE:  'var(--red-dim)',
-    };
-    return map[s] ?? 'var(--surface-2)';
-  }
-
-  // ── Section Contenu – Méthodes de navigation hiérarchique ──────────────────
+  // ── Section Contenu ──────────────────────────────────────────────────────────
 
   ouvrirContenu(): void {
     this.contenuNiveau = 0;
@@ -534,7 +438,20 @@ export class DashboardEnseignantComponent implements OnInit {
 
   getModName(id?: number): string {
     if (!id) return '–';
-    return this.modules.find(m => m.id === id)?.nom ?? '–';
+    return (
+      this.modules.find(m => m.id === id)?.nom ??
+      this.contenuModules.find(m => m.id === id)?.nom ?? '–'
+    );
+  }
+
+  isMonModule(mod: ModuleDTO): boolean {
+    if (this.enseignantConnecteId === null) return false;
+    return mod.enseignantId === this.enseignantConnecteId;
+  }
+
+  isMonCours(c: CoursDTO): boolean {
+    if (this.enseignantConnecteId === null) return false;
+    return c.enseignantId === this.enseignantConnecteId;
   }
 
   getNiveauColor(n: Niveau | undefined): string {
@@ -572,4 +489,122 @@ export class DashboardEnseignantComponent implements OnInit {
   get cf() { return this.catForm.controls;   }
   get mf() { return this.modForm.controls;   }
   get ff() { return this.coursForm.controls; }
+
+  private _colors = [
+    { color: 'var(--blue)',   dim: 'var(--blue-dim)',   icon: '💻' },
+    { color: 'var(--brand)',  dim: 'var(--brand-dim)',  icon: '🎯' },
+    { color: 'var(--green)',  dim: 'var(--green-dim)',  icon: '🔬' },
+    { color: 'var(--orange)', dim: 'var(--orange-dim)', icon: '📐' },
+    { color: 'var(--purple)', dim: 'var(--purple-dim)', icon: '🌐' },
+  ];
+
+  getCatStyle(i: number) { return this._colors[i % this._colors.length]; }
+  getModColor(i: number) { return this._colors[i % this._colors.length]; }
+
+  getModStatutStyle(mod: ModuleDTO): { bg: string; border: string; color: string; label: string } {
+    const s = mod.statut ?? (mod.actif ? 'ACTIF' : 'BROUILLON');
+    const map: Record<string, { bg: string; border: string; color: string; label: string }> = {
+      ACTIF:     { bg: 'var(--green-dim)',  border: 'var(--green)',  color: 'var(--green)',  label: '✅ ACTIF'     },
+      BROUILLON: { bg: 'var(--blue-dim)',   border: 'var(--blue)',   color: 'var(--blue)',   label: '📝 BROUILLON' },
+      ARCHIVE:   { bg: 'var(--surface-2)', border: 'var(--border)', color: 'var(--text-3)', label: '📦 ARCHIVÉ'   },
+    };
+    return map[s] ?? map['BROUILLON'];
+  }
+
+  getCoursStatutStyle(statut?: string): { bg: string; border: string; color: string; label: string } {
+    const map: Record<string, { bg: string; border: string; color: string; label: string }> = {
+      PUBLIE:    { bg: 'var(--green-dim)',  border: 'var(--green)',  color: 'var(--green)',  label: '🟢 Publié'    },
+      BROUILLON: { bg: 'var(--blue-dim)',   border: 'var(--blue)',   color: 'var(--blue)',   label: '📝 Brouillon' },
+      ARCHIVE:   { bg: 'var(--surface-2)', border: 'var(--border)', color: 'var(--text-3)', label: '📦 Archivé'   },
+    };
+    return map[statut ?? ''] ?? map['BROUILLON'];
+  }
+
+  getNiveauStyle(n?: string): { bg: string; color: string; label: string } {
+    const map: Record<string, { bg: string; color: string; label: string }> = {
+      DEBUTANT:      { bg: 'var(--green-dim)',  color: 'var(--green)',  label: '🟢 Débutant'      },
+      INTERMEDIAIRE: { bg: 'var(--orange-dim)', color: 'var(--orange)', label: '🟡 Intermédiaire' },
+      AVANCE:        { bg: 'var(--red-dim)',     color: 'var(--red)',    label: '🔴 Avancé'        },
+    };
+    return map[n ?? ''] ?? map['DEBUTANT'];
+  }
+
+  formatDureeEns(min?: number): string {
+    if (!min) return '—';
+    const h = Math.floor(min / 60), m = min % 60;
+    return h > 0 ? (m > 0 ? `${h}h ${m}min` : `${h}h`) : `${min} min`;
+  }
+
+  formatDateEns(d?: string): string {
+    if (!d) return '—';
+    return new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+  isPdf(filePath?: string): boolean {
+    return !!filePath && filePath.toLowerCase().endsWith('.pdf');
+  }
+
+  // ── Mes Apprenants ──────────────────────────────────────────────────────────
+
+  loadMesApprenants(): void {
+    this.loadingApprenants = true;
+    this.apprenantError    = '';
+    this.inscriptionService.getMesApprenants().subscribe({
+      next: (data) => {
+        this.mesApprenants      = data;
+        this.loadingApprenants  = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.apprenantError    = err.message ?? 'Impossible de charger les apprenants.';
+        this.loadingApprenants = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  chargerApprenantsDuModule(moduleId: number, moduleNom: string): void {
+    this.moduleSelectionneId  = moduleId;
+    this.moduleSelectionneNom = moduleNom;
+    this.apprenantSearch      = '';
+    this.loadingApprenants    = true;
+    this.apprenantError       = '';
+    this.inscriptionService.getApprenantsDuModule(moduleId).subscribe({
+      next: (data) => {
+        this.apprenantsDuModule = data;
+        this.loadingApprenants  = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.apprenantError    = err.message ?? 'Impossible de charger les apprenants.';
+        this.loadingApprenants = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  fermerDetailApprenants(): void {
+    this.moduleSelectionneId  = null;
+    this.moduleSelectionneNom = '';
+    this.apprenantsDuModule   = [];
+    this.apprenantSearch      = '';
+  }
+
+  get apprenantsFiltres(): ApprenantInscritDTO[] {
+    const liste = this.moduleSelectionneId
+      ? this.apprenantsDuModule
+      : this.mesApprenants;
+    if (!this.apprenantSearch.trim()) return liste;
+    const q = this.apprenantSearch.toLowerCase();
+    return liste.filter(a =>
+      String(a.apprenantId).includes(q) ||
+      a.moduleNom.toLowerCase().includes(q) ||
+      a.moduleCode.toLowerCase().includes(q)
+    );
+  }
+
+  getNbApprenantsDuModule(moduleId: number): number {
+    return this.mesApprenants.filter(a => a.moduleId === moduleId).length;
+  }
+
+
 }

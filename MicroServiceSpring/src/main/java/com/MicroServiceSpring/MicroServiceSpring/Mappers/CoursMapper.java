@@ -14,12 +14,11 @@ public class CoursMapper {
         dto.setTitre(cours.getTitre());
         dto.setDescription(cours.getDescription());
         dto.setNiveau(cours.getNiveau());
-        // CORRECTION : statut était absent du mapping
         dto.setStatut(cours.getStatut());
         dto.setDateCreation(cours.getDateCreation());
-        dto.setNombreInscrits(cours.getNombreInscrits());
         dto.setDureeMinutes(cours.getDureeMinutes());
         dto.setFilePath(cours.getFilePath());
+        dto.setEnseignantId(cours.getEnseignantId()); // ← propriétaire
         if (cours.getModule() != null) {
             dto.setModuleId(cours.getModule().getId());
         }
@@ -31,12 +30,11 @@ public class CoursMapper {
         cours.setTitre(dto.getTitre());
         cours.setDescription(dto.getDescription());
         cours.setNiveau(dto.getNiveau());
-        // CORRECTION : statut mappé depuis le DTO
         cours.setStatut(dto.getStatut());
-        cours.setNombreInscrits(dto.getNombreInscrits());
         cours.setDureeMinutes(dto.getDureeMinutes());
         cours.setFilePath(dto.getFilePath());
         cours.setModule(module);
+        // enseignantId est injecté par le service
         return cours;
     }
 
@@ -45,9 +43,9 @@ public class CoursMapper {
         cours.setDescription(dto.getDescription());
         cours.setNiveau(dto.getNiveau());
         cours.setStatut(dto.getStatut());
-        cours.setNombreInscrits(dto.getNombreInscrits());
         cours.setDureeMinutes(dto.getDureeMinutes());
         cours.setFilePath(dto.getFilePath());
         cours.setModule(module);
+        // On ne touche pas à enseignantId lors d'une mise à jour
     }
 }

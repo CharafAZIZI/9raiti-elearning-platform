@@ -73,6 +73,11 @@ export class CatalogueService {
     return this.http.get<ModuleDTO[]>(`${this.api}/modules/categorie/${categorieId}`).pipe(catchError(this.handleError));
   }
 
+  /** Modules appartenant à l'enseignant connecté (dashboard enseignant) */
+  getMesModules(): Observable<ModuleDTO[]> {
+    return this.http.get<ModuleDTO[]>(`${this.api}/modules/mes-modules`).pipe(catchError(this.handleError));
+  }
+
   getModuleById(id: number): Observable<ModuleDTO> {
     return this.http.get<ModuleDTO>(`${this.api}/modules/${id}`).pipe(catchError(this.handleError));
   }
@@ -104,6 +109,11 @@ export class CatalogueService {
 
   getCoursByModule(moduleId: number): Observable<CoursDTO[]> {
     return this.http.get<CoursDTO[]>(`${this.api}/cours/module/${moduleId}`).pipe(catchError(this.handleError));
+  }
+
+  /** Cours appartenant à l'enseignant connecté (dashboard enseignant) */
+  getMesCours(): Observable<CoursDTO[]> {
+    return this.http.get<CoursDTO[]>(`${this.api}/cours/mes-cours`).pipe(catchError(this.handleError));
   }
 
   getCoursPublies(): Observable<CoursDTO[]> {

@@ -4,6 +4,7 @@ import { RouterModule, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { CatalogueService } from '../../core/services/catalogue.service';
+import { InscriptionService } from '../../core/services/inscription.service';
 import { TokenService } from '../../core/services/token.service';
 import { ModuleDTO, StatutModule } from '../../models/module.model';
 
@@ -18,21 +19,28 @@ type Filtre = 'tous' | 'actif' | 'brouillon' | 'archive';
 })
 export class ModulesComponent implements OnInit {
 
-  modules: ModuleDTO[] = [];
+  modules:  ModuleDTO[] = [];
   filtered: ModuleDTO[] = [];
-  loading = true;
+  loading  = true;
   errorMsg = '';
 
   searchQuery = '';
   filtre: Filtre = 'tous';
 
-  role: string = '';
+  role = '';
   get isApprenant()  { return this.role === 'apprenant'; }
   get isEnseignant() { return this.role === 'enseignant'; }
   get isAdmin()      { return this.role === 'admin'; }
 
   categorieId: number | null = null;
   categorieNom = '';
+
+  // ── Inscriptions (apprenant uniquement) ────────────────────────────────
+  /** Map<moduleId, estInscrit> */
+  inscriptionStatus  = new Map<number, boolean>();
+  /** Map<moduleId, enChargement> */
+  inscriptionLoading = new Map<number, boolean>();
+  toast: { type: 'success' | 'error'; text: string } | null = null;
 
   private colors = [
     { color: 'var(--blue)',   dim: 'var(--blue-dim)'   },
@@ -43,9 +51,10 @@ export class ModulesComponent implements OnInit {
   ];
 
   constructor(
-    private catalogueService: CatalogueService,
-    private route: ActivatedRoute,
-    private tokenService: TokenService
+    private catalogueService:   CatalogueService,
+    private inscriptionService: InscriptionService,
+    private route:              ActivatedRoute,
+    private tokenService:       TokenService
   ) {}
 
   ngOnInit(): void {
@@ -61,15 +70,16 @@ export class ModulesComponent implements OnInit {
 
     obs$.subscribe({
       next: (data) => {
-        if (this.isApprenant) {
-          // Apprenant: uniquement les modules ACTIFS (actif === true)
-          this.modules = data.filter(m => this.getStatutModule(m) === 'ACTIF');
-        } else {
-          // Enseignant et Admin: tous les modules, tous statuts
-          this.modules = data;
-        }
+        this.modules = this.isApprenant
+          ? data.filter(m => this.getStatutModule(m) === 'ACTIF')
+          : data;
         this.applyFilters();
         this.loading = false;
+
+        // Charger les statuts d inscription pour l apprenant
+        if (this.isApprenant) {
+          this.loadInscriptionStatuses();
+        }
       },
       error: () => {
         this.errorMsg = 'Impossible de charger les modules.';
@@ -78,29 +88,88 @@ export class ModulesComponent implements OnInit {
     });
   }
 
-  /** Détermine le statut réel d'un module (priorité au champ statut, sinon actif booléen) */
+  // ── Inscription helpers ───────────────────────────────────────────────
+
+  private loadInscriptionStatuses(): void {
+    this.modules.forEach(mod => {
+      if (!mod.id) return;
+      this.inscriptionService.estInscrit(mod.id).subscribe({
+        next:  (v) => this.inscriptionStatus.set(mod.id!, v),
+        error: ()  => this.inscriptionStatus.set(mod.id!, false)
+      });
+    });
+  }
+
+  estInscrit(moduleId: number): boolean {
+    return this.inscriptionStatus.get(moduleId) ?? false;
+  }
+
+  isLoading(moduleId: number): boolean {
+    return this.inscriptionLoading.get(moduleId) ?? false;
+  }
+
+  toggleInscription(mod: ModuleDTO): void {
+    if (!mod.id) return;
+    const id = mod.id;
+    this.inscriptionLoading.set(id, true);
+    this.toast = null;
+
+    if (this.estInscrit(id)) {
+      this.inscriptionService.desinscrire(id).subscribe({
+        next: () => {
+          this.inscriptionStatus.set(id, false);
+          this.inscriptionLoading.set(id, false);
+          this.showToast('success', `Vous vous etes desinsrit de "${mod.nom}".`);
+        },
+        error: (err) => {
+          this.inscriptionLoading.set(id, false);
+          this.showToast('error', err.message ?? 'Erreur lors de la desinscription.');
+        }
+      });
+    } else {
+      this.inscriptionService.inscrire(id).subscribe({
+        next: () => {
+          this.inscriptionStatus.set(id, true);
+          this.inscriptionLoading.set(id, false);
+          this.showToast('success', `Inscription au module "${mod.nom}" confirmee !`);
+        },
+        error: (err) => {
+          this.inscriptionLoading.set(id, false);
+          this.showToast('error', err.message ?? "Erreur lors de l inscription.");
+        }
+      });
+    }
+  }
+
+  private showToast(type: 'success' | 'error', text: string): void {
+    this.toast = { type, text };
+    setTimeout(() => { this.toast = null; }, 4000);
+  }
+
+  // ── Filtre & Search ───────────────────────────────────────────────────
+
   getStatutModule(m: ModuleDTO): StatutModule {
     if (m.statut) return m.statut;
     return m.actif ? 'ACTIF' : 'BROUILLON';
   }
 
   applyFilters(): void {
-    let result = [...this.modules];
+    let r = [...this.modules];
     if (!this.isApprenant) {
-      if (this.filtre === 'actif')     result = result.filter(m => this.getStatutModule(m) === 'ACTIF');
-      if (this.filtre === 'brouillon') result = result.filter(m => this.getStatutModule(m) === 'BROUILLON');
-      if (this.filtre === 'archive')   result = result.filter(m => this.getStatutModule(m) === 'ARCHIVE');
+      if (this.filtre === 'actif')     r = r.filter(m => this.getStatutModule(m) === 'ACTIF');
+      if (this.filtre === 'brouillon') r = r.filter(m => this.getStatutModule(m) === 'BROUILLON');
+      if (this.filtre === 'archive')   r = r.filter(m => this.getStatutModule(m) === 'ARCHIVE');
     }
     const q = this.searchQuery.toLowerCase().trim();
-    if (q) result = result.filter(m =>
+    if (q) r = r.filter(m =>
       m.nom.toLowerCase().includes(q) ||
       m.description.toLowerCase().includes(q) ||
       m.code.toLowerCase().includes(q));
-    this.filtered = result;
+    this.filtered = r;
   }
 
   setFiltre(f: Filtre): void { this.filtre = f; this.applyFilters(); }
-  onSearch(): void { this.applyFilters(); }
+  onSearch(): void  { this.applyFilters(); }
   clearSearch(): void { this.searchQuery = ''; this.applyFilters(); }
 
   get actifCount()    { return this.modules.filter(m => this.getStatutModule(m) === 'ACTIF').length; }
@@ -111,7 +180,7 @@ export class ModulesComponent implements OnInit {
 
   statutLabel(m: ModuleDTO): string {
     const s = this.getStatutModule(m);
-    const map: Record<StatutModule, string> = { ACTIF: '✅ Actif', BROUILLON: '📝 Brouillon', ARCHIVE: '📦 Archivé' };
+    const map: Record<StatutModule, string> = { ACTIF: 'Actif', BROUILLON: 'Brouillon', ARCHIVE: 'Archive' };
     return map[s];
   }
 

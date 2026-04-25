@@ -29,7 +29,6 @@ public class Cours {
     @Enumerated(EnumType.STRING)
     private Niveau niveau;
 
-    // CORRECTION : StatutCours est un enum — ne pas le stocker/comparer comme String
     @Enumerated(EnumType.STRING)
     @Column(name = "statut")
     private StatutCours statut;
@@ -38,12 +37,16 @@ public class Cours {
     @Column(name = "date_creation", updatable = false)
     private LocalDateTime dateCreation;
 
-    private Integer nombreInscrits;
-
     private Integer dureeMinutes;
 
     @Column(name = "file_path")
     private String filePath;
+
+    /**
+     * ID de l'enseignant propriétaire (claim NameIdentifier du JWT .NET).
+     */
+    @Column(name = "enseignant_id")
+    private Long enseignantId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "module_id")

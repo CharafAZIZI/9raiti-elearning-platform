@@ -20,6 +20,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   /* ── State ─────────────────────────────────────────────── */
   isLoggedIn   = false;
+  userRole     = '';
   navOpen      = false;
   scrolled     = false;
   activeCatId: number | null = null;
@@ -120,7 +121,9 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.isLoggedIn = this.auth.isLoggedIn();
+    this.userRole   = this.auth.getRole()?.toLowerCase() ?? '';
     this.userStateService.user$.subscribe(u => {
+      this.userRole = u?.role?.toLowerCase() ?? '';
       this.isLoggedIn = !!u && this.auth.isLoggedIn();
     });
     this.loadCatalogue();
@@ -159,12 +162,20 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.startSlider();
   }
 
+  /** Retourne la route du dashboard selon le rôle connecté */
+  getDashboardRoute(): string {
+    if (this.userRole === 'apprenant')  return '/dashboard-apprenant';
+    if (this.userRole === 'enseignant') return '/dashboard-enseignant';
+    if (this.userRole === 'admin')      return '/dashboard-admin';
+    return '/categories';
+  }
+
   /** CTA → login si non connecté, sinon dashboard selon rôle */
   ctaAction(): void {
     if (!this.isLoggedIn) {
       this.router.navigate(['/login']);
     } else {
-      this.router.navigate(['/categories']);
+      this.router.navigateByUrl(this.getDashboardRoute());
     }
   }
 

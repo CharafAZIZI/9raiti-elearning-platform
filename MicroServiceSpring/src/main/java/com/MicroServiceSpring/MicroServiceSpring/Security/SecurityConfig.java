@@ -1,4 +1,5 @@
 package com.MicroServiceSpring.MicroServiceSpring.Security;
+
 import com.MicroServiceSpring.MicroServiceSpring.Filters.JwtAuthenticationFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,32 +28,30 @@ public class SecurityConfig {
         http
                 .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
-
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
                 .authorizeHttpRequests(auth -> auth
 
-                        // ── PUBLIC : catalogue visible sans connexion ─────────
+                        // ── PUBLIC : catalogue ────────────────────────────────────────────
                         .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/modules/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/cours/**").permitAll()
 
-                        // ── PUBLIC : soumission anonyme de feedback (page Home) ─
-                        .requestMatchers(HttpMethod.POST, "/api/feedbacks/anonyme").permitAll()
+                        // ── APPRENANT : ses inscriptions ──────────────────────────────────
+                        .requestMatchers(HttpMethod.GET,    "/api/inscriptions/mes-inscriptions").hasRole("APPRENANT")
+                        .requestMatchers(HttpMethod.GET,    "/api/inscriptions/status/**").hasRole("APPRENANT")
+                        .requestMatchers(HttpMethod.POST,   "/api/inscriptions/**").hasRole("APPRENANT")
+                        .requestMatchers(HttpMethod.DELETE, "/api/inscriptions/**").hasRole("APPRENANT")
 
-                        // ── APPRENANT + ENSEIGNANT : soumettre un feedback ─────
-                        .requestMatchers(HttpMethod.POST, "/api/feedbacks")
-                                .hasAnyRole("APPRENANT", "ENSEIGNANT")
-
-                        // ── ENSEIGNANT : consulter les avis sur ses cours ───────
-                        .requestMatchers(HttpMethod.GET, "/api/feedbacks/cours/**")
+                        // ── ENSEIGNANT : voir ses apprenants ──────────────────────────────
+                        .requestMatchers(HttpMethod.GET, "/api/inscriptions/mes-apprenants")
+                                .hasAnyRole("ENSEIGNANT", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/inscriptions/module/*/apprenants")
                                 .hasAnyRole("ENSEIGNANT", "ADMIN")
 
-                        // ── ADMIN : gestion complète des feedbacks ─────────────
-                        .requestMatchers("/api/feedbacks/**").hasRole("ADMIN")
-
-                        // ── ENSEIGNANT / ADMIN : écriture catalogue ────────────
+                        // ── ENSEIGNANT : gestion catalogue ────────────────────────────────
+                        .requestMatchers(HttpMethod.GET, "/api/modules/mes-modules").hasAnyRole("ENSEIGNANT", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/cours/mes-cours").hasAnyRole("ENSEIGNANT", "ADMIN")
                         .requestMatchers(HttpMethod.POST,   "/api/categories/**").hasAnyRole("ENSEIGNANT", "ADMIN")
                         .requestMatchers(HttpMethod.PUT,    "/api/categories/**").hasAnyRole("ENSEIGNANT", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/categories/**").hasAnyRole("ENSEIGNANT", "ADMIN")
@@ -65,20 +64,23 @@ public class SecurityConfig {
 
                         .anyRequest().authenticated()
                 )
-
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) -> {
                             response.setContentType("application/json");
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                             response.getWriter().write("{\"erreur\":\"Accès non autorisé\"}");
                         })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.setContentType("application/json");
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.getWriter().write(
+                                    "{\"erreur\":\"Accès refusé : vous n'êtes pas propriétaire de cette ressource.\"}");
+                        })
                 )
-
                 .addFilterBefore(
                         new JwtAuthenticationFilter(jwtSecret),
                         UsernamePasswordAuthenticationFilter.class
                 );
-
         return http.build();
     }
 
@@ -93,7 +95,6 @@ public class SecurityConfig {
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
-
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;

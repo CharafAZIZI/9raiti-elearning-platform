@@ -167,7 +167,6 @@
             <div class="flex items-center gap-1.5 p-2 rounded-lg"
                  style="background:var(--surface-2);border:1px solid var(--border);">
               <span>👥</span>
-              <span class="text-xs" style="color:var(--text-3);">{{ c.nombreInscrits ?? 0 }} inscrits</span>
             </div>
             <div class="col-span-2 flex items-center gap-1.5 p-2 rounded-lg"
                  style="background:var(--surface-2);border:1px solid var(--border);">
@@ -195,7 +194,6 @@
               <th>Niveau</th>
               <th>Statut</th>
               <th>Durée</th>
-              <th>Inscrits</th>
               <!-- ✅ AJOUTÉ : colonne fichier -->
               <th>Fichier</th>
               <th>Créé le</th>
@@ -205,44 +203,6 @@
           <tbody>
             <tr *ngFor="let c of filtered; let i = index" class="tbl-row animate-slide-up"
                 [class]="'d-' + (i % 5)">
-
-              <td style="max-width:280px;">
-                <div class="flex items-center gap-3">
-                  <div class="w-9 h-9 rounded-xl flex items-center justify-center text-base flex-shrink-0"
-                       [style.background]="getColor(i).dim">📖</div>
-                  <div>
-                    <p class="text-sm font-semibold clamp-2" style="color:var(--text);">{{ c.titre }}</p>
-                    <p class="text-xs clamp-2 mt-0.5" style="color:var(--text-3);">{{ c.description }}</p>
-                  </div>
-                </div>
-              </td>
-
-              <td>
-                <span *ngIf="c.niveau" class="badge text-xs"
-                      [style.background]="c.niveau==='DEBUTANT' ? 'var(--green-dim)' : c.niveau==='INTERMEDIAIRE' ? 'var(--orange-dim)' : 'var(--red-dim)'"
-                      [style.border-color]="niveauColors[c.niveau]"
-                      [style.color]="niveauColors[c.niveau]">
-                  {{ c.niveau === 'DEBUTANT' ? '🟢 Débutant' : c.niveau === 'INTERMEDIAIRE' ? '🟡 Intermédiaire' : '🔴 Avancé' }}
-                </span>
-                <span *ngIf="!c.niveau" style="color:var(--text-4);">—</span>
-              </td>
-
-              <td>
-                <span class="badge text-xs"
-                      [style.background]="getStatut(c.statut).bg"
-                      [style.border-color]="getStatut(c.statut).border"
-                      [style.color]="getStatut(c.statut).color">
-                  {{ getStatut(c.statut).label }}
-                </span>
-              </td>
-
-              <td>
-                <span class="badge b-blue text-xs">{{ formatDuree(c.dureeMinutes) }}</span>
-              </td>
-
-              <td>
-                <span style="color:var(--text-2);">{{ c.nombreInscrits ?? 0 }}</span>
-              </td>
 
               <!-- ✅ AJOUTÉ : badge fichier dans vue liste -->
               <td>

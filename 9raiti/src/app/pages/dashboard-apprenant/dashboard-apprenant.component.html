@@ -1,559 +1,213 @@
 <div class="min-h-screen" style="background:var(--bg);">
   <app-navbar></app-navbar>
-
-  <!-- Layout: sidebar + main -->
   <div class="flex h-[calc(100vh-64px)] overflow-hidden">
 
-    <!-- ═══ SIDEBAR ════════════════════════════════════════ -->
+    <!-- SIDEBAR -->
     <aside class="hidden md:flex flex-col w-60 flex-shrink-0 overflow-y-auto"
            style="background:var(--surface);border-right:1px solid var(--border);padding:20px 12px;">
 
-      <!-- User mini card -->
+      <!-- User card -->
       <div class="p-3 rounded-2xl mb-6" style="background:var(--brand-dim);border:1px solid var(--border-brand);">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-base flex-shrink-0"
                style="background:linear-gradient(135deg,#F59E0B,#D97706);color:white;font-family:'Syne',sans-serif;">
-            {{ userName.charAt(0) || 'U' }}
+            {{ userName ? userName.charAt(0).toUpperCase() : 'A' }}
           </div>
           <div class="min-w-0">
-            <div class="text-sm font-semibold truncate" style="color:var(--text);">{{ userName }}</div>
+            <div class="text-sm font-bold truncate" style="color:var(--text);">{{ userName }}</div>
             <div class="text-xs" style="color:var(--brand);">Apprenant</div>
           </div>
-        </div>
-        <div class="mt-3">
-          <div class="flex justify-between text-xs mb-1" style="color:var(--text-3);">
-            <span>Progression globale</span><span style="color:var(--brand);">62%</span>
-          </div>
-          <div class="prog-track"><div class="prog-fill" style="width:62%;background:var(--brand);"></div></div>
         </div>
       </div>
 
       <!-- Navigation -->
+      <p class="text-xs font-bold uppercase tracking-widest px-2 mb-2" style="color:var(--text-4);">Menu</p>
       <nav class="space-y-1 flex-1">
-        <p class="text-xs font-bold uppercase tracking-widest px-2 mb-2" style="color:var(--text-4);">Principal</p>
-        <button *ngFor="let item of [
-          {id:'accueil',  icon:'🏠', label:'Accueil'},
-          {id:'cours',    icon:'📚', label:'Mes cours'},
-          {id:'progression',icon:'📊',label:'Ma progression'},
-          {id:'evaluations',icon:'📝',label:'Évaluations'},
-          {id:'ia',       icon:'🤖', label:'Reco. IA'}
-        ]" (click)="setSection(item.id)" class="nav-item" [class.active]="activeSection===item.id">
-          <span class="text-base">{{item.icon}}</span>
-          <span>{{item.label}}</span>
+        <button (click)="setSection('accueil')" class="nav-item" [class.active]="activeSection==='accueil'">
+          <span class="text-base">🏠</span><span>Accueil</span>
         </button>
 
         <p class="text-xs font-bold uppercase tracking-widest px-2 mt-5 mb-2" style="color:var(--text-4);">Catalogue</p>
-        <a routerLink="/categories" class="nav-item" style="text-decoration:none;">
-          <span class="text-base">🗂️</span><span>Catégories</span>
+        <a routerLink="/categories" routerLinkActive="active" class="nav-item" style="text-decoration:none;">
+          <span class="text-base">📂</span><span>Catégories</span>
         </a>
-        <a routerLink="/modules" class="nav-item" style="text-decoration:none;">
+        <a routerLink="/modules" routerLinkActive="active" class="nav-item" style="text-decoration:none;">
           <span class="text-base">📦</span><span>Modules</span>
         </a>
-        <a routerLink="/cours" class="nav-item" style="text-decoration:none;">
-          <span class="text-base">🎓</span><span>Tous les cours</span>
+        <a routerLink="/cours" routerLinkActive="active" class="nav-item" style="text-decoration:none;">
+          <span class="text-base">📘</span><span>Cours</span>
         </a>
 
         <p class="text-xs font-bold uppercase tracking-widest px-2 mt-5 mb-2" style="color:var(--text-4);">Compte</p>
-        <button (click)="ouvrirFeedbackGlobal()" class="nav-item">
-          <span class="text-base">💬</span><span>Envoyer un avis</span>
-        </button>
-        <button (click)="openMesReclamations()" class="nav-item" [class.active]="activeSection==='mes-reclamations'">
-          <span class="text-base">📋</span><span>Mes réclamations</span>
-        </button>
-        <button (click)="setSection('profil')" class="nav-item">
+        <button (click)="navigateToProfil()" class="nav-item">
           <span class="text-base">👤</span><span>Mon profil</span>
         </button>
       </nav>
-
-      <!-- Score card -->
-      <div class="mt-4 p-3 rounded-2xl" style="background:var(--surface-2);border:1px solid var(--border);">
-        <div class="text-xs font-bold uppercase tracking-widest mb-2" style="color:var(--text-3);">Score global</div>
-        <div class="text-2xl font-bold text-grad mb-1" style="font-family:'Syne',sans-serif;">15.6<span class="text-sm font-normal" style="color:var(--text-3);">/20</span></div>
-        <div class="text-xs" style="color:var(--text-3);">Basé sur 7 évaluations</div>
-      </div>
     </aside>
 
-    <!-- ═══ MAIN CONTENT ═══════════════════════════════════ -->
-    <main class="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+    <!-- MAIN -->
+    <main class="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-6 space-y-5">
 
-      <!-- SECTION: Accueil -->
+      <!-- SECTION : Accueil -->
       <ng-container *ngIf="activeSection==='accueil'">
+        <div class="animate-fade-in space-y-5">
 
-        <!-- Hero banner -->
-        <div class="relative overflow-hidden rounded-2xl p-6 sm:p-8 animate-fade-in"
-             style="background:linear-gradient(135deg,var(--surface) 0%,var(--surface-2) 100%);border:1px solid var(--border-brand);">
-          <div class="absolute inset-0 pointer-events-none" style="background:radial-gradient(ellipse at top right,rgba(245,158,11,.12) 0%,transparent 60%);"></div>
-          <div class="absolute top-0 left-0 right-0 h-0.5 rounded-t-2xl" style="background:linear-gradient(90deg,transparent,var(--brand),transparent);"></div>
-          <div class="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <p class="text-xs font-bold uppercase tracking-[3px] mb-2" style="color:var(--brand);">Tableau de bord</p>
-              <h1 class="text-2xl sm:text-3xl font-bold mb-2" style="font-family:'Syne',sans-serif;color:var(--text);">
-                Bonjour, <span class="text-grad">{{ userName }}</span> 👋
-              </h1>
-              <p class="text-sm" style="color:var(--text-2);">Vous avez <strong style="color:var(--brand);">2 évaluations</strong> à passer cette semaine.</p>
+          <!-- Hero -->
+          <div class="relative overflow-hidden rounded-2xl p-6 sm:p-8"
+               style="background:linear-gradient(135deg,var(--surface),var(--surface-2));border:1px solid var(--border-brand);">
+            <div class="absolute top-0 left-0 right-0 h-0.5 rounded-t-2xl"
+                 style="background:linear-gradient(90deg,transparent,var(--brand),transparent);"></div>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <p class="text-xs font-bold uppercase tracking-[3px] mb-2" style="color:var(--brand);">Espace Apprenant</p>
+                <h1 class="text-2xl sm:text-3xl font-bold mb-2" style="font-family:'Syne',sans-serif;color:var(--text);">
+                  Bonjour, <span style="color:var(--brand);">{{ userName }}</span> 👋
+                </h1>
+                <p class="text-sm" style="color:var(--text-2);">Explorez le catalogue de formations et trouvez votre prochain cours.</p>
+              </div>
+              <a routerLink="/cours" class="btn btn-brand self-start sm:self-auto flex-shrink-0" style="text-decoration:none;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3l14 9-14 9V3z"/></svg>
+                Voir les cours
+              </a>
             </div>
-            <button (click)="setSection('evaluations')" class="btn btn-brand self-start sm:self-auto flex-shrink-0">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
-              Passer une évaluation
-            </button>
           </div>
-        </div>
 
-        <!-- Stats -->
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div *ngFor="let s of stats; let i=index" class="glass glass-hover rounded-2xl p-5 relative overflow-hidden animate-slide-up" [class]="'d-'+i">
-            <div class="stat-accent" [style.background]="s.color"></div>
-            <div class="w-11 h-11 rounded-xl flex items-center justify-center text-xl mb-3" [style.background]="s.dim">{{s.icon}}</div>
-            <div class="text-2xl font-bold mb-0.5" style="font-family:'Syne',sans-serif;color:var(--text);">{{s.value}}</div>
-            <div class="text-xs" style="color:var(--text-3);">{{s.label}}</div>
-          </div>
-        </div>
-
-        <!-- Continue learning + IA tip -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-
-          <!-- Continue course -->
-          <div class="lg:col-span-2 glass rounded-2xl p-5 animate-slide-up d-2">
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="font-bold" style="font-family:'Syne',sans-serif;color:var(--text);">Continuer l'apprentissage</h3>
-              <button (click)="setSection('cours')" class="text-xs font-semibold" style="color:var(--brand);background:none;border:none;cursor:pointer;">Voir tout →</button>
+          <!-- Stats -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div *ngFor="let s of stats; let i=index"
+                 class="glass glass-hover rounded-2xl p-5 relative overflow-hidden animate-slide-up" [class]="'d-'+i">
+              <div class="stat-accent" [style.background]="s.color"></div>
+              <div class="w-11 h-11 rounded-xl flex items-center justify-center text-xl mb-3" [style.background]="s.dim">{{s.icon}}</div>
+              <div class="text-2xl font-bold mb-0.5" style="font-family:'Syne',sans-serif;color:var(--text);">
+                <span *ngIf="loadingCatalogue">–</span>
+                <span *ngIf="!loadingCatalogue">{{s.value}}</span>
+              </div>
+              <div class="text-xs" style="color:var(--text-3);">{{s.label}}</div>
             </div>
-            <div class="space-y-3">
-              <div *ngFor="let c of courses.slice(0,3)" class="flex items-center gap-4 p-3 rounded-xl transition-all cursor-pointer glass-hover"
-                   style="background:var(--surface-2);border:1px solid var(--border);">
-                <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0" [style.background]="c.dim">{{c.icon}}</div>
-                <div class="flex-1 min-w-0">
-                  <div class="text-sm font-semibold clamp-2 mb-1.5" style="color:var(--text);">{{c.title}}</div>
-                  <div class="prog-track"><div class="prog-fill" [style.width]="c.progress+'%'" [style.background]="c.color"></div></div>
-                  <div class="flex justify-between text-xs mt-1.5">
-                    <span style="color:var(--text-3);">{{c.progress}}%</span>
-                    <span style="color:var(--text-3);">Suite: {{c.nextLesson}}</span>
+          </div>
+
+          <!-- Catalogue hiérarchique -->
+          <div class="glass rounded-2xl overflow-hidden">
+            <!-- Header + fil d'Ariane -->
+            <div class="flex items-center justify-between px-5 py-4" style="border-bottom:1px solid var(--border);">
+              <div>
+                <h2 class="font-bold text-base" style="font-family:'Syne',sans-serif;color:var(--text);">
+                  Catalogue de formations
+                </h2>
+                <nav class="flex items-center gap-2 text-xs mt-1 flex-wrap" style="color:var(--text-3);">
+                  <button (click)="retourCategories()" style="background:none;border:none;cursor:pointer;padding:0;"
+                          [style.color]="catalogNiveau>0 ? 'var(--brand)' : 'var(--text-3)'">
+                    📂 Catégories
+                  </button>
+                  <ng-container *ngIf="catalogNiveau >= 1 && selectedCat">
+                    <span>›</span>
+                    <button (click)="retourModules()" style="background:none;border:none;cursor:pointer;padding:0;"
+                            [style.color]="catalogNiveau > 1 ? 'var(--brand)' : 'var(--text)'">
+                      📦 {{ selectedCat.nom }}
+                    </button>
+                  </ng-container>
+                  <ng-container *ngIf="catalogNiveau === 2 && selectedMod">
+                    <span>›</span>
+                    <span style="color:var(--text);">📘 {{ selectedMod.nom }}</span>
+                  </ng-container>
+                </nav>
+              </div>
+              <button *ngIf="catalogNiveau > 0" (click)="catalogNiveau === 1 ? retourCategories() : retourModules()"
+                      class="btn btn-ghost btn-sm">← Retour</button>
+            </div>
+
+            <!-- Niveau 0 : Catégories -->
+            <ng-container *ngIf="catalogNiveau === 0">
+              <div *ngIf="loadingCatalogue" class="flex justify-center py-12">
+                <svg class="animate-spin-slow" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--brand);"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
+              </div>
+              <div *ngIf="!loadingCatalogue && categories.length === 0" class="py-12 text-center">
+                <div class="text-3xl mb-2 opacity-30">📂</div>
+                <p style="color:var(--text-3);">Aucune catégorie disponible.</p>
+              </div>
+              <div *ngIf="!loadingCatalogue && categories.length > 0"
+                   class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 p-4">
+                <button *ngFor="let cat of categories"
+                        (click)="selectionnerCategorie(cat)"
+                        class="text-left rounded-2xl p-4 glass-hover transition-all"
+                        style="background:var(--surface-2);border:1px solid var(--border);cursor:pointer;">
+                  <div class="flex items-center gap-3 mb-2">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0" style="background:var(--brand-dim);">📂</div>
+                    <div class="min-w-0">
+                      <div class="font-bold text-sm truncate" style="color:var(--text);font-family:'Syne',sans-serif;">{{ cat.nom }}</div>
+                      <div class="text-xs" style="color:var(--text-3);">{{ getModulesCount(cat.id!) }} module(s)</div>
+                    </div>
                   </div>
-                </div>
-                <button class="btn btn-ghost btn-sm flex-shrink-0">→</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- IA recommendation preview -->
-          <div class="glass rounded-2xl p-5 animate-slide-up d-3" style="border-color:rgba(139,92,246,.2);">
-            <div class="flex items-center gap-2 mb-4">
-              <div class="w-8 h-8 rounded-xl flex items-center justify-center" style="background:var(--purple-dim);font-size:16px;">🤖</div>
-              <div>
-                <h3 class="text-sm font-bold" style="color:var(--text);">IA Recommande</h3>
-                <p class="text-xs" style="color:var(--text-3);">Basé sur votre profil</p>
-              </div>
-            </div>
-            <div class="space-y-2.5">
-              <div *ngFor="let r of recommendations" class="p-3 rounded-xl" style="background:var(--surface-2);border:1px solid var(--border);">
-                <div class="flex items-center gap-2 mb-1">
-                  <span class="text-base">{{r.icon}}</span>
-                  <span class="text-xs font-semibold clamp-2" style="color:var(--text);">{{r.title}}</span>
-                </div>
-                <div class="flex items-center gap-2">
-                  <div class="prog-track flex-1" style="height:3px;"><div class="prog-fill" [style.width]="r.match+'%'" [style.background]="r.color"></div></div>
-                  <span class="text-xs font-bold" [style.color]="r.color">{{r.match}}%</span>
-                </div>
-              </div>
-            </div>
-            <button (click)="setSection('ia')" class="btn btn-ghost w-full mt-3 btn-sm">Voir toutes les recommandations</button>
-          </div>
-        </div>
-
-        <!-- Quick evaluations preview -->
-        <div class="glass rounded-2xl overflow-hidden animate-slide-up d-4">
-          <div class="flex items-center justify-between p-5 pb-3">
-            <h3 class="font-bold" style="font-family:'Syne',sans-serif;color:var(--text);">Évaluations à venir</h3>
-            <button (click)="setSection('evaluations')" class="text-xs font-semibold" style="color:var(--brand);background:none;border:none;cursor:pointer;">Tout voir →</button>
-          </div>
-          <div class="scroll-x">
-            <table class="tbl">
-              <thead><tr><th>Évaluation</th><th>Cours</th><th>Date</th><th>Durée</th><th>Statut</th><th></th></tr></thead>
-              <tbody>
-                <tr *ngFor="let ev of evaluations.slice(0,3)" class="tbl-row">
-                  <td><span class="text-sm font-medium" style="color:var(--text);">{{ev.title}}</span></td>
-                  <td>{{ev.course}}</td>
-                  <td>{{ev.date}}</td>
-                  <td><span class="badge b-blue">{{ev.duration}}</span></td>
-                  <td>
-                    <span *ngIf="ev.status==='disponible'" class="badge b-brand">Disponible</span>
-                    <span *ngIf="ev.status==='termine'"    class="badge b-green">{{ev.score}}/20</span>
-                  </td>
-                  <td>
-                    <button *ngIf="ev.status==='disponible'" (click)="openQuiz(ev)" class="btn btn-brand btn-sm">Commencer</button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </ng-container>
-
-      <!-- SECTION: Mes cours -->
-      <ng-container *ngIf="activeSection==='cours'">
-        <div class="animate-fade-in space-y-4">
-          <div class="flex items-center justify-between">
-            <h2 class="text-2xl font-bold" style="font-family:'Syne',sans-serif;color:var(--text);">Mes cours</h2>
-            <span class="badge b-blue">{{courses.length}} cours actifs</span>
-          </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-4">
-            <div *ngFor="let c of courses; let i=index" class="glass glass-hover rounded-2xl overflow-hidden animate-slide-up" [class]="'d-'+i">
-              <div class="h-32 flex items-center justify-center text-5xl relative" [style.background]="c.dim">
-                <div class="absolute inset-0 opacity-20" style="background:linear-gradient(135deg,transparent,rgba(0,0,0,.3));"></div>
-                <span class="relative z-10">{{c.icon}}</span>
-                <div class="absolute top-3 right-3"><span class="badge" [style.background]="c.dim" [style.border-color]="c.color" [style.color]="c.color">{{c.category}}</span></div>
-              </div>
-              <div class="p-4">
-                <h4 class="font-semibold text-sm mb-1" style="color:var(--text);">{{c.title}}</h4>
-                <p class="text-xs mb-3" style="color:var(--text-3);">👨‍🏫 {{c.teacher}} · {{c.duration}} · ⭐ {{c.rating}}</p>
-                <div class="prog-track mb-2"><div class="prog-fill" [style.width]="c.progress+'%'" [style.background]="c.color"></div></div>
-                <div class="flex items-center justify-between">
-                  <span class="text-xs" style="color:var(--text-3);">{{c.progress}}% complété</span>
-                  <span class="text-xs font-medium" [style.color]="c.color">Suite: {{c.nextLesson}}</span>
-                </div>
-                <div class="flex gap-2 mt-3">
-                  <button class="btn btn-brand btn-sm flex-1">Continuer →</button>
-                  <button class="btn btn-ghost btn-sm">📊</button>
-                  <button (click)="ouvrirFeedbackCours(c.id)" class="btn btn-ghost btn-sm" title="Donner un avis sur ce cours">💬</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </ng-container>
-
-      <!-- SECTION: Ma progression -->
-      <ng-container *ngIf="activeSection==='progression'">
-        <div class="animate-fade-in space-y-5">
-          <h2 class="text-2xl font-bold" style="font-family:'Syne',sans-serif;color:var(--text);">Suivre ma progression</h2>
-
-          <!-- Score cards -->
-          <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div *ngFor="let c of courses" class="glass rounded-2xl p-4 relative overflow-hidden">
-              <div class="stat-accent" [style.background]="c.color"></div>
-              <div class="text-lg mb-1">{{c.icon}}</div>
-              <div class="text-xs font-semibold mb-2 clamp-2" style="color:var(--text);">{{c.category}}</div>
-              <div class="text-2xl font-bold mb-1" [style.color]="c.color" style="font-family:'Syne',sans-serif;">{{c.progress}}<span class="text-xs font-normal" style="color:var(--text-3);">%</span></div>
-              <div class="prog-track"><div class="prog-fill" [style.width]="c.progress+'%'" [style.background]="c.color"></div></div>
-            </div>
-          </div>
-
-          <!-- Activity timeline -->
-          <div class="glass rounded-2xl p-5">
-            <h3 class="font-bold mb-4" style="font-family:'Syne',sans-serif;color:var(--text);">Historique d'activité</h3>
-            <div class="space-y-3">
-              <div *ngFor="let act of progression" class="flex items-center gap-4 p-3 rounded-xl" style="background:var(--surface-2);border:1px solid var(--border);">
-                <div class="w-9 h-9 rounded-xl flex items-center justify-center text-base flex-shrink-0"
-                     [style.background]="act.type==='quiz'?'var(--brand-dim)':act.type==='chapitre'?'var(--green-dim)':'var(--blue-dim)'">
-                  {{act.type==='quiz'?'📝':act.type==='chapitre'?'✅':'📚'}}
-                </div>
-                <div class="flex-1">
-                  <div class="text-sm font-semibold" style="color:var(--text);">{{act.action}}</div>
-                  <div class="text-xs" style="color:var(--text-3);">{{act.course}} · {{act.date}}</div>
-                </div>
-                <span class="badge b-brand text-xs">+{{act.points}} pts</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </ng-container>
-
-      <!-- SECTION: Évaluations -->
-      <ng-container *ngIf="activeSection==='evaluations'">
-        <div class="animate-fade-in space-y-5">
-          <div class="flex items-center justify-between">
-            <h2 class="text-2xl font-bold" style="font-family:'Syne',sans-serif;color:var(--text);">Passer une évaluation</h2>
-            <span class="badge b-blue">{{evaluations.length}} évaluations</span>
-          </div>
-
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div *ngFor="let ev of evaluations; let i=index" class="glass glass-hover rounded-2xl p-5 animate-slide-up" [class]="'d-'+i">
-              <div class="flex items-start justify-between gap-3 mb-3">
-                <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
-                     [style.background]="ev.type==='quiz'?'var(--brand-dim)':'var(--blue-dim)'">
-                  {{ev.type==='quiz'?'📝':'📋'}}
-                </div>
-                <span *ngIf="ev.status==='disponible'" class="badge b-brand">Disponible</span>
-                <span *ngIf="ev.status==='termine'"    class="badge b-green">{{ev.score}}/20</span>
-              </div>
-              <h4 class="font-semibold text-sm mb-1" style="color:var(--text);">{{ev.title}}</h4>
-              <p class="text-xs mb-3" style="color:var(--text-3);">{{ev.course}} · 📅 {{ev.date}} · ⏱️ {{ev.duration}}</p>
-
-              <!-- Detection faciale info -->
-              <div class="flex items-center gap-2 mb-3 p-2 rounded-lg" style="background:var(--purple-dim);border:1px solid rgba(139,92,246,.2);">
-                <span style="font-size:14px;">👁️</span>
-                <span class="text-xs" style="color:var(--purple);">Détection faciale active pendant la session</span>
-              </div>
-
-              <div class="flex gap-2">
-                <button *ngIf="ev.status==='disponible'" (click)="openQuiz(ev)" class="btn btn-brand btn-sm flex-1">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                  Commencer
+                  <p class="text-xs line-clamp-2 mb-3" style="color:var(--text-3);">{{ cat.description || 'Aucune description' }}</p>
+                  <div class="flex items-center gap-1 text-xs font-semibold" style="color:var(--brand);">
+                    <span>Explorer</span><span>→</span>
+                  </div>
                 </button>
-                <button *ngIf="ev.status==='termine'" class="btn btn-ghost btn-sm flex-1">Voir le corrigé</button>
               </div>
-            </div>
-          </div>
-        </div>
-      </ng-container>
+            </ng-container>
 
-      <!-- SECTION: IA Recommandations -->
-      <ng-container *ngIf="activeSection==='ia'">
-        <div class="animate-fade-in space-y-5">
-          <div class="glass-brand rounded-2xl p-6" style="background:linear-gradient(135deg,var(--surface),var(--surface-2));">
-            <div class="flex items-center gap-3 mb-2">
-              <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl" style="background:var(--purple-dim);">🤖</div>
-              <div>
-                <h2 class="text-xl font-bold" style="font-family:'Syne',sans-serif;color:var(--text);">Recommandations IA</h2>
-                <p class="text-sm" style="color:var(--text-2);">Cours suggérés en fonction de votre profil et progression</p>
+            <!-- Niveau 1 : Modules -->
+            <ng-container *ngIf="catalogNiveau === 1">
+              <div *ngIf="loadingModules" class="flex justify-center py-12">
+                <svg class="animate-spin-slow" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--brand);"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
               </div>
-            </div>
+              <div *ngIf="!loadingModules && catModules.length === 0" class="py-12 text-center">
+                <div class="text-3xl mb-2 opacity-30">📦</div>
+                <p class="font-semibold" style="color:var(--text-2);">Aucun module actif dans cette catégorie.</p>
+              </div>
+              <div *ngIf="!loadingModules && catModules.length > 0"
+                   class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 p-4">
+                <button *ngFor="let mod of catModules"
+                        (click)="selectionnerModule(mod)"
+                        class="text-left rounded-2xl p-4 glass-hover transition-all"
+                        style="background:var(--surface-2);border:1px solid var(--border);cursor:pointer;">
+                  <div class="flex items-center gap-3 mb-2">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0" style="background:var(--brand-dim);">📦</div>
+                    <div class="min-w-0">
+                      <div class="font-bold text-sm truncate" style="color:var(--text);font-family:'Syne',sans-serif;">{{ mod.nom }}</div>
+                      <div class="text-xs font-mono" style="color:var(--text-4);">{{ mod.code }}</div>
+                    </div>
+                  </div>
+                  <p class="text-xs line-clamp-2 mb-3" style="color:var(--text-3);">{{ mod.description }}</p>
+                  <div class="flex items-center justify-between">
+                    <span class="badge text-xs" [class.b-green]="mod.actif" [class.b-red]="!mod.actif">{{ mod.actif ? 'Actif' : 'Inactif' }}</span>
+                    <span class="text-xs font-semibold" style="color:var(--brand);">{{ getCoursCount(mod.id!) }} cours →</span>
+                  </div>
+                </button>
+              </div>
+            </ng-container>
+
+            <!-- Niveau 2 : Cours -->
+            <ng-container *ngIf="catalogNiveau === 2">
+              <div *ngIf="loadingCours" class="flex justify-center py-12">
+                <svg class="animate-spin-slow" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--brand);"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
+              </div>
+              <div *ngIf="!loadingCours && modCours.length === 0" class="py-12 text-center">
+                <div class="text-3xl mb-2 opacity-30">📘</div>
+                <p class="font-semibold" style="color:var(--text-2);">Aucun cours publié dans ce module.</p>
+              </div>
+              <div *ngIf="!loadingCours && modCours.length > 0" class="divide-y">
+                <div *ngFor="let c of modCours"
+                     class="flex items-center gap-4 px-5 py-3 transition-all"
+                     style="border-bottom:1px solid var(--border);">
+                  <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0" style="background:var(--blue-dim);">📘</div>
+                  <div class="flex-1 min-w-0">
+                    <div class="font-semibold text-sm truncate" style="color:var(--text);">{{ c.titre }}</div>
+                    <div class="flex items-center gap-2 mt-0.5 flex-wrap">
+                      <span class="badge text-xs" [class]="getNiveauCls(c.niveau)">{{ c.niveau }}</span>
+                      <span class="badge text-xs" [class]="getStatutCoursCls(c.statut)">{{ c.statut }}</span>
+                      <span *ngIf="c.dureeMinutes" class="text-xs" style="color:var(--text-3);">⏱ {{ c.dureeMinutes }} min</span>
+                    </div>
+                  </div>
+                  <a [routerLink]="['/cours', c.idCours]" class="btn btn-brand btn-sm flex-shrink-0" style="text-decoration:none;">Voir →</a>
+                </div>
+              </div>
+            </ng-container>
           </div>
 
-          <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <div *ngFor="let r of recommendations; let i=index" class="glass glass-hover rounded-2xl p-5 animate-slide-up" [class]="'d-'+i">
-              <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl mb-4" style="background:var(--purple-dim);">{{r.icon}}</div>
-              <h4 class="font-semibold text-sm mb-2" style="color:var(--text);">{{r.title}}</h4>
-              <p class="text-xs mb-3" style="color:var(--text-3);">{{r.reason}}</p>
-              <div class="flex items-center gap-2 mb-4">
-                <div class="prog-track flex-1"><div class="prog-fill" [style.width]="r.match+'%'" [style.background]="r.color"></div></div>
-                <span class="text-sm font-bold" [style.color]="r.color">{{r.match}}%</span>
-              </div>
-              <button class="btn btn-brand btn-sm w-full">S'inscrire à ce cours</button>
-            </div>
-          </div>
         </div>
       </ng-container>
 
     </main>
   </div>
-
-  <!-- MODAL: Quiz avec détection faciale -->
-  <div *ngIf="showQuizModal" class="overlay" (click)="closeQuiz()">
-    <div class="modal" style="max-width:520px;" (click)="$event.stopPropagation()">
-      <div class="flex items-center justify-between mb-5">
-        <div>
-          <h3 class="font-bold text-base" style="font-family:'Syne',sans-serif;color:var(--text);">{{currentQuiz.title}}</h3>
-          <div class="flex items-center gap-2 mt-1">
-            <span class="badge b-purple text-xs">👁️ Détection faciale active</span>
-            <span class="badge b-brand text-xs">🤖 Quiz généré par IA</span>
-          </div>
-        </div>
-        <button (click)="closeQuiz()" style="background:none;border:none;cursor:pointer;color:var(--text-3);font-size:20px;">×</button>
-      </div>
-
-      <div class="p-4 rounded-2xl mb-5" style="background:var(--surface-2);border:1px solid var(--border);">
-        <p class="text-sm font-semibold" style="color:var(--text);">{{currentQuiz.question}}</p>
-      </div>
-
-      <div class="space-y-2 mb-5">
-        <button *ngFor="let opt of currentQuiz.options; let i=index"
-                (click)="selectAnswer(i)"
-                class="w-full text-left p-3.5 rounded-xl text-sm transition-all"
-                [style]="currentQuiz.answered && i===1 ? 'background:var(--green-dim);border:2px solid var(--green);color:var(--green);'
-                       : currentQuiz.answered && i===currentQuiz.selected && i!==1 ? 'background:var(--red-dim);border:2px solid var(--red);color:var(--red);'
-                       : currentQuiz.selected===i ? 'background:var(--brand-dim);border:2px solid var(--brand);color:var(--brand);'
-                       : 'background:var(--surface-2);border:1px solid var(--border);color:var(--text-2);'"
-                style="font-family:'Plus Jakarta Sans',sans-serif;">
-          <span class="font-bold mr-2">{{['A','B','C','D'][i]}}.</span> {{opt}}
-          <span *ngIf="currentQuiz.answered && i===1" class="ml-2">✓</span>
-          <span *ngIf="currentQuiz.answered && i===currentQuiz.selected && i!==1" class="ml-2">✗</span>
-        </button>
-      </div>
-
-      <div *ngIf="currentQuiz.answered" class="p-3 rounded-xl mb-4" [class]="currentQuiz.correct?'alert-green':'alert-red'" style="display:flex;align-items:center;gap:8px;">
-        <span>{{currentQuiz.correct ? '✅ Bonne réponse ! La complexité de Quicksort est O(n log n) en moyenne.' : '❌ Incorrect. La bonne réponse est O(n log n).'}}</span>
-      </div>
-
-      <div class="flex gap-3">
-        <button (click)="closeQuiz()" class="btn btn-ghost flex-1">Fermer</button>
-        <button class="btn btn-brand flex-1" [disabled]="!currentQuiz.answered">Question suivante →</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════════════════════════════════════════════ -->
-  <!-- SECTION: Mes avis / Réclamations                                       -->
-  <!-- ══════════════════════════════════════════════════════════════════════ -->
-  <ng-container *ngIf="activeSection==='mes-reclamations'">
-    <div class="animate-fade-in space-y-5">
-
-      <!-- Header -->
-      <div class="flex items-center justify-between">
-        <div>
-          <h2 class="text-xl font-bold" style="font-family:'Syne',sans-serif;color:var(--text);">📋 Mes avis &amp; réclamations</h2>
-          <p class="text-sm mt-1" style="color:var(--text-3);">Suivez l'état de vos demandes et consultez les réponses de l'administration.</p>
-        </div>
-        <button (click)="ouvrirFeedbackGlobal()" class="btn btn-brand">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Nouvel avis
-        </button>
-      </div>
-
-      <!-- Loading -->
-      <div *ngIf="mesFeedbacksLoading" class="flex items-center justify-center py-16">
-        <div class="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin" style="border-color:var(--brand);border-top-color:transparent;"></div>
-        <span class="ml-3 text-sm" style="color:var(--text-3);">Chargement…</span>
-      </div>
-
-      <!-- Error -->
-      <div *ngIf="mesFeedbacksError && !mesFeedbacksLoading" class="alert alert-red">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12" y2="16"/></svg>
-        {{mesFeedbacksError}}
-      </div>
-
-      <!-- Empty state -->
-      <div *ngIf="!mesFeedbacksLoading && !mesFeedbacksError && mesFeedbacks.length === 0"
-           class="flex flex-col items-center justify-center py-16 rounded-2xl"
-           style="background:var(--surface);border:1px dashed var(--border);">
-        <div class="text-4xl mb-3">💬</div>
-        <p class="text-base font-semibold" style="color:var(--text);">Aucun avis envoyé</p>
-        <p class="text-sm mt-1 mb-4" style="color:var(--text-3);">Vous n'avez encore soumis aucune réclamation ou avis.</p>
-        <button (click)="ouvrirFeedbackGlobal()" class="btn btn-brand">Envoyer un avis</button>
-      </div>
-
-      <!-- Liste des feedbacks -->
-      <div *ngIf="!mesFeedbacksLoading && mesFeedbacks.length > 0" class="space-y-4">
-        <div *ngFor="let fb of mesFeedbacks"
-             class="rounded-2xl p-5 transition-all"
-             style="background:var(--surface);border:1px solid var(--border);">
-
-          <!-- En-tête de la carte -->
-          <div class="flex items-start justify-between gap-3 mb-3">
-            <div class="flex items-center gap-3 min-w-0">
-              <div class="w-9 h-9 rounded-xl flex items-center justify-center text-base flex-shrink-0"
-                   style="background:var(--brand-dim);">💬</div>
-              <div class="min-w-0">
-                <p class="text-sm font-semibold truncate" style="color:var(--text);">{{ getTypeLabel(fb.typeAvis) }}</p>
-                <p class="text-xs mt-0.5" style="color:var(--text-3);">
-                  Envoyé le {{ fb.dateCreation ? (fb.dateCreation | date:'dd MMM yyyy') : '–' }}
-                </p>
-              </div>
-            </div>
-            <!-- Badge statut -->
-            <span class="text-xs font-bold px-3 py-1 rounded-full flex-shrink-0"
-                  [style.color]="getStatutBadgeColor(fb.statut)"
-                  [style.background]="getStatutBadgeDim(fb.statut)">
-              {{ getStatutLabel(fb.statut) }}
-            </span>
-          </div>
-
-          <!-- Message apprenant -->
-          <div class="rounded-xl p-3 mb-3" style="background:var(--surface-2);border:1px solid var(--border);">
-            <p class="text-xs font-bold uppercase tracking-widest mb-1" style="color:var(--text-4);">Votre message</p>
-            <p class="text-sm" style="color:var(--text-2);">{{ fb.message }}</p>
-          </div>
-
-          <!-- Réponse admin -->
-          <div *ngIf="fb.reponseAdmin" class="rounded-xl p-3" style="background:var(--green-dim);border:1px solid rgba(16,185,129,.2);">
-            <div class="flex items-center gap-2 mb-1">
-              <span class="text-xs font-bold uppercase tracking-widest" style="color:var(--green);">✅ Réponse de l'administration</span>
-              <span *ngIf="fb.dateTraitement" class="text-xs" style="color:var(--text-3);">
-                · {{ fb.dateTraitement | date:'dd MMM yyyy' }}
-              </span>
-            </div>
-            <p class="text-sm" style="color:var(--text);">{{ fb.reponseAdmin }}</p>
-          </div>
-
-          <!-- En attente de réponse -->
-          <div *ngIf="!fb.reponseAdmin && fb.statut !== 'REJETE'" class="rounded-xl p-3" style="background:var(--orange-dim);border:1px solid rgba(245,158,11,.2);">
-            <p class="text-xs font-semibold" style="color:var(--orange);">⏳ En attente de réponse de l'administration</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </ng-container>
-
-  <!-- ══════════════════════════════════════════════════════════════════════ -->
-  <!-- MODAL FEEDBACK                                                         -->
-  <!-- ══════════════════════════════════════════════════════════════════════ -->
-  <div *ngIf="showFeedbackModal"
-       class="overlay"
-       (click)="fermerFeedback()">
-    <div class="modal" style="max-width:520px;" (click)="$event.stopPropagation()">
-
-      <!-- En-tête -->
-      <div class="flex items-center justify-between mb-5">
-        <div>
-          <h3 class="font-bold text-base" style="font-family:'Syne',sans-serif;color:var(--text);">
-            💬 Soumettre un avis
-          </h3>
-          <p class="text-xs mt-0.5" style="color:var(--text-3);">
-            <span *ngIf="feedbackCoursId">Avis lié au cours #{{ feedbackCoursId }}</span>
-            <span *ngIf="!feedbackCoursId">Feedback général sur la plateforme</span>
-          </p>
-        </div>
-        <button (click)="fermerFeedback()" style="background:none;border:none;cursor:pointer;color:var(--text-3);font-size:20px;">×</button>
-      </div>
-
-      <!-- Succès -->
-      <div *ngIf="fbSuccess" class="p-3 rounded-xl mb-4 flex items-center gap-2"
-           style="background:var(--green-dim);border:1px solid rgba(16,185,129,.3);color:var(--green);">
-        <span>✅</span><span class="text-sm">{{ fbSuccess }}</span>
-      </div>
-
-      <!-- Erreur -->
-      <div *ngIf="fbError" class="p-3 rounded-xl mb-4 flex items-center gap-2"
-           style="background:var(--red-dim);border:1px solid rgba(239,68,68,.3);color:var(--red);">
-        <span>⚠️</span><span class="text-sm">{{ fbError }}</span>
-      </div>
-
-      <div *ngIf="!fbSuccess" class="space-y-4">
-
-        <!-- Email -->
-        <div>
-          <label class="block text-xs font-semibold uppercase tracking-wider mb-1" style="color:var(--text-3);">
-            Email <span style="color:var(--red);">*</span>
-          </label>
-          <input type="email" [(ngModel)]="fbEmail"
-                 placeholder="votre@email.com" class="inp"
-                 [attr.disabled]="userEmail ? '' : null" />
-          <p *ngIf="userEmail" class="text-xs mt-1" style="color:var(--text-3);">
-            🔒 Pré-rempli depuis votre compte
-          </p>
-        </div>
-
-        <!-- Type d'avis -->
-        <div>
-          <label class="block text-xs font-semibold uppercase tracking-wider mb-1" style="color:var(--text-3);">
-            Type d'avis <span style="color:var(--red);">*</span>
-          </label>
-          <select [(ngModel)]="fbType" class="inp" style="cursor:pointer;">
-            <option value="" disabled selected>— Choisir un type —</option>
-            <option *ngFor="let t of typesAvis" [value]="t.value">{{ t.label }}</option>
-          </select>
-        </div>
-
-        <!-- Message -->
-        <div>
-          <label class="block text-xs font-semibold uppercase tracking-wider mb-1" style="color:var(--text-3);">
-            Message <span style="color:var(--red);">*</span>
-          </label>
-          <textarea [(ngModel)]="fbMessage" rows="5"
-                    placeholder="Décrivez votre avis, suggestion ou problème (min. 10 caractères)..."
-                    class="inp resize-none" style="min-height:120px;" maxlength="2000"></textarea>
-          <p class="text-xs text-right mt-1" style="color:var(--text-3);">{{ fbMessage.length }} / 2000</p>
-        </div>
-
-        <!-- Boutons -->
-        <div class="flex gap-3 pt-1">
-          <button (click)="fermerFeedback()" class="btn btn-ghost flex-1">Annuler</button>
-          <button (click)="soumettreFeedback()"
-                  [disabled]="fbLoading || !fbEmail || !fbType || fbMessage.length < 10"
-                  class="btn btn-brand flex-1">
-            <span *ngIf="!fbLoading">Envoyer →</span>
-            <span *ngIf="fbLoading" class="flex items-center justify-center gap-2">
-              <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-              </svg>
-              Envoi...
-            </span>
-          </button>
-        </div>
-
-      </div>
-    </div>
-  </div>
-
 </div>

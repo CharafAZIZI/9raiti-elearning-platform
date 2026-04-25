@@ -34,7 +34,7 @@
         <a routerLink="/register" class="btn btn-brand text-sm">Inscription</a>
       </ng-container>
       <ng-template #loggedInNav>
-        <a routerLink="/categories" class="btn btn-brand text-sm">Mon espace →</a>
+        <a [routerLink]="getDashboardRoute()" class="btn btn-brand text-sm">Mon espace →</a>
       </ng-template>
     </div>
 
@@ -55,8 +55,13 @@
     <button (click)="scrollTo('avis')"       class="text-left py-2 px-3 rounded-lg text-sm" style="color:var(--text-2)">Avis</button>
     <button (click)="scrollTo('reclamation')" class="text-left py-2 px-3 rounded-lg text-sm" style="color:var(--text-2)">Réclamation</button>
     <div class="divider my-1"></div>
-    <a routerLink="/login"    class="btn btn-ghost w-full justify-center">Connexion</a>
-    <a routerLink="/register" class="btn btn-brand w-full justify-center">Inscription</a>
+    <ng-container *ngIf="!isLoggedIn">
+      <a routerLink="/login"    class="btn btn-ghost w-full justify-center">Connexion</a>
+      <a routerLink="/register" class="btn btn-brand w-full justify-center">Inscription</a>
+    </ng-container>
+    <ng-container *ngIf="isLoggedIn">
+      <a [routerLink]="getDashboardRoute()" class="btn btn-brand w-full justify-center">Mon espace →</a>
+    </ng-container>
   </div>
 </header>
 
