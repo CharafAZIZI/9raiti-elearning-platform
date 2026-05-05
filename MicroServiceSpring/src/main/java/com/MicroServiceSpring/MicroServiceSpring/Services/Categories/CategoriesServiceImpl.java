@@ -1,11 +1,12 @@
 package com.MicroServiceSpring.MicroServiceSpring.Services.Categories;
 
-import com.MicroServiceSpring.MicroServiceSpring.DTO.CategoriesDTO;
+import com.MicroServiceSpring.MicroServiceSpring.DTO.Categories.CategoriesDTO;
 import com.MicroServiceSpring.MicroServiceSpring.Exceptions.ConflictException;
 import com.MicroServiceSpring.MicroServiceSpring.Exceptions.ResourceNotFoundException;
-import com.MicroServiceSpring.MicroServiceSpring.Mappers.CategoriesMapper;
+import com.MicroServiceSpring.MicroServiceSpring.Mappers.Categories.CategoriesMapper;
 import com.MicroServiceSpring.MicroServiceSpring.Models.Cetagories.Categories;
-import com.MicroServiceSpring.MicroServiceSpring.Repository.CategoriesRepository;
+import com.MicroServiceSpring.MicroServiceSpring.Repository.Categories.CategoriesRepository;
+import com.MicroServiceSpring.MicroServiceSpring.Repository.Modules.ModuleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +19,7 @@ public class CategoriesServiceImpl implements CategoriesService {
 
     private final CategoriesRepository categoriesRepository;
     private final CategoriesMapper categoriesMapper;
+    private final ModuleRepository moduleRepository;
 
     @Override
     @Transactional
@@ -27,6 +29,19 @@ public class CategoriesServiceImpl implements CategoriesService {
         }
         Categories categories = categoriesMapper.toEntity(dto);
         return categoriesMapper.toDTO(categoriesRepository.save(categories));
+    }
+
+    @Override
+    @Transactional
+    public void deleteCategory(Long id) {
+        Categories category = categoriesRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Catégorie introuvable avec l'id : " + id));
+
+        // ✅ Supprimer les modules liés à cette catégorie d'abord
+        moduleRepository.deleteByCategorieId(id);
+
+        // ✅ Ensuite supprimer la catégorie
+        categoriesRepository.delete(category);
     }
 
     @Override
@@ -54,14 +69,5 @@ public class CategoriesServiceImpl implements CategoriesService {
         category.setNom(dto.getNom());
         category.setDescription(dto.getDescription());
         return categoriesMapper.toDTO(categoriesRepository.save(category));
-    }
-
-    @Override
-    @Transactional
-    public void deleteCategory(Long id) {
-        if (!categoriesRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Catégorie introuvable avec l'id : " + id);
-        }
-        categoriesRepository.deleteById(id);
     }
 }

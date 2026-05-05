@@ -1,4 +1,4 @@
-package com.MicroServiceSpring.MicroServiceSpring.DTO;
+package com.MicroServiceSpring.MicroServiceSpring.DTO.Categories;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;

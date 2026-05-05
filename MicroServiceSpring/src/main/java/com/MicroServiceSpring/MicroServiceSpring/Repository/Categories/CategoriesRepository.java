@@ -1,4 +1,4 @@
-package com.MicroServiceSpring.MicroServiceSpring.Repository;
+package com.MicroServiceSpring.MicroServiceSpring.Repository.Categories;
 
 import com.MicroServiceSpring.MicroServiceSpring.Models.Cetagories.Categories;
 import org.springframework.data.jpa.repository.JpaRepository;

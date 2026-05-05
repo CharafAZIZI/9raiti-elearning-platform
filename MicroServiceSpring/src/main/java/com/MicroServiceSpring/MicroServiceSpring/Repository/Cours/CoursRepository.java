@@ -1,4 +1,4 @@
-package com.MicroServiceSpring.MicroServiceSpring.Repository;
+package com.MicroServiceSpring.MicroServiceSpring.Repository.Cours;
 
 import com.MicroServiceSpring.MicroServiceSpring.Models.Cours.Cours;
 import com.MicroServiceSpring.MicroServiceSpring.Models.Cours.StatutCours;

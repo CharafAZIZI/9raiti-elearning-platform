@@ -1,4 +1,4 @@
-package com.MicroServiceSpring.MicroServiceSpring.DTO;
+package com.MicroServiceSpring.MicroServiceSpring.DTO.Cours;
 
 import com.MicroServiceSpring.MicroServiceSpring.Models.Cours.Niveau;
 import com.MicroServiceSpring.MicroServiceSpring.Models.Cours.StatutCours;

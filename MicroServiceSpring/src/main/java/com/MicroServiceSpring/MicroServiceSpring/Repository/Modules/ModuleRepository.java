@@ -1,4 +1,4 @@
-package com.MicroServiceSpring.MicroServiceSpring.Repository;
+package com.MicroServiceSpring.MicroServiceSpring.Repository.Modules;
 
 import com.MicroServiceSpring.MicroServiceSpring.Models.Modules.Module;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -19,4 +19,6 @@ public interface ModuleRepository extends JpaRepository<Module, Long> {
 
     /** Sécuriser update/delete : module doit appartenir à l'enseignant */
     Optional<Module> findByIdAndEnseignantId(Long id, Long enseignantId);
+
+    void deleteByCategorieId(Long categorieId);
 }

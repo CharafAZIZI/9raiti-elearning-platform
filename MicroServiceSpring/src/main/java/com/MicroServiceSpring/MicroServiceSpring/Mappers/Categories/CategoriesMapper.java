@@ -1,6 +1,6 @@
-package com.MicroServiceSpring.MicroServiceSpring.Mappers;
+package com.MicroServiceSpring.MicroServiceSpring.Mappers.Categories;
 
-import com.MicroServiceSpring.MicroServiceSpring.DTO.CategoriesDTO;
+import com.MicroServiceSpring.MicroServiceSpring.DTO.Categories.CategoriesDTO;
 import com.MicroServiceSpring.MicroServiceSpring.Models.Cetagories.Categories;
 import org.springframework.stereotype.Component;
 

@@ -1,6 +1,6 @@
 package com.MicroServiceSpring.MicroServiceSpring.Controllers;
 
-import com.MicroServiceSpring.MicroServiceSpring.DTO.ModuleDTO;
+import com.MicroServiceSpring.MicroServiceSpring.DTO.Modules.ModuleDTO;
 import com.MicroServiceSpring.MicroServiceSpring.Security.JwtUtil;
 import com.MicroServiceSpring.MicroServiceSpring.Services.Modules.ModuleService;
 import jakarta.validation.Valid;

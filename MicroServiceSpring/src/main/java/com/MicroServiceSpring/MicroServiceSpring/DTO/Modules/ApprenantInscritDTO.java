@@ -1,4 +1,4 @@
-package com.MicroServiceSpring.MicroServiceSpring.DTO;
+package com.MicroServiceSpring.MicroServiceSpring.DTO.Modules;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;

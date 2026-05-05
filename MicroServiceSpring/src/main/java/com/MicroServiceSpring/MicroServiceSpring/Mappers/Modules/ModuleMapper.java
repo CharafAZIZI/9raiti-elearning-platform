@@ -1,10 +1,11 @@
-package com.MicroServiceSpring.MicroServiceSpring.Mappers;
+package com.MicroServiceSpring.MicroServiceSpring.Mappers.Modules;
 
-import com.MicroServiceSpring.MicroServiceSpring.DTO.ModuleDTO;
+import com.MicroServiceSpring.MicroServiceSpring.DTO.Modules.ModuleDTO;
 import com.MicroServiceSpring.MicroServiceSpring.Exceptions.ResourceNotFoundException;
+import com.MicroServiceSpring.MicroServiceSpring.Mappers.Cours.CoursMapper;
 import com.MicroServiceSpring.MicroServiceSpring.Models.Cetagories.Categories;
 import com.MicroServiceSpring.MicroServiceSpring.Models.Modules.Module;
-import com.MicroServiceSpring.MicroServiceSpring.Repository.CategoriesRepository;
+import com.MicroServiceSpring.MicroServiceSpring.Repository.Categories.CategoriesRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.stream.Collectors;

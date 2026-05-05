@@ -1,9 +1,9 @@
 package com.MicroServiceSpring.MicroServiceSpring.Controllers;
 
-import com.MicroServiceSpring.MicroServiceSpring.DTO.CoursDTO;
+import com.MicroServiceSpring.MicroServiceSpring.DTO.Cours.CoursDTO;
 import com.MicroServiceSpring.MicroServiceSpring.Security.JwtUtil;
 import com.MicroServiceSpring.MicroServiceSpring.Services.Cours.CoursService;
-import com.MicroServiceSpring.MicroServiceSpring.Services.Minio.MinioService;
+import com.MicroServiceSpring.MicroServiceSpring.Services.Minio.IMinioService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
@@ -21,7 +21,7 @@ import java.util.Map;
 public class CoursController {
 
     private final CoursService coursService;
-    private final MinioService minioService;
+    private final IMinioService minioService;
 
     // ── CRUD ──────────────────────────────────────────────────────────────────
 

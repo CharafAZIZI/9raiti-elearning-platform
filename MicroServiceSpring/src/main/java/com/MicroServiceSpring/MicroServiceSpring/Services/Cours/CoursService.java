@@ -1,6 +1,6 @@
 package com.MicroServiceSpring.MicroServiceSpring.Services.Cours;
 
-import com.MicroServiceSpring.MicroServiceSpring.DTO.CoursDTO;
+import com.MicroServiceSpring.MicroServiceSpring.DTO.Cours.CoursDTO;
 
 import java.util.List;
 

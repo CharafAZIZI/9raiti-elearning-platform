@@ -1,7 +1,7 @@
 package com.MicroServiceSpring.MicroServiceSpring.Controllers;
 
-import com.MicroServiceSpring.MicroServiceSpring.DTO.ApprenantInscritDTO;
-import com.MicroServiceSpring.MicroServiceSpring.DTO.InscriptionDTO;
+import com.MicroServiceSpring.MicroServiceSpring.DTO.Modules.ApprenantInscritDTO;
+import com.MicroServiceSpring.MicroServiceSpring.DTO.Modules.InscriptionDTO;
 import com.MicroServiceSpring.MicroServiceSpring.Services.Inscriptions.InscriptionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

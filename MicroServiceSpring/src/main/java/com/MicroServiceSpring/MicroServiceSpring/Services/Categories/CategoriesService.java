@@ -1,6 +1,6 @@
 package com.MicroServiceSpring.MicroServiceSpring.Services.Categories;
 
-import com.MicroServiceSpring.MicroServiceSpring.DTO.CategoriesDTO;
+import com.MicroServiceSpring.MicroServiceSpring.DTO.Categories.CategoriesDTO;
 
 import java.util.List;
 

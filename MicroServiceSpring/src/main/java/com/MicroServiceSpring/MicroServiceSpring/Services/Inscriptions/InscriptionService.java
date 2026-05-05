@@ -1,7 +1,7 @@
 package com.MicroServiceSpring.MicroServiceSpring.Services.Inscriptions;
 
-import com.MicroServiceSpring.MicroServiceSpring.DTO.ApprenantInscritDTO;
-import com.MicroServiceSpring.MicroServiceSpring.DTO.InscriptionDTO;
+import com.MicroServiceSpring.MicroServiceSpring.DTO.Modules.ApprenantInscritDTO;
+import com.MicroServiceSpring.MicroServiceSpring.DTO.Modules.InscriptionDTO;
 
 import java.util.List;
 

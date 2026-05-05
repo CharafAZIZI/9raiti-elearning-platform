@@ -1,14 +1,14 @@
 package com.MicroServiceSpring.MicroServiceSpring.Services.Inscriptions;
 
-import com.MicroServiceSpring.MicroServiceSpring.DTO.ApprenantInscritDTO;
-import com.MicroServiceSpring.MicroServiceSpring.DTO.InscriptionDTO;
+import com.MicroServiceSpring.MicroServiceSpring.DTO.Modules.ApprenantInscritDTO;
+import com.MicroServiceSpring.MicroServiceSpring.DTO.Modules.InscriptionDTO;
 import com.MicroServiceSpring.MicroServiceSpring.Exceptions.ConflictException;
 import com.MicroServiceSpring.MicroServiceSpring.Exceptions.ResourceNotFoundException;
-import com.MicroServiceSpring.MicroServiceSpring.Mappers.InscriptionMapper;
+import com.MicroServiceSpring.MicroServiceSpring.Mappers.Modules.InscriptionMapper;
 import com.MicroServiceSpring.MicroServiceSpring.Models.Inscriptions.Inscription;
 import com.MicroServiceSpring.MicroServiceSpring.Models.Modules.Module;
-import com.MicroServiceSpring.MicroServiceSpring.Repository.InscriptionRepository;
-import com.MicroServiceSpring.MicroServiceSpring.Repository.ModuleRepository;
+import com.MicroServiceSpring.MicroServiceSpring.Repository.Modules.InscriptionRepository;
+import com.MicroServiceSpring.MicroServiceSpring.Repository.Modules.ModuleRepository;
 import com.MicroServiceSpring.MicroServiceSpring.Security.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

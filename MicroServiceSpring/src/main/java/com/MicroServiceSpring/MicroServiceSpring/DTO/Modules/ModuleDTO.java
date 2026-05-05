@@ -1,5 +1,6 @@
-package com.MicroServiceSpring.MicroServiceSpring.DTO;
+package com.MicroServiceSpring.MicroServiceSpring.DTO.Modules;
 
+import com.MicroServiceSpring.MicroServiceSpring.DTO.Cours.CoursDTO;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import java.util.List;

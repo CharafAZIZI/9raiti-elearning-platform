@@ -16,7 +16,7 @@ import java.time.Duration;
 import java.util.UUID;
 
 @Service
-public class MinioService {
+public class MinioService implements IMinioService {
 
     private final S3Client s3Client;
     private final S3Presigner s3PublicPresigner;

@@ -1,7 +1,7 @@
-package com.MicroServiceSpring.MicroServiceSpring.Mappers;
+package com.MicroServiceSpring.MicroServiceSpring.Mappers.Modules;
 
-import com.MicroServiceSpring.MicroServiceSpring.DTO.InscriptionDTO;
-import com.MicroServiceSpring.MicroServiceSpring.DTO.ModuleDTO;
+import com.MicroServiceSpring.MicroServiceSpring.DTO.Modules.InscriptionDTO;
+import com.MicroServiceSpring.MicroServiceSpring.DTO.Modules.ModuleDTO;
 import com.MicroServiceSpring.MicroServiceSpring.Models.Inscriptions.Inscription;
 import com.MicroServiceSpring.MicroServiceSpring.Models.Modules.Module;
 import org.springframework.stereotype.Component;

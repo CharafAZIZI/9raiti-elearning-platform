@@ -1,4 +1,4 @@
-package com.MicroServiceSpring.MicroServiceSpring.Repository;
+package com.MicroServiceSpring.MicroServiceSpring.Repository.Modules;
 
 import com.MicroServiceSpring.MicroServiceSpring.Models.Inscriptions.Inscription;
 import org.springframework.data.jpa.repository.JpaRepository;
