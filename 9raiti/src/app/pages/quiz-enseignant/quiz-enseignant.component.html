@@ -1,0 +1,322 @@
+<app-navbar></app-navbar>
+
+<div class="quiz-enseignant-page">
+
+  <!-- ── Messages ─────────────────────────────────────────────────────── -->
+  <div *ngIf="successMsg" class="alert alert-success">✅ {{ successMsg }}</div>
+  <div *ngIf="errorMsg"   class="alert alert-error">❌ {{ errorMsg }}</div>
+
+  <!-- ── En-tête ──────────────────────────────────────────────────────── -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">🎯 Gestion des Quiz</h1>
+      <p class="page-subtitle">Créez et gérez vos quiz pour vos cours</p>
+    </div>
+    <button class="btn-primary" (click)="ouvrirCreerQuiz()">+ Nouveau Quiz</button>
+  </div>
+
+  <!-- ── Grille Quiz ───────────────────────────────────────────────────── -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Chargement des quiz...</p>
+  </div>
+
+  <div *ngIf="!loading && quiz.length === 0" class="empty-state">
+    <div class="empty-icon">🎯</div>
+    <h3>Aucun quiz créé</h3>
+    <p>Commencez par créer votre premier quiz pour vos apprenants.</p>
+    <button class="btn-primary" (click)="ouvrirCreerQuiz()">+ Créer un quiz</button>
+  </div>
+
+  <div class="quiz-grid" *ngIf="!loading && quiz.length > 0">
+    <div class="quiz-card" *ngFor="let q of quiz">
+      <div class="quiz-card-header">
+        <div class="quiz-badge" [class.badge-actif]="q.actif" [class.badge-inactif]="!q.actif">
+          {{ q.actif ? 'Actif' : 'Inactif' }}
+        </div>
+        <div class="quiz-config-icons">
+          <span *ngIf="q.config?.correctionInstantanee" title="Correction instantanée">⚡</span>
+          <span *ngIf="q.config?.tempsLimiteMinutes"    title="Timer activé">⏱</span>
+          <span *ngIf="q.config?.randomiserQuestions"   title="Questions aléatoires">🔀</span>
+        </div>
+      </div>
+
+      <h3 class="quiz-titre">{{ q.titre }}</h3>
+      <p class="quiz-description">{{ q.description || 'Aucune description' }}</p>
+
+      <div class="quiz-meta">
+        <span class="meta-item">📘 {{ q.coursTitre || getNomCours(q.coursId) }}</span>
+        <span class="meta-item">❓ {{ q.nombreQuestions ?? 0 }} question(s)</span>
+        <span *ngIf="q.config?.tempsLimiteMinutes" class="meta-item">⏱ {{ q.config.tempsLimiteMinutes }} min</span>
+      </div>
+
+      <div class="quiz-actions">
+        <button class="btn-icon btn-details"  (click)="ouvrirDetails(q)"            title="Voir les détails">👁</button>
+        <button class="btn-icon btn-questions"(click)="ouvrirQuestions(q)"          title="Gérer les questions">❓</button>
+        <button class="btn-icon btn-edit"     (click)="ouvrirModifierQuiz(q)"       title="Modifier">✏️</button>
+        <button class="btn-icon btn-delete"   (click)="demanderSuppressionQuiz(q)"  title="Supprimer">🗑</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     MODAL : Créer / Modifier un Quiz
+══════════════════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" *ngIf="showQuizModal" (click)="fermerQuizModal()">
+  <div class="modal-box modal-lg" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ editingQuiz ? '✏️ Modifier le Quiz' : '+ Nouveau Quiz' }}</h2>
+      <button class="modal-close" (click)="fermerQuizModal()">✕</button>
+    </div>
+
+    <form [formGroup]="quizForm" (ngSubmit)="sauvegarderQuiz()" class="modal-form">
+
+      <!-- Titre -->
+      <div class="form-group">
+        <label>Titre *</label>
+        <input formControlName="titre" type="text" placeholder="Titre du quiz" class="form-input"
+               [class.input-error]="getControl('titre').invalid && getControl('titre').touched">
+        <span class="error-msg" *ngIf="getControl('titre').invalid && getControl('titre').touched">
+          Le titre est obligatoire (min. 3 caractères).
+        </span>
+      </div>
+
+      <!-- Description -->
+      <div class="form-group">
+        <label>Description</label>
+        <textarea formControlName="description" rows="2" placeholder="Description du quiz" class="form-input"></textarea>
+      </div>
+
+      <!-- Cours -->
+      <div class="form-group">
+        <label>Cours associé *</label>
+        <select formControlName="coursId" class="form-input"
+                [class.input-error]="getControl('coursId').invalid && getControl('coursId').touched">
+          <option value="">-- Sélectionner un cours --</option>
+          <option *ngFor="let c of mesCours" [value]="c.idCours">{{ c.titre }}</option>
+        </select>
+        <span class="error-msg" *ngIf="getControl('coursId').invalid && getControl('coursId').touched">
+          Veuillez sélectionner un cours.
+        </span>
+      </div>
+
+      <!-- Configuration -->
+      <div class="config-section">
+        <h4 class="config-title">⚙️ Configuration</h4>
+        <div class="config-grid">
+
+          <label class="toggle-label">
+            <input type="checkbox" formControlName="correctionInstantanee" class="toggle-input">
+            <span class="toggle-slider"></span>
+            <span>Correction instantanée</span>
+          </label>
+
+          <label class="toggle-label">
+            <input type="checkbox" formControlName="randomiserQuestions" class="toggle-input">
+            <span class="toggle-slider"></span>
+            <span>Randomiser les questions</span>
+          </label>
+
+          <label class="toggle-label">
+            <input type="checkbox" formControlName="randomiserReponses" class="toggle-input">
+            <span class="toggle-slider"></span>
+            <span>Randomiser les réponses</span>
+          </label>
+
+          <label class="toggle-label">
+            <input type="checkbox" formControlName="actif" class="toggle-input">
+            <span class="toggle-slider"></span>
+            <span>Quiz actif (visible aux apprenants)</span>
+          </label>
+
+        </div>
+
+        <div class="form-group" style="margin-top:12px;">
+          <label>Temps limite (minutes, optionnel)</label>
+          <input formControlName="tempsLimiteMinutes" type="number" min="1" max="180"
+                 placeholder="Ex: 30" class="form-input form-input-sm">
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" (click)="fermerQuizModal()">Annuler</button>
+        <button type="submit" class="btn-primary" [disabled]="quizLoading">
+          <span *ngIf="quizLoading" class="spinner-sm"></span>
+          {{ editingQuiz ? 'Mettre à jour' : 'Créer le quiz' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     MODAL : Gérer les Questions
+══════════════════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" *ngIf="showQuestionsModal" (click)="fermerQuestionsModal()">
+  <div class="modal-box modal-xl" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>❓ Questions — {{ quizSelectionne?.titre }}</h2>
+      <button class="modal-close" (click)="fermerQuestionsModal()">✕</button>
+    </div>
+
+    <div class="questions-toolbar">
+      <span class="questions-count">{{ quizSelectionne?.questions?.length ?? 0 }} question(s)</span>
+      <button class="btn-primary btn-sm" (click)="ouvrirAjouterQuestion()">+ Ajouter une question</button>
+    </div>
+
+    <div *ngIf="questionsLoading" class="loading-state">
+      <div class="spinner"></div>
+    </div>
+
+    <div class="questions-list" *ngIf="!questionsLoading">
+
+      <div *ngIf="!quizSelectionne?.questions?.length" class="empty-state-sm">
+        Aucune question dans ce quiz. Ajoutez votre première question !
+      </div>
+
+      <div class="question-item" *ngFor="let question of quizSelectionne?.questions; let i = index">
+        <div class="question-header">
+          <div class="question-numero">Q{{ i + 1 }}</div>
+          <div class="question-content">
+            <p class="question-texte">{{ question.texte }}</p>
+            <span class="type-badge" [class.type-qcm]="question.type === 'QCM'" [class.type-vf]="question.type === 'VRAI_FAUX'">
+              {{ question.type === 'QCM' ? 'QCM' : 'Vrai / Faux' }}
+            </span>
+          </div>
+          <div class="question-actions">
+            <button class="btn-icon btn-edit" (click)="ouvrirModifierQuestion(question)" title="Modifier">✏️</button>
+            <button class="btn-icon btn-delete" (click)="demanderSuppressionQuestion(question)" title="Supprimer">🗑</button>
+          </div>
+        </div>
+
+        <div class="reponses-list">
+          <div class="reponse-item" *ngFor="let r of question.reponses"
+               [class.reponse-correcte]="r.estCorrecte">
+            <span class="reponse-icon">{{ r.estCorrecte ? '✅' : '○' }}</span>
+            <span>{{ r.texte }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="fermerQuestionsModal()">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     MODAL : Ajouter / Modifier une Question
+══════════════════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" *ngIf="showQuestionModal" (click)="fermerQuestionModal()">
+  <div class="modal-box modal-lg" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ editingQuestion ? '✏️ Modifier la Question' : '+ Nouvelle Question' }}</h2>
+      <button class="modal-close" (click)="fermerQuestionModal()">✕</button>
+    </div>
+
+    <form [formGroup]="questionForm" (ngSubmit)="sauvegarderQuestion()" class="modal-form">
+
+      <!-- Type -->
+      <div class="form-group">
+        <label>Type de question *</label>
+        <select formControlName="type" class="form-input"
+                (change)="onTypeChange(getQControl('type').value)">
+          <option value="QCM">QCM (Choix multiple)</option>
+          <option value="VRAI_FAUX">Vrai / Faux</option>
+        </select>
+      </div>
+
+      <!-- Texte question -->
+      <div class="form-group">
+        <label>Texte de la question *</label>
+        <textarea formControlName="texte" rows="3" placeholder="Entrez votre question..." class="form-input"
+                  [class.input-error]="getQControl('texte').invalid && getQControl('texte').touched"></textarea>
+        <span class="error-msg" *ngIf="getQControl('texte').invalid && getQControl('texte').touched">
+          Le texte de la question est obligatoire.
+        </span>
+      </div>
+
+      <!-- Réponses -->
+      <div class="form-group">
+        <div class="reponses-header">
+          <label>Réponses *</label>
+          <button type="button" class="btn-sm btn-outline"
+                  *ngIf="getQControl('type').value === 'QCM'"
+                  (click)="ajouterReponse()">+ Ajouter une réponse</button>
+        </div>
+
+        <div formArrayName="reponses" class="reponses-form-list">
+          <div *ngFor="let rep of reponses.controls; let ri = index" [formGroupName]="ri" class="reponse-form-item">
+            <div class="reponse-form-row">
+              <input formControlName="texte" type="text" placeholder="Texte de la réponse"
+                     class="form-input reponse-input"
+                     [class.input-error]="rep.get('texte')?.invalid && rep.get('texte')?.touched">
+              <label class="correcte-label">
+                <input type="checkbox" formControlName="estCorrecte" class="checkbox-input">
+                <span>Correcte</span>
+              </label>
+              <button type="button" class="btn-icon btn-delete"
+                      *ngIf="getQControl('type').value === 'QCM' && reponses.length > 2"
+                      (click)="supprimerReponse(ri)">🗑</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" (click)="fermerQuestionModal()">Annuler</button>
+        <button type="submit" class="btn-primary" [disabled]="questionLoading">
+          <span *ngIf="questionLoading" class="spinner-sm"></span>
+          {{ editingQuestion ? 'Mettre à jour' : 'Ajouter la question' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     MODAL : Détails Quiz
+══════════════════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" *ngIf="showDetailsModal" (click)="fermerDetails()">
+  <div class="modal-box modal-lg" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>👁 Détails du Quiz</h2>
+      <button class="modal-close" (click)="fermerDetails()">✕</button>
+    </div>
+    <div class="details-body" *ngIf="quizDetails">
+      <div class="detail-row"><span class="detail-label">Titre</span><span>{{ quizDetails.titre }}</span></div>
+      <div class="detail-row"><span class="detail-label">Description</span><span>{{ quizDetails.description || '—' }}</span></div>
+      <div class="detail-row"><span class="detail-label">Cours</span><span>{{ quizDetails.coursTitre || getNomCours(quizDetails.coursId) }}</span></div>
+      <div class="detail-row"><span class="detail-label">Statut</span><span [class.text-green]="quizDetails.actif" [class.text-red]="!quizDetails.actif">{{ quizDetails.actif ? 'Actif' : 'Inactif' }}</span></div>
+      <div class="detail-row"><span class="detail-label">Correction instantanée</span><span>{{ quizDetails.config.correctionInstantanee ? 'Oui' : 'Non' }}</span></div>
+      <div class="detail-row"><span class="detail-label">Temps limite</span><span>{{ quizDetails.config.tempsLimiteMinutes ? quizDetails.config.tempsLimiteMinutes + ' min' : 'Aucun' }}</span></div>
+      <div class="detail-row"><span class="detail-label">Randomiser questions</span><span>{{ quizDetails.config.randomiserQuestions ? 'Oui' : 'Non' }}</span></div>
+      <div class="detail-row"><span class="detail-label">Randomiser réponses</span><span>{{ quizDetails.config.randomiserReponses ? 'Oui' : 'Non' }}</span></div>
+      <div class="detail-row"><span class="detail-label">Nb. questions</span><span>{{ quizDetails.questions?.length ?? 0 }}</span></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="fermerDetails()">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Confirmation Suppression ────────────────────────────────────── -->
+<div class="modal-overlay" *ngIf="deleteTarget" (click)="annulerSuppression()">
+  <div class="modal-box modal-sm" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>🗑 Confirmer la suppression</h2>
+    </div>
+    <div class="delete-body">
+      <p>Voulez-vous vraiment supprimer :</p>
+      <strong>« {{ deleteTarget?.nom }} »</strong>
+      <p class="delete-warning">Cette action est irréversible.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="annulerSuppression()">Annuler</button>
+      <button class="btn-danger" (click)="confirmerSuppression()">Supprimer</button>
+    </div>
+  </div>
+</div>

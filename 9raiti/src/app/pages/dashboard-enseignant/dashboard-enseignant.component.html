@@ -40,21 +40,58 @@
           </span>
         </button>
 
+        <button (click)="ouvrirSectionQuiz()" class="nav-item" [class.active]="activeSection==='quiz'">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <span>Mes Quiz</span>
+          <span *ngIf="mesQuiz.length > 0" class="ml-auto text-xs font-bold px-1.5 py-0.5 rounded-full"
+                style="background:var(--purple-dim,#ede9fe);color:var(--purple,#7c3aed);">
+            {{ mesQuiz.length }}
+          </span>
+        </button>
+
       </nav>
 
       <!-- Actions rapides -->
       <div class="mt-4 space-y-2 pt-4" style="border-top:1px solid var(--border);">
-        <p class="text-xs font-bold uppercase tracking-widest px-2 mb-2" style="color:var(--text-4);">Créer</p>
-        <button (click)="ouvrirContenu(); openCreateMod()" class="btn btn-ghost w-full" style="font-size:12px;padding:8px 12px;justify-content:flex-start;">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Nouveau module
-        </button>
-        <button (click)="ouvrirContenu(); openCreateCours()" class="btn btn-brand w-full" style="font-size:12px;padding:9px 12px;">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Nouveau cours
-        </button>
-      </div>
-    </aside>
+  <p class="text-xs font-bold uppercase tracking-widest px-2 mb-2" style="color:var(--text-4);">
+    Créer
+  </p>
+
+  <!-- Nouveau module -->
+  <button (click)="ouvrirContenu(); openCreateMod()"
+          class="btn btn-ghost w-full"
+          style="font-size:12px;padding:8px 12px;justify-content:flex-start;">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <line x1="12" y1="5" x2="12" y2="19"/>
+      <line x1="5" y1="12" x2="19" y2="12"/>
+    </svg>
+    Nouveau module
+  </button>
+
+  <!-- Nouveau cours -->
+  <button (click)="ouvrirContenu(); openCreateCours()"
+          class="btn btn-brand w-full"
+          style="font-size:12px;padding:9px 12px;display:flex;align-items:center;gap:6px;">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <line x1="12" y1="5" x2="12" y2="19"/>
+      <line x1="5" y1="12" x2="19" y2="12"/>
+    </svg>
+    Nouveau cours
+  </button>
+
+  <!-- Nouveau quiz -->
+  <button (click)="ouvrirSectionQuiz(); ouvrirCreerQuiz()"
+          class="btn w-full"
+          style="font-size:12px;padding:9px 12px;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:white;border:none;border-radius:10px;display:flex;align-items:center;gap:6px;font-weight:600;">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <line x1="12" y1="5" x2="12" y2="19"/>
+      <line x1="5" y1="12" x2="19" y2="12"/>
+    </svg>
+    Nouveau quiz
+  </button>
+
+</div>
+</aside>
 
     <!-- ── MAIN ─────────────────────────────────────────────────────────── -->
     <main class="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-6 space-y-5">
@@ -687,6 +724,121 @@
       </ng-container>
       <!-- FIN SECTION : Mes Apprenants -->
 
+
+      <!-- ════════════════════════════════════════════════════════════════════ -->
+      <!-- SECTION : MES QUIZ (Enseignant)                                      -->
+      <!-- ════════════════════════════════════════════════════════════════════ -->
+      <ng-container *ngIf="activeSection==='quiz'">
+        <div class="animate-fade-in space-y-5">
+
+          <!-- En-tête -->
+          <div class="flex items-center justify-between flex-wrap gap-3">
+            <div>
+              <h2 class="text-xl font-bold" style="font-family:'Syne',sans-serif;color:var(--text);">🎯 Mes Quiz</h2>
+              <p class="text-sm mt-1" style="color:var(--text-3);">Créez et gérez vos quiz pour vos cours.</p>
+            </div>
+            <button (click)="ouvrirCreerQuiz()" class="btn flex items-center gap-2"
+              style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:white;border:none;font-weight:600;padding:10px 18px;border-radius:8px;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Nouveau Quiz
+              </button>
+          </div>
+
+          <!-- Loading -->
+          <div *ngIf="loadingQuiz" class="flex justify-center py-16">
+            <svg class="animate-spin-slow" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:#7c3aed;"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
+          </div>
+
+          <!-- Vide -->
+          <div *ngIf="!loadingQuiz && mesQuiz.length===0"
+               class="flex flex-col items-center justify-center py-20 rounded-2xl"
+               style="background:var(--surface);border:1px dashed var(--border);">
+            <div class="text-6xl mb-4">🎯</div>
+            <p class="font-bold text-lg mb-2" style="color:var(--text);">Aucun quiz créé</p>
+            <p class="text-sm mb-5" style="color:var(--text-3);">Commencez par créer votre premier quiz !</p>
+            <button (click)="ouvrirCreerQuiz()" class="btn"
+                    style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:white;border:none;font-weight:600;">
+              + Créer mon premier quiz
+            </button>
+          </div>
+
+          <!-- Grille quiz -->
+          <div *ngIf="!loadingQuiz && mesQuiz.length>0"
+               class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+            <div *ngFor="let q of mesQuiz; let i=index"
+                 class="glass glass-hover rounded-2xl overflow-hidden flex flex-col animate-slide-up"
+                 [class]="'d-' + (i%5)">
+
+              <!-- Bannière -->
+              <div class="h-24 flex items-center justify-center relative"
+                   style="background:linear-gradient(135deg,#ede9fe,#ddd6fe);">
+                <div class="absolute inset-0 opacity-10"
+                     style="background:linear-gradient(135deg,transparent,rgba(109,40,217,.6));"></div>
+                <span class="relative z-10 text-4xl">🎯</span>
+                <!-- Badges -->
+                <div class="absolute top-2 right-2 flex gap-1.5">
+                  <span class="badge text-xs"
+                        [style.background]="q.actif?'var(--green-dim)':'var(--red-dim)'"
+                        [style.color]="q.actif?'var(--green)':'var(--red)'">
+                    {{ q.actif ? '✅ Actif' : '❌ Inactif' }}
+                  </span>
+                </div>
+                <!-- Icônes config -->
+                <div class="absolute bottom-2 left-2 flex gap-1">
+                  <span *ngIf="q.config.correctionInstantanee" title="Correction instantanée"
+                        class="text-xs px-1.5 py-0.5 rounded-full"
+                        style="background:rgba(109,40,217,.15);color:#6d28d9;">⚡</span>
+                  <span *ngIf="q.config.tempsLimiteMinutes" title="Timer"
+                        class="text-xs px-1.5 py-0.5 rounded-full"
+                        style="background:rgba(109,40,217,.15);color:#6d28d9;">⏱ {{q.config.tempsLimiteMinutes}}min</span>
+                  <span *ngIf="q.config.randomiserQuestions" title="Aléatoire"
+                        class="text-xs px-1.5 py-0.5 rounded-full"
+                        style="background:rgba(109,40,217,.15);color:#6d28d9;">🔀</span>
+                </div>
+                <div class="absolute bottom-0 left-0 right-0 h-0.5"
+                     style="background:linear-gradient(90deg,#7c3aed,#6d28d9);"></div>
+              </div>
+
+              <!-- Corps -->
+              <div class="p-4 flex-1 flex flex-col gap-3">
+                <div>
+                  <h3 class="font-bold text-sm mb-1 clamp-2"
+                      style="font-family:'Syne',sans-serif;color:var(--text);">{{ q.titre }}</h3>
+                  <p class="text-xs clamp-2" style="color:var(--text-3);">{{ q.description || 'Aucune description' }}</p>
+                </div>
+
+                <!-- Meta -->
+                <div class="flex flex-wrap gap-2">
+                  <span class="badge text-xs" style="background:var(--surface-2);color:var(--text-3);">
+                    📘 {{ getNomCours(q.coursId) }}
+                  </span>
+                  <span class="badge text-xs" style="background:var(--surface-2);color:var(--text-3);">
+                    ❓ {{ q.nombreQuestions ?? q.questions?.length ?? 0 }} question(s)
+                  </span>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex gap-2 mt-auto pt-3" style="border-top:1px solid var(--border);">
+                  <button (click)="ouvrirQuestions(q)"
+                          class="btn btn-brand btn-sm flex-1"
+                          style="font-size:11px;">
+                    ❓ Questions
+                  </button>
+                  <button (click)="ouvrirModifierQuiz(q)" class="btn btn-ghost btn-sm" title="Modifier">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  </button>
+                  <button (click)="demanderSuppressionQuiz(q)" class="btn btn-danger btn-sm" title="Supprimer">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </ng-container>
+      <!-- FIN SECTION : Mes Quiz -->
+
     </main>
   </div>
 </div>
@@ -855,6 +1007,245 @@
     <div class="flex gap-3">
       <button (click)="cancelDelete()" class="btn btn-ghost flex-1">Annuler</button>
       <button (click)="executeDelete()" class="btn btn-danger flex-1">Supprimer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════ MODAL : Créer / Modifier un Quiz ════════════════════════ -->
+<div *ngIf="showQuizModal" class="overlay" (click)="fermerQuizModal()">
+  <div class="modal" style="max-width:560px;" (click)="$event.stopPropagation()">
+    <div class="flex items-center justify-between mb-5">
+      <h3 class="font-bold text-base" style="font-family:'Syne',sans-serif;color:var(--text);">
+        {{ editingQuiz ? '✏️ Modifier le Quiz' : '🎯 Nouveau Quiz' }}
+      </h3>
+      <button (click)="fermerQuizModal()" style="background:none;border:none;cursor:pointer;color:var(--text-3);font-size:22px;">✕</button>
+    </div>
+    <form [formGroup]="quizForm" (ngSubmit)="sauvegarderQuiz()" novalidate class="space-y-4">
+
+      <div>
+        <label class="text-xs font-semibold uppercase tracking-wider mb-1 block" style="color:var(--text-3);">Titre *</label>
+        <input class="inp" formControlName="titre" placeholder="Titre du quiz"
+               [class.err]="getQuizControl('titre').invalid && getQuizControl('titre').touched"/>
+        <p *ngIf="getQuizControl('titre').invalid && getQuizControl('titre').touched"
+           class="text-xs mt-1" style="color:var(--red);">Min. 3 caractères requis.</p>
+      </div>
+
+      <div>
+        <label class="text-xs font-semibold uppercase tracking-wider mb-1 block" style="color:var(--text-3);">Description</label>
+        <textarea class="inp" formControlName="description" rows="2" placeholder="Description du quiz…" style="resize:vertical;"></textarea>
+      </div>
+
+      <div>
+        <label class="text-xs font-semibold uppercase tracking-wider mb-1 block" style="color:var(--text-3);">Cours associé *</label>
+        <select class="inp" formControlName="coursId" [class.err]="getQuizControl('coursId').invalid && getQuizControl('coursId').touched">
+          <option [ngValue]="null">-- Sélectionner un cours --</option>
+          <option *ngFor="let c of cours" [value]="c.idCours">{{ c.titre }}</option>
+        </select>
+        <p *ngIf="getQuizControl('coursId').invalid && getQuizControl('coursId').touched"
+           class="text-xs mt-1" style="color:var(--red);">Veuillez sélectionner un cours.</p>
+      </div>
+
+      <!-- Configuration -->
+      <div class="rounded-xl p-4 space-y-3" style="background:var(--surface-2);border:1px solid var(--border);">
+        <p class="text-xs font-bold uppercase tracking-wider" style="color:var(--text-3);">⚙️ Configuration</p>
+        <div class="grid grid-cols-2 gap-3">
+          <label class="flex items-center gap-2 cursor-pointer text-sm" style="color:var(--text-2);">
+            <input type="checkbox" formControlName="correctionInstantanee" class="rounded"/>
+            Correction instantanée
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer text-sm" style="color:var(--text-2);">
+            <input type="checkbox" formControlName="randomiserQuestions" class="rounded"/>
+            Questions aléatoires
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer text-sm" style="color:var(--text-2);">
+            <input type="checkbox" formControlName="randomiserReponses" class="rounded"/>
+            Réponses aléatoires
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer text-sm" style="color:var(--text-2);">
+            <input type="checkbox" formControlName="actif" class="rounded"/>
+            Quiz actif
+          </label>
+        </div>
+        <div>
+          <label class="text-xs font-semibold uppercase tracking-wider mb-1 block" style="color:var(--text-3);">Temps limite (minutes)</label>
+          <input class="inp" type="number" min="1" max="180" formControlName="tempsLimiteMinutes"
+                 placeholder="Optionnel — ex: 30" style="max-width:200px;"/>
+        </div>
+      </div>
+
+      <div class="flex gap-3 pt-2">
+        <button type="button" (click)="fermerQuizModal()" class="btn btn-ghost flex-1">Annuler</button>
+        <button type="submit" [disabled]="quizLoading" class="btn flex-1"
+                style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:white;border:none;font-weight:600;">
+          <svg *ngIf="quizLoading" class="animate-spin-slow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
+          {{ editingQuiz ? 'Mettre à jour' : 'Créer le Quiz' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ════════════════════════ MODAL : Gérer les Questions ════════════════════════ -->
+<div *ngIf="showQuestionsModal" class="overlay" (click)="fermerQuestionsModal()">
+  <div class="modal" style="max-width:700px;max-height:85vh;display:flex;flex-direction:column;" (click)="$event.stopPropagation()">
+    <div class="flex items-center justify-between mb-4 flex-shrink-0">
+      <div>
+        <h3 class="font-bold text-base" style="font-family:'Syne',sans-serif;color:var(--text);">
+          ❓ Questions — {{ quizSelectionne?.titre }}
+        </h3>
+        <p class="text-xs mt-0.5" style="color:var(--text-3);">
+          {{ quizSelectionne?.questions?.length ?? 0 }} question(s)
+        </p>
+      </div>
+      <div class="flex gap-2">
+        <button (click)="ouvrirAjouterQuestion()" class="btn btn-brand btn-sm">+ Question</button>
+        <button (click)="fermerQuestionsModal()" style="background:none;border:none;cursor:pointer;color:var(--text-3);font-size:22px;">✕</button>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="questionsLoading" class="flex justify-center py-8 flex-shrink-0">
+      <svg class="animate-spin-slow" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--brand);"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
+    </div>
+
+    <!-- Vide -->
+    <div *ngIf="!questionsLoading && (!quizSelectionne?.questions || quizSelectionne?.questions?.length===0)"
+         class="flex flex-col items-center justify-center py-12 flex-shrink-0">
+      <div class="text-4xl mb-3">❓</div>
+      <p class="font-semibold" style="color:var(--text);">Aucune question</p>
+      <p class="text-sm mt-1 mb-4" style="color:var(--text-3);">Ajoutez votre première question.</p>
+    </div>
+
+    <!-- Liste questions -->
+    <div class="overflow-y-auto flex-1 space-y-3 pr-1">
+      <div *ngFor="let question of quizSelectionne?.questions; let qi=index"
+           class="rounded-2xl p-4" style="background:var(--surface-2);border:1px solid var(--border);">
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-xl flex items-center justify-center text-sm font-bold flex-shrink-0"
+               style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:white;">{{ qi+1 }}</div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="badge text-xs"
+                    [style.background]="question.type==='QCM'?'var(--blue-dim)':'var(--orange-dim)'"
+                    [style.color]="question.type==='QCM'?'var(--blue)':'var(--orange)'">
+                {{ question.type==='QCM' ? 'QCM' : 'Vrai / Faux' }}
+              </span>
+            </div>
+            <p class="text-sm font-semibold mb-2" style="color:var(--text);">{{ question.texte }}</p>
+            <!-- Réponses -->
+            <div class="space-y-1">
+              <div *ngFor="let rep of question.reponses"
+                   class="flex items-center gap-2 text-xs py-1 px-2 rounded-lg"
+                   [style.background]="rep.estCorrecte?'var(--green-dim)':'transparent'"
+                   [style.color]="rep.estCorrecte?'var(--green)':'var(--text-3)'">
+                <span>{{ rep.estCorrecte ? '✅' : '⚪' }}</span>
+                <span>{{ rep.texte }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="flex gap-1 flex-shrink-0">
+            <button (click)="ouvrirModifierQuestion(question)" class="btn btn-ghost btn-sm" title="Modifier" style="padding:4px 8px;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button (click)="demanderSuppressionQuestion(question)" class="btn btn-danger btn-sm" title="Supprimer" style="padding:4px 8px;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex justify-end mt-4 pt-3 flex-shrink-0" style="border-top:1px solid var(--border);">
+      <button (click)="fermerQuestionsModal()" class="btn btn-ghost">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════ MODAL : Ajouter / Modifier une Question ════════════════════════ -->
+<div *ngIf="showQuestionModal" class="overlay" (click)="fermerQuestionModal()">
+  <div class="modal" style="max-width:560px;" (click)="$event.stopPropagation()">
+    <div class="flex items-center justify-between mb-5">
+      <h3 class="font-bold text-base" style="font-family:'Syne',sans-serif;color:var(--text);">
+        {{ editingQuestion ? '✏️ Modifier la Question' : '➕ Nouvelle Question' }}
+      </h3>
+      <button (click)="fermerQuestionModal()" style="background:none;border:none;cursor:pointer;color:var(--text-3);font-size:22px;">✕</button>
+    </div>
+
+    <form [formGroup]="questionForm" (ngSubmit)="sauvegarderQuestion()" novalidate class="space-y-4">
+
+      <!-- Type -->
+      <div>
+        <label class="text-xs font-semibold uppercase tracking-wider mb-1 block" style="color:var(--text-3);">Type de question *</label>
+        <select class="inp" formControlName="type" (change)="onTypeChange(getQControl('type').value)">
+          <option value="QCM">QCM (Choix multiple)</option>
+          <option value="VRAI_FAUX">Vrai / Faux</option>
+        </select>
+      </div>
+
+      <!-- Texte -->
+      <div>
+        <label class="text-xs font-semibold uppercase tracking-wider mb-1 block" style="color:var(--text-3);">Question *</label>
+        <textarea class="inp" formControlName="texte" rows="3" placeholder="Entrez votre question ici…"
+                  [class.err]="getQControl('texte').invalid && getQControl('texte').touched"
+                  style="resize:vertical;"></textarea>
+        <p *ngIf="getQControl('texte').invalid && getQControl('texte').touched"
+           class="text-xs mt-1" style="color:var(--red);">Question obligatoire (min. 3 car.)</p>
+      </div>
+
+      <!-- Réponses -->
+      <div>
+        <div class="flex items-center justify-between mb-2">
+          <label class="text-xs font-semibold uppercase tracking-wider" style="color:var(--text-3);">Réponses *</label>
+          <button type="button" class="btn btn-ghost btn-sm text-xs"
+                  *ngIf="getQControl('type').value === 'QCM'"
+                  (click)="ajouterReponse()">+ Réponse</button>
+        </div>
+        <div formArrayName="reponses" class="space-y-2">
+          <div *ngFor="let rep of reponses.controls; let ri=index" [formGroupName]="ri"
+               class="flex items-center gap-2 p-2 rounded-xl"
+               style="background:var(--surface-2);border:1px solid var(--border);">
+            <input type="text" formControlName="texte"
+                   placeholder="Texte de la réponse…"
+                   class="inp flex-1" style="border:none;background:transparent;padding:6px;"/>
+            <label class="flex items-center gap-1 text-xs cursor-pointer flex-shrink-0" style="color:var(--text-2);">
+              <input type="checkbox" formControlName="estCorrecte" style="accent-color:var(--green);"/>
+              Correct
+            </label>
+            <button type="button" class="btn btn-danger btn-sm flex-shrink-0"
+                    *ngIf="getQControl('type').value==='QCM' && reponses.length>2"
+                    (click)="supprimerReponseForm(ri)"
+                    style="padding:4px 8px;">✕</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex gap-3 pt-2">
+        <button type="button" (click)="fermerQuestionModal()" class="btn btn-ghost flex-1">Annuler</button>
+        <button type="submit" [disabled]="questionLoading" class="btn btn-brand flex-1">
+          <svg *ngIf="questionLoading" class="animate-spin-slow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
+          {{ editingQuestion ? 'Mettre à jour' : 'Ajouter' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ════════════════════════ MODAL : Confirmation suppression Quiz/Question ════════════════════════ -->
+<div *ngIf="deleteQuizTarget" class="overlay" (click)="annulerSuppressionQuiz()">
+  <div class="modal" style="max-width:380px;" (click)="$event.stopPropagation()">
+    <div class="flex items-center gap-3 mb-3">
+      <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl" style="background:var(--red-dim);">🗑️</div>
+      <div>
+        <p class="font-bold text-sm" style="color:var(--text);">Confirmer la suppression</p>
+        <p class="text-xs" style="color:var(--text-3);">Cette action est irréversible.</p>
+      </div>
+    </div>
+    <p class="text-sm mb-4" style="color:var(--text-2);">
+      Supprimer <strong style="color:var(--text);">{{ deleteQuizTarget.nom }}</strong> ?
+    </p>
+    <div class="flex gap-3">
+      <button (click)="annulerSuppressionQuiz()" class="btn btn-ghost flex-1">Annuler</button>
+      <button (click)="confirmerSuppressionQuiz()" class="btn btn-danger flex-1">Supprimer</button>
     </div>
   </div>
 </div>

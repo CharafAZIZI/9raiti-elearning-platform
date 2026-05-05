@@ -1,0 +1,278 @@
+<app-navbar></app-navbar>
+
+<div class="quiz-apprenant-page">
+
+  <!-- ── En-tête ──────────────────────────────────────────────────────── -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">🎯 Mes Quiz</h1>
+      <p class="page-subtitle">Bonjour {{ userName }}, passez vos quiz et progressez !</p>
+    </div>
+    <div class="tab-bar">
+      <button class="tab-btn" [class.active]="activeSection === 'quiz'"       (click)="setSection('quiz')">📋 Quiz disponibles</button>
+      <button class="tab-btn" [class.active]="activeSection === 'historique'" (click)="setSection('historique')">📊 Mon historique</button>
+    </div>
+  </div>
+
+  <!-- ── Erreur ─────────────────────────────────────────────────────────── -->
+  <div *ngIf="errorMsg" class="alert alert-error">❌ {{ errorMsg }}</div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       SECTION : Quiz disponibles
+  ══════════════════════════════════════════════════════════ -->
+  <div *ngIf="activeSection === 'quiz'" class="section-quiz">
+
+    <!-- Cours sidebar + Quiz list -->
+    <div class="quiz-layout">
+
+      <!-- Sidebar : mes cours -->
+      <div class="cours-sidebar">
+        <h3 class="sidebar-title">📘 Mes Cours</h3>
+        <div *ngIf="loadingCours" class="loading-sm"><div class="spinner"></div></div>
+        <div class="cours-list" *ngIf="!loadingCours">
+          <div *ngIf="mesCours.length === 0" class="empty-sm">Aucun cours inscrit.</div>
+          <button *ngFor="let c of mesCours"
+                  class="cours-item"
+                  [class.cours-actif]="coursSelectionne?.idCours === c.idCours"
+                  (click)="selectionnerCours(c)">
+            <span class="cours-icon">📘</span>
+            <span class="cours-titre">{{ c.titre }}</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quiz du cours sélectionné -->
+      <div class="quiz-content">
+        <div *ngIf="coursSelectionne" class="cours-header-info">
+          <h3>Quiz du cours : <strong>{{ coursSelectionne.titre }}</strong></h3>
+        </div>
+
+        <div *ngIf="loadingQuiz" class="loading-state">
+          <div class="spinner"></div><p>Chargement des quiz...</p>
+        </div>
+
+        <div *ngIf="!loadingQuiz && quizDuCours.length === 0" class="empty-state">
+          <div class="empty-icon">🎯</div>
+          <h3>Aucun quiz disponible</h3>
+          <p>Aucun quiz n'est disponible pour ce cours pour le moment.</p>
+        </div>
+
+        <div class="quiz-grid" *ngIf="!loadingQuiz && quizDuCours.length > 0">
+          <div class="quiz-card" *ngFor="let quiz of quizDuCours">
+            <div class="quiz-card-top">
+              <div class="quiz-config-badges">
+                <span *ngIf="quiz.config?.correctionInstantanee" class="badge badge-blue">⚡ Correction instantanée</span>
+                <span *ngIf="quiz.config?.tempsLimiteMinutes"    class="badge badge-orange">⏱ {{ quiz.config.tempsLimiteMinutes }} min</span>
+              </div>
+            </div>
+
+            <h3 class="quiz-titre">{{ quiz.titre }}</h3>
+            <p class="quiz-description">{{ quiz.description || 'Aucune description.' }}</p>
+
+            <div class="quiz-meta-list">
+              <div class="meta-item">❓ <strong>{{ quiz.nombreQuestions ?? 0 }}</strong> question(s)</div>
+              <div class="meta-item" *ngIf="quiz.config?.tempsLimiteMinutes">⏱ <strong>{{ quiz.config.tempsLimiteMinutes }}</strong> minutes</div>
+              <div class="meta-item">📋 <strong>{{ quiz.config?.correctionInstantanee ? 'Mode apprentissage' : 'Mode examen' }}</strong></div>
+            </div>
+
+            <button class="btn-commencer" (click)="commencerQuiz(quiz)">
+              🚀 Commencer le quiz
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       SECTION : Historique
+  ══════════════════════════════════════════════════════════ -->
+  <div *ngIf="activeSection === 'historique'" class="section-historique">
+    <h3 class="section-title">📊 Historique de mes tentatives</h3>
+
+    <div *ngIf="loadingTentatives" class="loading-state">
+      <div class="spinner"></div><p>Chargement...</p>
+    </div>
+
+    <div *ngIf="!loadingTentatives && mesTentatives.length === 0" class="empty-state">
+      <div class="empty-icon">📊</div>
+      <h3>Aucune tentative</h3>
+      <p>Vous n'avez pas encore passé de quiz.</p>
+    </div>
+
+    <div class="tentatives-list" *ngIf="!loadingTentatives && mesTentatives.length > 0">
+      <div class="tentative-card" *ngFor="let t of mesTentatives" (click)="voirDetailsTentative(t)">
+        <div class="tentative-info">
+          <div class="tentative-quiz-nom">{{ t.quizTitre }}</div>
+          <div class="tentative-date">{{ t.dateTentative | date:'dd/MM/yyyy HH:mm' }}</div>
+        </div>
+        <div class="tentative-score" [class.score-rouge]="t.scoreSur20 < 10" [class.score-orange]="t.scoreSur20 >= 10 && t.scoreSur20 <= 15" [class.score-vert]="t.scoreSur20 > 15">
+          <span class="score-valeur">{{ t.scoreSur20 | number:'1.1-1' }}</span>
+          <span class="score-sur">/20</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     MODAL : Quiz Runner
+══════════════════════════════════════════════════════════════════════ -->
+<div class="quiz-runner-overlay" *ngIf="showQuizRunner">
+
+  <!-- ── En-tête du quiz ─────────────────────────────────────────────── -->
+  <div class="quiz-runner-header">
+    <div class="quiz-runner-titre">
+      <button class="btn-quitter" (click)="fermerQuiz()" title="Quitter">✕</button>
+      <span>{{ quizEnCours?.titre }}</span>
+    </div>
+    <div class="quiz-runner-meta">
+      <span class="progression-text">{{ getNbReponses() }} / {{ questionsActuelles.length }} répondu(s)</span>
+      <div *ngIf="timerRestant > 0" class="timer" [class.timer-urgent]="timerUrgent">
+        ⏱ {{ timerFormate }}
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Barre de progression ────────────────────────────────────────── -->
+  <div class="progress-bar-container">
+    <div class="progress-bar-fill" [style.width.%]="progression"></div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       RÉSULTATS
+  ═══════════════════════════════════════════════════════════ -->
+  <div *ngIf="quizTermine && resultats" class="resultats-container">
+    <div class="score-card" [class]="couleurScore">
+      <div class="score-cercle">
+        <span class="score-grand">{{ resultats.scoreSur20 | number:'1.1-1' }}</span>
+        <span class="score-sur-20">/20</span>
+      </div>
+      <div class="score-details">
+        <p class="score-brut">{{ resultats.scoreBrut }} / {{ resultats.nombreQuestions }} bonnes réponses</p>
+        <p class="score-message">{{ messageScore }}</p>
+      </div>
+    </div>
+
+    <!-- Correction détaillée (mode examen) -->
+    <div *ngIf="!quizEnCours?.config?.correctionInstantanee && resultats?.resultats" class="correction-detaillee">
+      <h4>📋 Correction détaillée</h4>
+      <div *ngFor="let r of resultats.resultats; let i = index" class="correction-item"
+           [class.item-correct]="r.estCorrecte" [class.item-incorrect]="!r.estCorrecte">
+        <div class="correction-numero">Q{{ i + 1 }}</div>
+        <div class="correction-contenu">
+          <p class="correction-question">{{ r.questionTexte }}</p>
+          <p class="correction-reponse-donnee">
+            <span class="label-reponse">Votre réponse :</span>
+            {{ r.reponseSelectionneeTexte }}
+            <span class="icone-resultat">{{ r.estCorrecte ? '✅' : '❌' }}</span>
+          </p>
+          <p *ngIf="!r.estCorrecte" class="correction-bonne-reponse">
+            <span class="label-reponse">Bonne réponse :</span> {{ r.reponseCorrecteTexte }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="resultats-actions">
+      <button class="btn-secondary" (click)="fermerQuiz()">Fermer</button>
+      <button class="btn-primary" (click)="recommencerQuiz()">🔄 Recommencer</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       QUESTION EN COURS
+  ═══════════════════════════════════════════════════════════ -->
+  <div *ngIf="!quizTermine && questionCourante" class="question-runner">
+
+    <!-- Navigation numéros questions -->
+    <div class="questions-nav">
+      <button *ngFor="let q of questionsActuelles; let i = index"
+              class="nav-btn"
+              [class.nav-actuel]="i === questionActuelleIndex"
+              [class.nav-repondu]="reponsesSaisies[q.id] !== undefined"
+              (click)="allerQuestion(i)">
+        {{ i + 1 }}
+      </button>
+    </div>
+
+    <!-- Carte question -->
+    <div class="question-card">
+      <div class="question-numero-badge">
+        Question {{ questionActuelleIndex + 1 }} / {{ questionsActuelles.length }}
+      </div>
+      <h3 class="question-texte">{{ questionCourante.texte }}</h3>
+      <span class="type-pill" [class.type-qcm]="questionCourante.type === 'QCM'" [class.type-vf]="questionCourante.type === 'VRAI_FAUX'">
+        {{ questionCourante.type === 'QCM' ? 'QCM' : 'Vrai / Faux' }}
+      </span>
+
+      <!-- Réponses -->
+      <div class="reponses-runner">
+        <button *ngFor="let rep of questionCourante.reponses"
+                class="reponse-btn"
+                [class.reponse-selectionnee]="reponseSelectionnee(questionCourante.id, rep.id)"
+                [class.reponse-correcte]="getStatutReponse(questionCourante.id, rep.id, rep.estCorrecte) === 'correcte'"
+                [class.reponse-incorrecte]="getStatutReponse(questionCourante.id, rep.id, rep.estCorrecte) === 'incorrecte'"
+                (click)="selectionnerReponse(questionCourante.id, rep.id)">
+          <span class="reponse-indicateur"></span>
+          <span class="reponse-texte">{{ rep.texte }}</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="navigation-runner">
+      <button class="btn-nav btn-precedent" (click)="questionPrecedente()"
+              [disabled]="questionActuelleIndex === 0">← Précédent</button>
+
+      <button *ngIf="questionActuelleIndex < questionsActuelles.length - 1"
+              class="btn-nav btn-suivant" (click)="questionSuivante()">
+        Suivant →
+      </button>
+
+      <button *ngIf="questionActuelleIndex === questionsActuelles.length - 1"
+              class="btn-submit" (click)="soumettrQuiz()" [disabled]="submitting">
+        <span *ngIf="submitting" class="spinner-sm"></span>
+        🏁 Soumettre le quiz
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Modal Détails Tentative ────────────────────────────────────────── -->
+<div class="modal-overlay" *ngIf="showDetailsModal" (click)="fermerDetails()">
+  <div class="modal-box modal-lg" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>📊 Détails de la tentative</h2>
+      <button class="modal-close" (click)="fermerDetails()">✕</button>
+    </div>
+    <div *ngIf="tentativeDetails" class="details-body">
+      <div class="score-mini" [class.score-rouge]="tentativeDetails.scoreSur20 < 10" [class.score-orange]="tentativeDetails.scoreSur20 >= 10 && tentativeDetails.scoreSur20 <= 15" [class.score-vert]="tentativeDetails.scoreSur20 > 15">
+        <span>{{ tentativeDetails.scoreSur20 | number:'1.1-1' }}/20</span>
+        <small>{{ tentativeDetails.scoreBrut }} / {{ tentativeDetails.nombreQuestions }} bonnes réponses</small>
+      </div>
+
+      <div *ngIf="tentativeDetails.resultats" class="correction-detaillee">
+        <div *ngFor="let r of tentativeDetails.resultats; let i = index" class="correction-item"
+             [class.item-correct]="r.estCorrecte" [class.item-incorrect]="!r.estCorrecte">
+          <div class="correction-numero">Q{{ i + 1 }}</div>
+          <div class="correction-contenu">
+            <p class="correction-question">{{ r.questionTexte }}</p>
+            <p class="correction-reponse-donnee">
+              <span class="label-reponse">Votre réponse :</span> {{ r.reponseSelectionneeTexte }}
+              <span class="icone-resultat">{{ r.estCorrecte ? '✅' : '❌' }}</span>
+            </p>
+            <p *ngIf="!r.estCorrecte" class="correction-bonne-reponse">
+              <span class="label-reponse">Bonne réponse :</span> {{ r.reponseCorrecteTexte }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="fermerDetails()">Fermer</button>
+    </div>
+  </div>
+</div>
