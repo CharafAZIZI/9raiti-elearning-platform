@@ -1,65 +1,280 @@
 {
   "Routes": [
     {
-      "DownstreamPathTemplate": "/api/cours/{everything}",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [{ "Host": "spring-service", "Port": 8080 }],
-      "UpstreamPathTemplate": "/api/cours/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "OPTIONS" ]
-    },
-    {
-      "DownstreamPathTemplate": "/api/modules/{everything}",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [{ "Host": "spring-service", "Port": 8080 }],
-      "UpstreamPathTemplate": "/api/modules/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "OPTIONS" ]
-    },
-    {
       "DownstreamPathTemplate": "/api/categories/{everything}",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [{ "Host": "spring-service", "Port": 8080 }],
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "spring-service",
+          "Port": 8080
+        }
+      ],
       "UpstreamPathTemplate": "/api/categories/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "OPTIONS" ]
     },
     {
+      "DownstreamPathTemplate": "/api/modules/mes-modules",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "spring-service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/modules/mes-modules",
+      "UpstreamHttpMethod": [ "GET", "OPTIONS" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/modules/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "spring-service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/modules/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "OPTIONS" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/cours/mes-cours",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "spring-service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/cours/mes-cours",
+      "UpstreamHttpMethod": [ "GET", "OPTIONS" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/cours/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "spring-service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/cours/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "OPTIONS" ]
+    },
+
+    {
+      "DownstreamPathTemplate": "/api/cours/{coursId}/upload",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "spring-service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/cours/{coursId}/upload",
+      "UpstreamHttpMethod": [ "POST", "OPTIONS" ]
+    },
+
+    {
       "DownstreamPathTemplate": "/api/inscriptions/mes-apprenants",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [{ "Host": "spring-service", "Port": 8080 }],
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "spring-service",
+          "Port": 8080
+        }
+      ],
       "UpstreamPathTemplate": "/api/inscriptions/mes-apprenants",
       "UpstreamHttpMethod": [ "GET", "OPTIONS" ]
     },
     {
       "DownstreamPathTemplate": "/api/inscriptions/module/{moduleId}/apprenants",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [{ "Host": "spring-service", "Port": 8080 }],
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "spring-service",
+          "Port": 8080
+        }
+      ],
       "UpstreamPathTemplate": "/api/inscriptions/module/{moduleId}/apprenants",
       "UpstreamHttpMethod": [ "GET", "OPTIONS" ]
     },
     {
       "DownstreamPathTemplate": "/api/inscriptions/{everything}",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [{ "Host": "spring-service", "Port": 8080 }],
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "spring-service",
+          "Port": 8080
+        }
+      ],
       "UpstreamPathTemplate": "/api/inscriptions/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "DELETE", "OPTIONS" ]
     },
     {
       "DownstreamPathTemplate": "/api/inscriptions",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [{ "Host": "spring-service", "Port": 8080 }],
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "spring-service",
+          "Port": 8080
+        }
+      ],
       "UpstreamPathTemplate": "/api/inscriptions",
       "UpstreamHttpMethod": [ "GET", "POST", "DELETE", "OPTIONS" ]
     },
     {
+      "DownstreamPathTemplate": "/api/quiz/mes-quiz",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "spring-service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/quiz/mes-quiz",
+      "UpstreamHttpMethod": [ "GET", "OPTIONS" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/quiz/mes-tentatives",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "spring-service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/quiz/mes-tentatives",
+      "UpstreamHttpMethod": [ "GET", "OPTIONS" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/quiz/soumettre",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "spring-service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/quiz/soumettre",
+      "UpstreamHttpMethod": [ "POST", "OPTIONS" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/quiz/questions/{questionId}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "spring-service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/quiz/questions/{questionId}",
+      "UpstreamHttpMethod": [ "PUT", "DELETE", "OPTIONS" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/quiz/tentatives/{tentativeId}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "spring-service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/quiz/tentatives/{tentativeId}",
+      "UpstreamHttpMethod": [ "GET", "OPTIONS" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/quiz/cours/{coursId}/disponibles",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "spring-service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/quiz/cours/{coursId}/disponibles",
+      "UpstreamHttpMethod": [ "GET", "OPTIONS" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/quiz/cours/{coursId}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "spring-service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/quiz/cours/{coursId}",
+      "UpstreamHttpMethod": [ "GET", "OPTIONS" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/quiz/{quizId}/questions",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "spring-service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/quiz/{quizId}/questions",
+      "UpstreamHttpMethod": [ "POST", "OPTIONS" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/quiz/{quizId}/tentatives",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "spring-service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/quiz/{quizId}/tentatives",
+      "UpstreamHttpMethod": [ "GET", "OPTIONS" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/quiz/{quizId}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "spring-service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/quiz/{quizId}",
+      "UpstreamHttpMethod": [ "GET", "PUT", "DELETE", "OPTIONS" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/quiz",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "spring-service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/quiz",
+      "UpstreamHttpMethod": [ "GET", "POST", "OPTIONS" ]
+    },
+    {
       "DownstreamPathTemplate": "/{everything}",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [{ "Host": "dotnet-service", "Port": 5000 }],
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "dotnet-service",
+          "Port": 5000
+        }
+      ],
       "UpstreamPathTemplate": "/dotnet-api/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS" ]
     },
     {
       "DownstreamPathTemplate": "/api/{everything}",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [{ "Host": "dotnet-service", "Port": 5000 }],
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "dotnet-service",
+          "Port": 5000
+        }
+      ],
       "UpstreamPathTemplate": "/api/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS" ]
     }
