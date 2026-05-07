@@ -29,6 +29,9 @@ export class CoursComponent implements OnInit {
   niveauFiltre: Niveau | 'tous' = 'tous';
   vue: Vue = 'grille';
 
+  categorieId: number | null = null;
+  categorieNom = '';
+
   role: string = '';
   get isApprenant()  { return this.role === 'apprenant'; }
   get isEnseignant() { return this.role === 'enseignant'; }
@@ -74,6 +77,9 @@ export class CoursComponent implements OnInit {
     const id = this.route.snapshot.queryParamMap.get('moduleId');
     this.moduleId = id ? +id : null;
     this.moduleNom = this.route.snapshot.queryParamMap.get('moduleNom') || '';
+    const cid = this.route.snapshot.queryParamMap.get('categorieId');
+    this.categorieId  = cid ? +cid : null;
+    this.categorieNom = this.route.snapshot.queryParamMap.get('categorieNom') || '';
 
     if (this.isApprenant) {
       this.loadForApprenant();

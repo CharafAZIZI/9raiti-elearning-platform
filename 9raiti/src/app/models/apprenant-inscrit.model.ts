@@ -4,5 +4,5 @@ export interface ApprenantInscritDTO {
   moduleId:      number;
   moduleNom:     string;
   moduleCode:    string;
-  dateInscription: string; // ISO 8601
+  dateInscription: string;
 }

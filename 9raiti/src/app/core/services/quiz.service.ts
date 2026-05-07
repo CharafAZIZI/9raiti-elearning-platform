@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
+import { TokenService } from './token.service';
 import {
   QuizDTO,
   QuestionDTO,
@@ -13,9 +14,13 @@ import {
 @Injectable({ providedIn: 'root' })
 export class QuizService {
 
-  private readonly api = `${environment.apiUrl}/quiz`;
+  private readonly api    = `${environment.apiUrl}/quiz`;
+  private readonly aiApi  = `${environment.apiUrl}/quiz-ai`;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private tokenService: TokenService
+  ) {}
 
   // ── QUIZ CRUD (Enseignant) ────────────────────────────────────────────────
 
@@ -81,6 +86,56 @@ export class QuizService {
     return this.http.get<QuizDTO[]>(`${this.api}/cours/${coursId}/disponibles`).pipe(catchError(this.handleError));
   }
 
+  // ── GÉNÉRATION IA ────────────────────────────────────────────────────────
+
+  genererQuizParIA(
+    file: File,
+    coursId: number,
+    nombreQuestions: number = 5,
+    difficulte: 'FACILE' | 'MOYEN' | 'DIFFICILE' = 'MOYEN',
+    typeQuestions: 'QCM' | 'VRAI_FAUX' | 'MIXTE' = 'QCM',
+    config?: {
+      titre?: string;
+      description?: string;
+      correctionInstantanee?: boolean;
+      tempsLimiteMinutes?: number;
+      randomiserQuestions?: boolean;
+      randomiserReponses?: boolean;
+    }
+  ): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('coursId', coursId.toString());
+    formData.append('nombreQuestions', nombreQuestions.toString());
+    formData.append('difficulte', difficulte);
+    formData.append('typeQuestions', typeQuestions);
+
+    if (config) {
+      if (config.titre)
+        formData.append('titre', config.titre);
+      if (config.description)
+        formData.append('description', config.description);
+      if (config.correctionInstantanee !== undefined)
+        formData.append('correctionInstantanee', String(config.correctionInstantanee));
+      if (config.tempsLimiteMinutes)
+        formData.append('tempsLimiteMinutes', config.tempsLimiteMinutes.toString());
+      if (config.randomiserQuestions !== undefined)
+        formData.append('randomiserQuestions', String(config.randomiserQuestions));
+      if (config.randomiserReponses !== undefined)
+        formData.append('randomiserReponses', String(config.randomiserReponses));
+    }
+
+    // ✅ Token depuis auth_token (TokenService)
+    const token = this.tokenService.getToken() ?? '';
+    const headers = new HttpHeaders({
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+    });
+
+    // ✅ Appel direct — bypass Ocelot (pas de timeout 503)
+    return this.http.post(`${this.aiApi}/generate`, formData, { headers })
+      .pipe(catchError(this.handleError));
+  }
+
   // ── Gestion erreurs ──────────────────────────────────────────────────────
 
   private handleError(error: HttpErrorResponse): Observable<never> {
@@ -90,9 +145,9 @@ export class QuizService {
     } else if (error.status === 401) {
       message = 'Non autorisé. Veuillez vous reconnecter.';
     } else if (error.status === 403) {
-      message = "Accès refusé.";
+      message = 'Accès refusé.';
     } else if (error.status === 404) {
-      message = `Ressource introuvable.`;
+      message = 'Ressource introuvable.';
     } else if (error.error?.message) {
       message = error.error.message;
     } else {

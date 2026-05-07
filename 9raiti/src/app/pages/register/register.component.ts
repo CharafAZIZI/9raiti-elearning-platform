@@ -78,8 +78,20 @@ export class RegisterComponent {
           this.successMessage = 'Inscription réussie ! Vérifiez votre email pour activer votre compte.';          
         }
       },
+      // error: (err) => {
+      //   this.loading = false;
+      //   if (err.status === 409) {
+      //     this.errorMessage = 'Un compte avec cette adresse email existe déjà.';
+      //   } else {
+      //     this.errorMessage = 'Une erreur est survenue. Veuillez réessayer.';
+      //   }
+      // }
       error: (err) => {
         this.loading = false;
+        console.error('ERREUR INSCRIPTION:', err); // ✅ temporaire
+        console.error('STATUS:', err.status);
+        console.error('ERROR BODY:', err.error);
+        
         if (err.status === 409) {
           this.errorMessage = 'Un compte avec cette adresse email existe déjà.';
         } else {

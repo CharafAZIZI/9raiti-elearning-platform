@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ViewEncapsulation } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import {
   FormsModule, ReactiveFormsModule, FormBuilder, FormGroup,
@@ -24,7 +24,8 @@ const ACCEPTED_MIME_TYPES = ['application/pdf','video/mp4','video/webm','video/o
   standalone: true,
   imports: [CommonModule, FormsModule, ReactiveFormsModule, NavbarComponent, DatePipe, RouterModule],
   templateUrl: './dashboard-enseignant.component.html',
-  styleUrls: ['./dashboard-enseignant.component.css']
+  styleUrls: ['./dashboard-enseignant.component.css'],
+  encapsulation: ViewEncapsulation.None
 })
 export class DashboardEnseignantComponent implements OnInit {
 
@@ -63,6 +64,10 @@ export class DashboardEnseignantComponent implements OnInit {
 
   // ══════════════════════════════════════ QUIZ ══════════════════════════════════════
   mesQuiz: QuizDTO[] = []; loadingQuiz = false;
+  showGenerationIAModal = false;
+selectedPdfFile: File | null = null;
+iaGenerationLoading = false;
+iaForm!: FormGroup;
 
   // Modal création/édition quiz
   showQuizModal = false; editingQuiz: QuizDTO | null = null;
@@ -77,6 +82,8 @@ export class DashboardEnseignantComponent implements OnInit {
 
   // Confirmation suppression quiz/question
   deleteQuizTarget: { type: 'quiz'|'question'; id: number; nom: string } | null = null;
+
+
 
   constructor(
     private tokenService: TokenService, private userStateService: UserStateService,
@@ -95,6 +102,7 @@ export class DashboardEnseignantComponent implements OnInit {
       this.enseignantConnecteId = this.tokenService.getEnseignantId();
     });
     this.buildForms();
+    this.buildIAForm();
     this.loadAll();
     this.loadMesApprenants();
   }
@@ -119,6 +127,18 @@ export class DashboardEnseignantComponent implements OnInit {
       statut: ['PUBLIE'], dureeMinutes: [null, [Validators.min(1)]], moduleId: [null, Validators.required]
     });
   }
+
+private buildIAForm(): void {
+  this.iaForm = this.fb.group({
+    coursId: [null, Validators.required],
+    nombreQuestions: [10, [Validators.required, Validators.min(1), Validators.max(50)]],
+    difficulte: ['MOYEN', Validators.required],
+    typeQuestions: ['QCM', Validators.required],
+    titre: [''],
+    correctionInstantanee: [false],
+    randomiserQuestions: [false]
+  });
+}
 
   // ─── Chargement ─────────────────────────────────────────────────────────────
 
@@ -154,42 +174,140 @@ export class DashboardEnseignantComponent implements OnInit {
   openCreateCat(): void { this.editingCat=null; this.catForm.reset({nom:'',description:''}); this.showCatModal=true; }
   openEditCat(cat: CategorieDTO): void { this.editingCat=cat; this.catForm.patchValue({nom:cat.nom,description:cat.description??''}); this.showCatModal=true; }
   submitCat(): void {
-    if (this.catForm.invalid) { this.catForm.markAllAsTouched(); return; }
-    this.catLoading=true;
-    const obs = this.editingCat?.id ? this.catalogueService.updateCategorie(this.editingCat.id,this.catForm.value) : this.catalogueService.createCategorie(this.catForm.value);
-    obs.subscribe({ next:()=>{ this.catLoading=false; this.showCatModal=false; this.loadCategories(); this.showSuccess(this.editingCat?'Catégorie mise à jour.':'Catégorie créée.'); }, error:e=>{ this.catLoading=false; this.showError(this.extractError(e,'Erreur.')); } });
-  }
+  if (this.catForm.invalid) { this.catForm.markAllAsTouched(); return; }
+  this.catLoading = true;
+  const obs = this.editingCat?.id
+    ? this.catalogueService.updateCategorie(this.editingCat.id, this.catForm.value)
+    : this.catalogueService.createCategorie(this.catForm.value);
+
+  obs.subscribe({
+    next: () => {
+      this.catLoading = false;
+      this.showCatModal = false;
+      this.loadCategories(); // recharge la liste principale
+
+      // Si on est dans la section contenu → recharger aussi les catégories du contenu
+      if (this.contenuNiveau === 0) {
+        this.catalogueService.getAllCategories().subscribe({
+          next: d => { this.categories = d; this.cdr.detectChanges(); },
+          error: () => {}
+        });
+      }
+
+      this.showSuccess(this.editingCat ? 'Catégorie mise à jour.' : 'Catégorie créée.');
+    },
+    error: e => { this.catLoading = false; this.showError(this.extractError(e, 'Erreur.')); }
+  });
+}
 
   // ─── Modules CRUD ───────────────────────────────────────────────────────────
 
   openCreateMod(): void { this.editingMod=null; this.modForm.reset({nom:'',description:'',code:'',actif:true,statut:'ACTIF',categorieId:null}); this.showModModal=true; }
   openEditMod(mod: ModuleDTO): void { this.editingMod=mod; this.modForm.patchValue({nom:mod.nom,description:mod.description,code:mod.code,actif:mod.actif,statut:mod.statut??(mod.actif?'ACTIF':'BROUILLON'),categorieId:mod.categorieId??null}); this.showModModal=true; }
-  submitMod(): void {
-    if (this.modForm.invalid) { this.modForm.markAllAsTouched(); return; }
-    this.modLoading=true;
-    const val=this.modForm.value; const dto: ModuleDTO={...val,actif:val.statut==='ACTIF'};
-    const obs=this.editingMod?.id?this.catalogueService.updateModule(this.editingMod.id,dto):this.catalogueService.createModule(dto);
-    obs.subscribe({ next:()=>{ this.modLoading=false; this.showModModal=false; this.loadModules(); this.showSuccess(this.editingMod?'Module mis à jour.':'Module créé.'); }, error:e=>{ this.modLoading=false; this.showError(this.extractError(e,'Erreur.')); } });
-  }
+ submitMod(): void {
+  if (this.modForm.invalid) { this.modForm.markAllAsTouched(); return; }
+  this.modLoading = true;
+  const val = this.modForm.value;
+  const dto: ModuleDTO = { ...val, actif: val.statut === 'ACTIF' };
+  const obs = this.editingMod?.id
+    ? this.catalogueService.updateModule(this.editingMod.id, dto)
+    : this.catalogueService.createModule(dto);
+
+  obs.subscribe({
+    next: () => {
+      this.modLoading = false;
+      this.showModModal = false;
+      this.loadModules(); // recharge la liste principale
+
+      // Si on est dans la section contenu et une catégorie est sélectionnée → recharger
+      if (this.contenuNiveau >= 1 && this.contenuCategorieSelectee?.id) {
+        this.contenuLoadingModules = true;
+        this.catalogueService.getModulesByCategorie(this.contenuCategorieSelectee.id).subscribe({
+          next: d => { this.contenuModules = d; this.contenuLoadingModules = false; this.cdr.detectChanges(); },
+          error: () => { this.contenuLoadingModules = false; }
+        });
+      }
+
+      this.showSuccess(this.editingMod ? 'Module mis à jour.' : 'Module créé.');
+    },
+    error: e => { this.modLoading = false; this.showError(this.extractError(e, 'Erreur.')); }
+  });
+}
 
   // ─── Cours CRUD ─────────────────────────────────────────────────────────────
 
   openCreateCours(): void { this.editingCours=null; this.coursForm.reset({titre:'',description:'',niveau:'DEBUTANT',statut:'PUBLIE',dureeMinutes:null,moduleId:null}); this.selectedFile=null; this.showCoursModal=true; }
   openEditCours(c: CoursDTO): void { this.editingCours=c; this.coursForm.patchValue({titre:c.titre,description:c.description,niveau:c.niveau,statut:c.statut??'BROUILLON',dureeMinutes:c.dureeMinutes??null,moduleId:c.moduleId}); this.selectedFile=null; this.showCoursModal=true; }
   submitCours(): void {
-    if (this.coursForm.invalid) { this.coursForm.markAllAsTouched(); return; }
-    this.coursLoading=true;
-    const dto: CoursDTO={titre:this.coursForm.value.titre,description:this.coursForm.value.description,niveau:this.coursForm.value.niveau,statut:this.coursForm.value.statut,dureeMinutes:this.coursForm.value.dureeMinutes||undefined,moduleId:Number(this.coursForm.value.moduleId)};
-    const obs=this.editingCours?.idCours?this.catalogueService.updateCours(this.editingCours.idCours,dto):this.catalogueService.createCours(dto);
-    obs.subscribe({ next:created=>{ this.coursLoading=false; this.showCoursModal=false; if(this.selectedFile&&created.idCours) this.uploadFile(created.idCours,this.selectedFile); else this.loadCours(); this.showSuccess(this.editingCours?'Cours mis à jour.':'Cours créé.'); }, error:e=>{ this.coursLoading=false; this.showError(this.extractError(e,'Erreur.')); } });
-  }
+  if (this.coursForm.invalid) { this.coursForm.markAllAsTouched(); return; }
+  this.coursLoading = true;
+  const dto: CoursDTO = {
+    titre: this.coursForm.value.titre,
+    description: this.coursForm.value.description,
+    niveau: this.coursForm.value.niveau,
+    statut: this.coursForm.value.statut,
+    dureeMinutes: this.coursForm.value.dureeMinutes || undefined,
+    moduleId: Number(this.coursForm.value.moduleId)
+  };
+  const obs = this.editingCours?.idCours
+    ? this.catalogueService.updateCours(this.editingCours.idCours, dto)
+    : this.catalogueService.createCours(dto);
+
+  obs.subscribe({
+    next: created => {
+      this.coursLoading = false;
+      this.showCoursModal = false;
+
+      if (this.selectedFile && created.idCours) {
+        this.uploadFile(created.idCours, this.selectedFile);
+      } else {
+        this.loadCours(); // recharge liste principale
+      }
+
+      // Si on est dans la section contenu et un module est sélectionné → recharger
+      if (this.contenuNiveau === 2 && this.contenuModuleSelectionne?.id) {
+        this.contenuLoadingCours = true;
+        this.catalogueService.getCoursByModule(this.contenuModuleSelectionne.id).subscribe({
+          next: d => { this.contenuCours = d; this.contenuLoadingCours = false; this.cdr.detectChanges(); },
+          error: () => { this.contenuLoadingCours = false; }
+        });
+      }
+
+      this.showSuccess(this.editingCours ? 'Cours mis à jour.' : 'Cours créé.');
+    },
+    error: e => { this.coursLoading = false; this.showError(this.extractError(e, 'Erreur.')); }
+  });
+}
 
   onFileSelected(event: Event): void { const f=(event.target as HTMLInputElement).files?.[0]; if(!f)return; if(!ACCEPTED_MIME_TYPES.includes(f.type)){this.showError('Type non supporté.');this.selectedFile=null;return;} this.selectedFile=f; }
   openUpload(cours: CoursDTO): void { const i=document.createElement('input');i.type='file';i.accept='application/pdf,video/mp4,video/webm,video/ogg';i.onchange=e=>{const f=(e.target as HTMLInputElement).files?.[0];if(f&&cours.idCours)this.uploadFile(cours.idCours,f)};i.click(); }
   uploadFile(coursId: number, file: File): void {
-    this.uploadLoading=true; this.uploadingId=coursId;
-    this.catalogueService.uploadCoursFile(coursId,file).subscribe({ next:()=>{ this.uploadLoading=false;this.uploadingId=null;this.selectedFile=null;this.loadCours();this.showSuccess('Fichier uploadé.'); }, error:e=>{ this.uploadLoading=false;this.uploadingId=null;this.showError(this.extractError(e,'Erreur upload.')); } });
-  }
+  this.uploadLoading = true;
+  this.uploadingId = coursId;
+  this.catalogueService.uploadCoursFile(coursId, file).subscribe({
+    next: () => {
+      this.uploadLoading = false;
+      this.uploadingId = null;
+      this.selectedFile = null;
+      this.loadCours(); // liste principale
+
+      // Recharger contenuCours aussi
+      if (this.contenuNiveau === 2 && this.contenuModuleSelectionne?.id) {
+        this.catalogueService.getCoursByModule(this.contenuModuleSelectionne.id).subscribe({
+          next: d => { this.contenuCours = d; this.cdr.detectChanges(); },
+          error: () => {}
+        });
+      }
+
+      this.showSuccess('Fichier uploadé.');
+    },
+    error: e => {
+      this.uploadLoading = false;
+      this.uploadingId = null;
+      this.showError(this.extractError(e, 'Erreur upload.'));
+    }
+  });
+}
   getFileIcon(cours: CoursDTO): string { if(!cours.filePath)return '';const p=cours.filePath.toLowerCase();if(p.endsWith('.pdf'))return '📄 PDF';if(p.includes('video')||p.endsWith('.mp4')||p.endsWith('.webm'))return '🎬 Vidéo';return '📎 Fichier'; }
   getViewUrl(cours: CoursDTO): string { return cours.idCours?`/cours/${cours.idCours}`:'#'; }
 
@@ -198,11 +316,51 @@ export class DashboardEnseignantComponent implements OnInit {
   confirmDelete(type:'categorie'|'module'|'cours',id:number,name:string): void { this.deleteTarget={type,id,name}; }
   cancelDelete(): void { this.deleteTarget=null; }
   executeDelete(): void {
-    if(!this.deleteTarget)return;
-    const {type,id}=this.deleteTarget; this.deleteTarget=null;
-    const obs=type==='categorie'?this.catalogueService.deleteCategorie(id):type==='module'?this.catalogueService.deleteModule(id):this.catalogueService.deleteCours(id);
-    obs.subscribe({ next:()=>{ this.showSuccess('Supprimé(e).'); if(type==='categorie')this.loadCategories();else if(type==='module')this.loadModules();else this.loadCours(); }, error:e=>this.showError(this.extractError(e,'Erreur suppression.')) });
-  }
+  if (!this.deleteTarget) return;
+  const { type, id } = this.deleteTarget;
+  this.deleteTarget = null;
+
+  const obs = type === 'categorie'
+    ? this.catalogueService.deleteCategorie(id)
+    : type === 'module'
+      ? this.catalogueService.deleteModule(id)
+      : this.catalogueService.deleteCours(id);
+
+  obs.subscribe({
+    next: () => {
+      this.showSuccess('Supprimé(e).');
+
+      if (type === 'categorie') {
+        this.loadCategories();
+
+      } else if (type === 'module') {
+        this.loadModules();
+
+        // Recharger contenuModules si on est dans la bonne catégorie
+        if (this.contenuNiveau >= 1 && this.contenuCategorieSelectee?.id) {
+          this.contenuLoadingModules = true;
+          this.catalogueService.getModulesByCategorie(this.contenuCategorieSelectee.id).subscribe({
+            next: d => { this.contenuModules = d; this.contenuLoadingModules = false; this.cdr.detectChanges(); },
+            error: () => { this.contenuLoadingModules = false; }
+          });
+        }
+
+      } else {
+        this.loadCours();
+
+        // Recharger contenuCours si on est dans le bon module
+        if (this.contenuNiveau === 2 && this.contenuModuleSelectionne?.id) {
+          this.contenuLoadingCours = true;
+          this.catalogueService.getCoursByModule(this.contenuModuleSelectionne.id).subscribe({
+            next: d => { this.contenuCours = d; this.contenuLoadingCours = false; this.cdr.detectChanges(); },
+            error: () => { this.contenuLoadingCours = false; }
+          });
+        }
+      }
+    },
+    error: e => this.showError(this.extractError(e, 'Erreur suppression.'))
+  });
+}
 
   // ─── Section Contenu ─────────────────────────────────────────────────────────
 
@@ -387,7 +545,94 @@ const dto: QuestionDTO = {
   }
   getNbApprenantsDuModule(moduleId: number): number { return this.mesApprenants.filter(a=>a.moduleId===moduleId).length; }
 
-  // ─── Helpers ─────────────────────────────────────────────────────────────────
+  // ══════════════════════════════════════ GÉNÉRATION IA ══════════════════════════
+
+ouvrirGenerationIA(): void {
+  console.log('🔥 BOUTON CLIQUÉ - Ouverture modal IA');
+  this.selectedPdfFile = null;
+  this.iaForm.reset({
+    coursId: null,
+    nombreQuestions: 10,
+    difficulte: 'MOYEN',
+    typeQuestions: 'QCM',
+    titre: '',
+    correctionInstantanee: false,
+    randomiserQuestions: false
+  });
+  this.showGenerationIAModal = true;
+  console.log('✅ showGenerationIAModal =', this.showGenerationIAModal);
+  this.cdr.detectChanges();
+}
+
+fermerGenerationIA(): void {
+  this.showGenerationIAModal = false;
+  this.selectedPdfFile = null;
+  this.iaGenerationLoading = false;
+}
+
+onPdfSelected(event: Event): void {
+  const file = (event.target as HTMLInputElement).files?.[0];
+  if (!file) return;
+  
+  if (file.type !== 'application/pdf') {
+    this.showError('⚠️ Veuillez sélectionner un fichier PDF valide.');
+    this.selectedPdfFile = null;
+    return;
+  }
+  
+  // Limite de taille : 20 MB
+  if (file.size > 20 * 1024 * 1024) {
+    this.showError('⚠️ Le fichier PDF est trop volumineux (max 20 MB).');
+    this.selectedPdfFile = null;
+    return;
+  }
+  
+  this.selectedPdfFile = file;
+}
+genererQuizIA(): void {
+  console.log('PDF file:', this.selectedPdfFile);
+  console.log('Form values:', this.iaForm.value);
+
+  if (this.iaForm.invalid || !this.selectedPdfFile) {
+    this.iaForm.markAllAsTouched();
+    this.showError('Veuillez remplir tous les champs et sélectionner un PDF.');
+    return;
+  }
+
+  const values = this.iaForm.value;
+  
+  // ✅ Capturer le fichier AVANT de fermer le modal
+  const pdfFile = this.selectedPdfFile;
+
+  // ✅ Fermer le modal maintenant
+  this.fermerGenerationIA();
+
+  this.showSuccess('🤖 Génération du quiz en cours...');
+
+  // ✅ Utiliser pdfFile (pas this.selectedPdfFile qui est null maintenant)
+  this.quizService.genererQuizParIA(
+    pdfFile,
+    values.coursId,
+    values.nombreQuestions,
+    values.difficulte,
+    values.typeQuestions,
+    {
+      titre: values.titre || undefined,
+      correctionInstantanee: values.correctionInstantanee,
+      randomiserQuestions: values.randomiserQuestions
+    }
+  ).subscribe({
+    next: (response) => {
+      this.showSuccess(`✅ Quiz généré avec succès !`);
+      this.chargerMesQuiz();
+      this.cdr.detectChanges();
+    },
+    error: (error) => {
+      this.showError(`❌ Erreur : ${error.message}`);
+      this.cdr.detectChanges();
+    }
+  });
+}  // ─── Helpers ─────────────────────────────────────────────────────────────────
 
   setSection(s: string): void { this.activeSection=s; }
   getCatName(id?: number): string { if(!id)return'–';return this.categories.find(c=>c.id===id)?.nom??'–'; }

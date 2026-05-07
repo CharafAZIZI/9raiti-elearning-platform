@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { CatalogueService } from '../../core/services/catalogue.service';
@@ -16,20 +16,25 @@ type FileType = 'pdf' | 'video' | 'unknown' | null;
   styleUrls: ['./cours-detail.component.css']
 })
 export class CoursDetailComponent implements OnInit {
-
   cours: CoursDTO | null = null;
   loading = true;
   errorMsg = '';
 
-  // Fichier
   fileLoading = false;
   fileError   = '';
   fileType: FileType = null;
   presignedUrl: SafeResourceUrl | null = null;
-  rawUrl = '';   // URL brute pour <video src>
+  rawUrl = '';
+
+  // ✅ Contexte de navigation conservé
+  moduleId: number | null = null;
+  moduleNom = '';
+  categorieId: number | null = null;
+  categorieNom = '';
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private catalogueService: CatalogueService,
     private sanitizer: DomSanitizer
   ) {}
@@ -38,16 +43,39 @@ export class CoursDetailComponent implements OnInit {
     const id = Number(this.route.snapshot.paramMap.get('id'));
     if (!id) { this.errorMsg = 'ID de cours invalide.'; this.loading = false; return; }
 
+    // ✅ Lire les queryParams pour savoir d'où on vient
+    const qp = this.route.snapshot.queryParamMap;
+    const mid = qp.get('moduleId');
+    this.moduleId    = mid ? +mid : null;
+    this.moduleNom   = qp.get('moduleNom') || '';
+    const cid = qp.get('categorieId');
+    this.categorieId  = cid ? +cid : null;
+    this.categorieNom = qp.get('categorieNom') || '';
+
     this.catalogueService.getCoursById(id).subscribe({
       next: (c) => { this.cours = c; this.loading = false; },
       error: () => { this.errorMsg = 'Impossible de charger ce cours.'; this.loading = false; }
     });
   }
 
-  /** Appelé quand l'apprenant clique "Accéder au contenu" */
+  // ✅ Retour intelligent vers /cours avec le bon moduleId
+  retourVersCours(): void {
+    if (this.moduleId) {
+      this.router.navigate(['/cours'], {
+        queryParams: {
+          moduleId: this.moduleId,
+          moduleNom: this.moduleNom,
+          categorieId: this.categorieId || undefined,
+          categorieNom: this.categorieNom || undefined
+        }
+      });
+    } else {
+      this.router.navigate(['/cours']);
+    }
+  }
+
   loadFile(): void {
     if (!this.cours?.idCours || !this.cours.filePath) return;
-
     this.fileLoading = true;
     this.fileError   = '';
     this.presignedUrl = null;
@@ -58,10 +86,8 @@ export class CoursDetailComponent implements OnInit {
       next: (res) => {
         this.fileLoading = false;
         this.rawUrl = res.url;
-
         if (res.type === 'pdf') {
           this.fileType = 'pdf';
-          // Bypass de la sécurité Angular pour les URLs de ressources
           this.presignedUrl = this.sanitizer.bypassSecurityTrustResourceUrl(res.url);
         } else if (res.type.startsWith('video/')) {
           this.fileType = 'video';
@@ -72,7 +98,7 @@ export class CoursDetailComponent implements OnInit {
       },
       error: () => {
         this.fileLoading = false;
-        this.fileError   = 'Impossible de charger le fichier. Réessayez.';
+        this.fileError = 'Impossible de charger le fichier. Réessayez.';
       }
     });
   }

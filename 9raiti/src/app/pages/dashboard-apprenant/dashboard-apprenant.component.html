@@ -1,5 +1,21 @@
 <div class="min-h-screen" style="background:var(--bg);">
   <app-navbar></app-navbar>
+
+  <!-- ── Mobile bottom nav ──────────────────────────────────── -->
+  <nav class="mobile-nav md:hidden">
+    <button class="mobile-nav-item" [class.active]="activeSection==='accueil'" (click)="setSection('accueil')">
+      <span class="mobile-nav-icon">🏠</span>Accueil
+    </button>
+    <a routerLink="/categories" class="mobile-nav-item" routerLinkActive="active">
+      <span class="mobile-nav-icon">📂</span>Catégories
+    </a>
+    <a routerLink="/modules" class="mobile-nav-item" routerLinkActive="active">
+      <span class="mobile-nav-icon">📦</span>Modules
+    </a>
+    <button class="mobile-nav-item" [class.active]="activeSection==='quiz'" (click)="ouvrirSectionQuiz()">
+      <span class="mobile-nav-icon">🎯</span>Quiz
+    </button>
+  </nav>
   <div class="flex h-[calc(100vh-64px)] overflow-hidden">
 
     <!-- SIDEBAR -->
@@ -46,11 +62,6 @@
         <a routerLink="/cours" routerLinkActive="active" class="nav-item" style="text-decoration:none;">
           <span class="text-base">📘</span><span>Cours</span>
         </a>
-
-        <p class="text-xs font-bold uppercase tracking-widest px-2 mt-5 mb-2" style="color:var(--text-4);">Compte</p>
-        <button (click)="navigateToProfil()" class="nav-item">
-          <span class="text-base">👤</span><span>Mon profil</span>
-        </button>
       </nav>
     </aside>
 
@@ -323,7 +334,7 @@
                       </div>
                       <button (click)="commencerQuiz(quiz)"
                               class="btn w-full mt-auto"
-                              style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:white;border:none;font-weight:700;">
+                              style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:white;border:none;font-weight:700; padding:10px 20px;">
                         🚀 Commencer
                       </button>
                     </div>

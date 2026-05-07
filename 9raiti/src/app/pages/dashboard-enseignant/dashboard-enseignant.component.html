@@ -93,6 +93,22 @@
 </div>
 </aside>
 
+
+  <!-- ── Mobile bottom nav ──────────────────────────────────── -->
+  <nav class="mobile-nav md:hidden">
+    <button class="mobile-nav-item" [class.active]="activeSection==='accueil'" (click)="setSection('accueil')">
+      <span class="mobile-nav-icon">🏠</span>Dashboard
+    </button>
+    <button class="mobile-nav-item" [class.active]="activeSection==='contenu'" (click)="ouvrirContenu()">
+      <span class="mobile-nav-icon">📚</span>Contenu
+    </button>
+    <button class="mobile-nav-item" [class.active]="activeSection==='apprenants'" (click)="setSection('apprenants'); loadMesApprenants()">
+      <span class="mobile-nav-icon">👥</span>Apprenants
+    </button>
+    <button class="mobile-nav-item" [class.active]="activeSection==='quiz'" (click)="ouvrirSectionQuiz()">
+      <span class="mobile-nav-icon">🎯</span>Quiz
+    </button>
+  </nav>
     <!-- ── MAIN ─────────────────────────────────────────────────────────── -->
     <main class="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-6 space-y-5">
 
@@ -737,11 +753,25 @@
               <h2 class="text-xl font-bold" style="font-family:'Syne',sans-serif;color:var(--text);">🎯 Mes Quiz</h2>
               <p class="text-sm mt-1" style="color:var(--text-3);">Créez et gérez vos quiz pour vos cours.</p>
             </div>
-            <button (click)="ouvrirCreerQuiz()" class="btn flex items-center gap-2"
+            
+            <!-- <button (click)="ouvrirCreerQuiz()" class="btn flex items-center gap-2"
               style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:white;border:none;font-weight:600;padding:10px 18px;border-radius:8px;">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 Nouveau Quiz
-              </button>
+              </button> -->
+              <div class="flex gap-2">
+                <button (click)="ouvrirCreerQuiz()" class="btn flex items-center gap-2"
+                  style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:white;border:none;font-weight:600;padding:10px 18px;border-radius:8px;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Nouveau Quiz
+                </button>
+                
+                <!-- 🤖 NOUVEAU BOUTON GÉNÉRATION IA -->
+                <button (click)="ouvrirGenerationIA()" class="btn flex items-center gap-2"
+                  style="background:linear-gradient(135deg,#10b981,#059669);color:white;border:none;font-weight:600;padding:10px 18px;border-radius:8px;">
+                    🤖 Générer par IA
+                </button>
+              </div>
           </div>
 
           <!-- Loading -->
@@ -1250,3 +1280,239 @@
   </div>
 </div>
 
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<!-- MODAL : Génération Quiz par IA                                           -->
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<div *ngIf="showGenerationIAModal" class="overlay" (click)="fermerGenerationIA()">
+  <div class="modal-ia-box" (click)="$event.stopPropagation()">
+
+    <!-- Header -->
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;">
+      <div>
+        <div style="display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:99px;
+                    background:var(--green-dim);border:1px solid rgba(16,185,129,.2);margin-bottom:10px;">
+          <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--green);">
+            🤖 Intelligence Artificielle
+          </span>
+        </div>
+        <h3 class="ia-title"
+            style="font-family:'Syne',sans-serif;font-weight:800;font-size:18px;margin:0 0 6px 0;">
+          Générer un Quiz par IA
+        </h3>
+        <p class="ia-subtitle" style="font-size:13px;margin:0;">
+          Uploadez un PDF — l'IA génère automatiquement vos questions
+        </p>
+      </div>
+      <button (click)="fermerGenerationIA()"
+              style="background:var(--surface-2);border:1px solid var(--border-2);cursor:pointer;
+                     color:var(--text-3);font-size:18px;line-height:1;padding:8px 10px;
+                     border-radius:10px;transition:all .2s;">✕</button>
+    </div>
+
+    <form [formGroup]="iaForm" (ngSubmit)="genererQuizIA()" novalidate
+          style="display:flex;flex-direction:column;gap:18px;">
+
+      <!-- Upload PDF -->
+      <div>
+        <label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;
+                      letter-spacing:.5px;margin-bottom:8px;color:var(--text-3);">
+          📄 Document PDF *
+        </label>
+        <div class="ia-upload-zone"
+             style="border:2px dashed;border-radius:14px;padding:24px;
+                    text-align:center;transition:all .2s;cursor:pointer;"
+             [style.border-color]="selectedPdfFile ? 'var(--green)' : 'var(--border-2)'"
+             [style.background]="selectedPdfFile ? 'var(--green-dim)' : 'var(--surface-2)'">
+          <input type="file" accept="application/pdf" (change)="onPdfSelected($event)"
+                 style="position:absolute;opacity:0;width:0;height:0;" #pdfInput/>
+          <div *ngIf="!selectedPdfFile" (click)="pdfInput.click()">
+            <div style="font-size:32px;margin-bottom:8px;">📤</div>
+            <p class="ia-upload-title"
+               style="font-size:14px;font-weight:600;margin:0 0 4px 0;">
+              Cliquez pour uploader
+            </p>
+            <p class="ia-upload-subtitle" style="font-size:12px;margin:0;">
+              PDF uniquement — max 50MB
+            </p>
+          </div>
+          <div *ngIf="selectedPdfFile"
+               style="display:flex;align-items:center;gap:12px;">
+            <div style="width:40px;height:40px;border-radius:10px;background:var(--green);
+                        display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <span style="font-size:20px;">📄</span>
+            </div>
+            <div style="flex:1;text-align:left;min-width:0;">
+              <p style="font-size:13px;font-weight:600;color:var(--text);margin:0;
+                        white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                {{ selectedPdfFile.name }}
+              </p>
+              <p style="font-size:12px;color:var(--green);margin:4px 0 0 0;">
+                ✅ {{ (selectedPdfFile.size / 1024 / 1024).toFixed(2) }} MB — Prêt
+              </p>
+            </div>
+            <button type="button" (click)="selectedPdfFile=null;pdfInput.value=''"
+                    style="background:var(--red-dim);border:1px solid rgba(239,68,68,.2);
+                           color:var(--red);border-radius:8px;padding:4px 10px;cursor:pointer;
+                           font-size:12px;font-weight:600;flex-shrink:0;">✕</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cours associé -->
+      <div>
+        <label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;
+                      letter-spacing:.5px;margin-bottom:8px;color:var(--text-3);">
+          📘 Cours associé *
+        </label>
+        <select formControlName="coursId" class="inp">
+          <option [value]="null">-- Sélectionner un cours --</option>
+          <option *ngFor="let c of cours" [value]="c.idCours">{{ c.titre }}</option>
+        </select>
+        <span *ngIf="iaForm.get('coursId')?.invalid && iaForm.get('coursId')?.touched"
+              style="display:block;font-size:12px;color:var(--red);margin-top:5px;">
+          Veuillez sélectionner un cours
+        </span>
+      </div>
+
+      <!-- Nombre de questions + Difficulté -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div>
+          <label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;
+                        letter-spacing:.5px;margin-bottom:8px;color:var(--text-3);">
+            ❓ Nombre de questions
+          </label>
+          <input type="number" formControlName="nombreQuestions"
+                 min="1" max="50" class="inp" placeholder="5"/>
+        </div>
+        <div>
+          <label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;
+                        letter-spacing:.5px;margin-bottom:8px;color:var(--text-3);">
+            🎯 Difficulté
+          </label>
+          <select formControlName="difficulte" class="inp">
+            <option value="FACILE">🟢 Facile</option>
+            <option value="MOYEN">🟡 Moyen</option>
+            <option value="DIFFICILE">🔴 Difficile</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Type de questions -->
+      <div>
+        <label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;
+                      letter-spacing:.5px;margin-bottom:8px;color:var(--text-3);">
+          📝 Type de questions
+        </label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <label *ngFor="let t of [{v:'QCM',l:'QCM'},{v:'VRAI_FAUX',l:'Vrai/Faux'},{v:'MIXTE',l:'Mixte'}]"
+                 style="cursor:pointer;">
+            <input type="radio" formControlName="typeQuestions" [value]="t.v"
+                   style="display:none;"/>
+            <span style="display:inline-flex;align-items:center;padding:8px 18px;
+                         border-radius:99px;font-size:13px;font-weight:600;
+                         transition:all .2s;cursor:pointer;"
+                  [style.background]="iaForm.get('typeQuestions')?.value===t.v
+                                      ? 'var(--green-dim)' : 'var(--surface-2)'"
+                  [style.color]="iaForm.get('typeQuestions')?.value===t.v
+                                 ? 'var(--green)' : 'var(--text-2)'"
+                  [style.border]="iaForm.get('typeQuestions')?.value===t.v
+                                  ? '1.5px solid rgba(16,185,129,.4)'
+                                  : '1.5px solid var(--border-2)'">
+              {{ t.l }}
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Titre optionnel -->
+      <div>
+        <label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;
+                      letter-spacing:.5px;margin-bottom:8px;color:var(--text-3);">
+          ✏️ Titre du quiz
+          <span style="font-weight:400;text-transform:none;font-size:11px;"> (optionnel)</span>
+        </label>
+        <input formControlName="titre" class="inp"
+               placeholder="Généré automatiquement si vide"/>
+      </div>
+
+      <!-- Configuration -->
+      <div class="ia-config-box"
+           style="border:1px solid;border-radius:14px;padding:16px;">
+        <p style="font-size:11px;font-weight:700;text-transform:uppercase;
+                  letter-spacing:.5px;margin:0 0 14px 0;color:var(--text-3);">
+          ⚙️ Configuration
+        </p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <label class="ia-checkbox-card"
+                 style="display:flex;align-items:center;gap:10px;cursor:pointer;
+                        padding:10px 12px;border-radius:10px;border:1px solid;">
+            <input type="checkbox" formControlName="correctionInstantanee"
+                   style="width:16px;height:16px;accent-color:var(--green);cursor:pointer;"/>
+            <span style="font-size:13px;font-weight:500;color:var(--text-2);">
+              Correction instantanée
+            </span>
+          </label>
+          <label class="ia-checkbox-card"
+                 style="display:flex;align-items:center;gap:10px;cursor:pointer;
+                        padding:10px 12px;border-radius:10px;border:1px solid;">
+            <input type="checkbox" formControlName="randomiserQuestions"
+                   style="width:16px;height:16px;accent-color:var(--green);cursor:pointer;"/>
+            <span style="font-size:13px;font-weight:500;color:var(--text-2);">
+              Questions aléatoires
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div style="display:flex;gap:12px;padding-top:4px;">
+        <button type="button" (click)="fermerGenerationIA()" class="btn btn-ghost flex-1">
+          Annuler
+        </button>
+        <button type="submit"
+                [disabled]="iaGenerationLoading || !selectedPdfFile || iaForm.invalid"
+                style="flex:1;padding:13px 20px;border:none;border-radius:12px;
+                       background:linear-gradient(135deg,#10b981,#059669);
+                       color:white;cursor:pointer;font-weight:700;font-size:14px;
+                       font-family:'Plus Jakarta Sans',sans-serif;
+                       display:flex;align-items:center;justify-content:center;gap:8px;
+                       transition:opacity .2s;"
+                [style.opacity]="iaGenerationLoading||!selectedPdfFile||iaForm.invalid?'0.5':'1'"
+                [style.cursor]="iaGenerationLoading||!selectedPdfFile||iaForm.invalid?'not-allowed':'pointer'">
+          <svg *ngIf="iaGenerationLoading" class="animate-spin-slow" width="16" height="16"
+               viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/>
+          </svg>
+          {{ iaGenerationLoading ? 'Génération en cours...' : '🤖 Générer le Quiz' }}
+        </button>
+      </div>
+    </form>
+
+    <!-- Progress -->
+    <div *ngIf="iaGenerationLoading"
+         style="margin-top:20px;padding:16px;border-radius:14px;
+                background:var(--green-dim);border:1px solid rgba(16,185,129,.2);">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+        <svg class="animate-spin-slow" width="18" height="18" viewBox="0 0 24 24"
+             fill="none" stroke="currentColor" stroke-width="2"
+             style="color:var(--green);flex-shrink:0;">
+          <circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/>
+        </svg>
+        <p style="font-size:14px;font-weight:700;margin:0;color:var(--green);">
+          Génération en cours...
+        </p>
+      </div>
+      <p style="font-size:13px;line-height:1.6;color:var(--text-2);margin:0 0 12px 0;">
+        L'IA analyse votre PDF et génère les questions.
+        Cela prend <strong style="color:var(--text);">15 à 60 secondes</strong>.
+      </p>
+      <div style="height:6px;border-radius:99px;overflow:hidden;background:rgba(16,185,129,.15);">
+        <div style="height:100%;border-radius:99px;
+                    background:linear-gradient(90deg,#10b981,#059669);
+                    animation:shimmer 2s linear infinite;
+                    background-size:200% 100%;width:100%;"></div>
+      </div>
+    </div>
+
+  </div>
+</div>

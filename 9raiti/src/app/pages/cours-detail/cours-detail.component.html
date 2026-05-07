@@ -4,9 +4,10 @@
   <div class="px-4 sm:px-6 lg:px-8 py-8 max-w-5xl mx-auto">
 
     <!-- Retour -->
-    <a routerLink="/cours" style="color:var(--brand);text-decoration:none;font-size:13px;font-weight:600;">
-      ← Retour aux cours
-    </a>
+    <button (click)="retourVersCours()"
+        style="background:none;border:none;cursor:pointer;color:var(--brand);font-size:13px;font-weight:600;padding:0;">
+  ← Retour aux cours
+</button>
 
     <!-- Skeleton -->
     <div *ngIf="loading" class="mt-6 space-y-4">

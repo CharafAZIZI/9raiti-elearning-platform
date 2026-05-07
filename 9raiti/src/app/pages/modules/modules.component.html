@@ -164,21 +164,30 @@
 
           <!-- Voir les cours -->
           <a [routerLink]="['/cours']"
-             [queryParams]="{moduleId: mod.id, moduleNom: mod.nom}"
-             class="btn btn-brand btn-sm w-full"
-             style="text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px;">
+            [queryParams]="{
+              moduleId: mod.id,
+              moduleNom: mod.nom,
+              categorieId: categorieId || undefined,
+              categorieNom: categorieNom || undefined
+            }"
+            class="btn btn-brand btn-sm w-full"
+            style="text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px;">
             📖 Voir les cours
           </a>
-        </div>
 
         <!-- Action enseignant / admin -->
         <a *ngIf="!isApprenant"
-           [routerLink]="['/cours']"
-           [queryParams]="{moduleId: mod.id, moduleNom: mod.nom}"
-           class="btn btn-brand btn-sm w-full"
-           style="text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px;">
-          🎓 Voir les cours
-        </a>
+            [routerLink]="['/cours']"
+            [queryParams]="{
+              moduleId: mod.id,
+              moduleNom: mod.nom,
+              categorieId: categorieId || undefined,
+              categorieNom: categorieNom || undefined
+            }"
+            class="btn btn-brand btn-sm w-full"
+            style="text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px;">
+            🎓 Voir les cours
+          </a>
       </div>
     </div>
 

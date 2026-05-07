@@ -1,1 +1,42 @@
-/* Global styles in src/index.html */
+/* ════════════════════════════════════════════════════════════════════════════════
+   MODAL GÉNÉRATION IA
+   ════════════════════════════════════════════════════════════════════════════════ */
+
+.modal-ia-box {
+  position: relative;
+  background-color: #ffffff;
+  border-radius: 20px;
+  padding: 32px;
+  max-width: 650px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.5);
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  .modal-ia-box {
+    background-color: #1e1e1e;
+    color: #ffffff;
+  }
+}
+
+/* Scrollbar */
+.modal-ia-box::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-ia-box::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+
+.modal-ia-box::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+}
+
+.modal-ia-box::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.5);
+}

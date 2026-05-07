@@ -461,3 +461,41 @@
   .quiz-runner-header { flex-direction: column; align-items: flex-start; }
   .page-header    { flex-direction: column; }
 }
+
+
+/* ============================================================
+   QUIZ APPRENANT — Responsive additions
+   ============================================================ */
+@media (max-width: 767px) {
+  .quiz-apprenant-page { padding: 16px 12px 80px; }
+  .page-header  { flex-direction: column; align-items: flex-start; margin-bottom: 18px; }
+  .page-title   { font-size: 1.4rem; }
+  .tab-bar      { width: 100%; }
+  .tab-btn      { flex: 1; text-align: center; padding: 8px 6px; font-size: .78rem; }
+  .quiz-layout  { grid-template-columns: 1fr; gap: 16px; }
+  .cours-sidebar { position: static !important; top: unset !important; max-height: 200px; }
+  .cours-list   { max-height: 160px; overflow-y: auto; }
+  .quiz-grid    { grid-template-columns: 1fr; }
+  .quiz-runner-header { padding: 10px 14px; gap: 8px; }
+  .question-runner    { padding: 16px 12px 80px; }
+  .question-card { padding: 18px; }
+  .question-texte { font-size: 1rem; }
+  .reponse-btn   { padding: 11px 14px; }
+  .navigation-runner { gap: 8px; }
+  .btn-nav    { padding: 8px 14px; font-size: .85rem; }
+  .btn-submit { padding: 10px 18px; font-size: .85rem; }
+  .resultats-container { padding: 16px 12px 80px; }
+  .score-grand { font-size: 3.5rem; }
+  .resultats-actions { flex-direction: column; }
+  .resultats-actions .btn-primary,
+  .resultats-actions .btn-secondary { width: 100%; }
+  .tentative-card { flex-wrap: wrap; gap: 8px; }
+  .score-valeur { font-size: 1.75rem; }
+  .modal-overlay { align-items: flex-end !important; padding: 0 !important; }
+  .modal-box { border-radius: 16px 16px 0 0 !important; max-height: 82vh !important; }
+}
+@media (max-width: 479px) {
+  .questions-nav { gap: 5px; }
+  .nav-btn { width: 30px; height: 30px; font-size: .78rem; }
+  .timer   { font-size: .8rem; padding: 4px 10px; }
+}
