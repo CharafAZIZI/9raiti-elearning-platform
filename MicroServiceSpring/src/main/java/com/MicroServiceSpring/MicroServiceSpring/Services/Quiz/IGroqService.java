@@ -1,4 +1,6 @@
 package com.MicroServiceSpring.MicroServiceSpring.Services.Quiz;
 
-public class IGroqService {
+public interface IGroqService {
+    String genererQuizJson(String texte, int nombreQuestions,
+                           String difficulte, String typeQuestions);
 }
