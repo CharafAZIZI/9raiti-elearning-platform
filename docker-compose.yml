@@ -47,7 +47,7 @@ services:
     networks:
       - elearning-net
 
-  # ── Microservice Spring Boot (Cours) ────────────────────────────────────────
+  # ── Microservice Spring Boot (Cours + Quiz AI) ──────────────────────────────
   spring-service:
     build:
       context: ./MicroServiceSpring
@@ -60,12 +60,12 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/GestionCours
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=REMOVED_PASSWORD
-      # MinIO : surcharge l'application.properties
       - MINIO_URL=http://minio-service:9000
       - MINIO_ACCESS_KEY=minioadmin
       - MINIO_SECRET_KEY=REMOVED_PASSWORD
       - MINIO_BUCKET=cours
       - MINIO_PUBLIC_URL=http://localhost:9002
+      - GROQ_API_KEY=REMOVED_GROQ_KEY
     depends_on:
       postgres:
         condition: service_healthy
@@ -73,7 +73,7 @@ services:
         condition: service_healthy
     networks:
       - elearning-net
-    healthcheck:  # permet à API Gateway de vérifier que le service est prêt
+    healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 10s
       timeout: 5s
@@ -89,8 +89,8 @@ services:
       - MINIO_ROOT_USER=minioadmin
       - MINIO_ROOT_PASSWORD=REMOVED_PASSWORD
     ports:
-      - "9002:9000"    # API S3 (accès depuis l'hôte pour debug)
-      - "9003:9001"    # Console web MinIO (http://localhost:9003)
+      - "9002:9000"
+      - "9003:9001"
     volumes:
       - minio-data:/data
     networks:
@@ -152,4 +152,4 @@ networks:
 volumes:
   sqlserver-data:
   postgres-data:
-  minio-data:     # Volume persistant pour les fichiers MinIO
+  minio-data:
