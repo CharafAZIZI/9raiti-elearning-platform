@@ -49,19 +49,6 @@
       "UpstreamHttpMethod": [ "GET", "OPTIONS" ]
     },
     {
-      "DownstreamPathTemplate": "/api/cours/{everything}",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "spring-service",
-          "Port": 8080
-        }
-      ],
-      "UpstreamPathTemplate": "/api/cours/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "OPTIONS" ]
-    },
-
-    {
       "DownstreamPathTemplate": "/api/cours/{coursId}/upload",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
@@ -73,7 +60,18 @@
       "UpstreamPathTemplate": "/api/cours/{coursId}/upload",
       "UpstreamHttpMethod": [ "POST", "OPTIONS" ]
     },
-
+    {
+      "DownstreamPathTemplate": "/api/cours/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "spring-service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/cours/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "OPTIONS" ]
+    },
     {
       "DownstreamPathTemplate": "/api/inscriptions/mes-apprenants",
       "DownstreamScheme": "http",
@@ -255,6 +253,18 @@
       "UpstreamHttpMethod": [ "GET", "POST", "OPTIONS" ]
     },
     {
+      "DownstreamPathTemplate": "/api/quiz-ai/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "spring-service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/quiz-ai/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "OPTIONS" ]
+    },
+    {
       "DownstreamPathTemplate": "/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
@@ -280,6 +290,10 @@
     }
   ],
   "GlobalConfiguration": {
-    "BaseUrl": "http://api-gateway:9000"
+    "BaseUrl": "http://api-gateway:9000",
+    "RequestIdKey": "OcRequestId",
+    "ServiceDiscoveryProvider": {
+      "Namespace": "Dev"
+    }
   }
 }
