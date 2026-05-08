@@ -29,16 +29,19 @@
       <p class="text-xs font-bold uppercase tracking-widest px-2 mb-2" style="color:var(--text-4);">Tableau de bord</p>
       <nav class="space-y-1 mb-4">
         <button *ngFor="let item of [
-          {id:'dashboard', icon:'dashboard', label:'Vue d\'ensemble'},
-          {id:'users',     icon:'users',     label:'Utilisateurs'},
-          {id:'content',   icon:'content',   label:'Contenu pédagogique'},
+          {id:'dashboard',      icon:'dashboard', label:'Vue d\'ensemble'},
+          {id:'users',          icon:'users',     label:'Utilisateurs'},
+          {id:'content',        icon:'content',   label:'Contenu pédagogique'},
+          {id:'notifications',  icon:'bell',      label:'Notifications'}
 ]" (click)="activeTab=item.id" class="nav-item" [class.active]="activeTab===item.id">
           <!-- Dashboard icon -->
           <svg *ngIf="item.icon==='dashboard'" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
           <!-- Users icon -->
           <svg *ngIf="item.icon==='users'" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
           <!-- Content icon -->
-          <svg *ngIf="item.icon==='content'" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg><!-- Notifs icon -->
+          <svg *ngIf="item.icon==='content'" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+          <!-- Bell icon -->
+          <svg *ngIf="item.icon==='bell'" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
           <span>{{item.label}}</span>
         </button>
       </nav>
@@ -554,6 +557,8 @@
                                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
                               </button>
                             </div>
+                            <!-- Interactions cours -->
+                            <app-cours-interaction [coursId]="c.idCours!" userRole="admin"></app-cours-interaction>
                           </div>
                         </div>
                       </div>
@@ -600,6 +605,70 @@
                 <button (click)="openCreateCat()" class="btn btn-brand mt-3">Commencer par créer une catégorie</button>
               </div>
             </div>
+
+        </div>
+      </ng-container>
+
+      <!-- ================================================================== -->
+      <!-- NOTIFICATIONS TAB                                                    -->
+      <!-- ================================================================== -->
+      <ng-container *ngIf="activeTab==='notifications'">
+        <div class="animate-fade-in space-y-5">
+
+          <!-- Header -->
+          <div class="relative overflow-hidden rounded-2xl p-6"
+               style="background:linear-gradient(135deg,var(--surface),var(--surface-2));border:1px solid rgba(139,92,246,.25);">
+            <div class="absolute top-0 left-0 right-0 h-0.5 rounded-t-2xl" style="background:linear-gradient(90deg,transparent,var(--purple),transparent);"></div>
+            <p class="text-xs font-bold uppercase tracking-[3px] mb-1" style="color:var(--purple);">Communications</p>
+            <h2 class="text-xl font-bold mb-1" style="font-family:'Syne',sans-serif;color:var(--text);">📢 Notifications & Diffusion</h2>
+            <p class="text-sm" style="color:var(--text-2);">Envoyez des messages ciblés à vos utilisateurs en temps réel.</p>
+          </div>
+
+          <!-- Composant broadcast -->
+          <app-admin-broadcast></app-admin-broadcast>
+
+          <!-- Historique des notifications reçues -->
+          <div class="rounded-2xl overflow-hidden" style="border:1.5px solid var(--border);">
+            <div class="px-5 py-4" style="background:var(--surface);border-bottom:1px solid var(--border);">
+              <h3 class="font-bold text-sm" style="font-family:'Syne',sans-serif;color:var(--text);">📥 Notifications reçues</h3>
+            </div>
+            <app-notification-center role="admin"></app-notification-center>
+          </div>
+
+          <!-- Info sur les notifications automatiques -->
+          <div class="rounded-2xl p-5" style="background:var(--card);border:1.5px solid var(--border);">
+            <h3 class="font-bold text-sm mb-3" style="font-family:'Syne',sans-serif;color:var(--text);">🤖 Notifications automatiques</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div class="flex items-start gap-3 p-3 rounded-xl" style="background:var(--surface-2);border:1px solid var(--border);">
+                <span class="text-xl">🎓</span>
+                <div>
+                  <p class="text-xs font-semibold" style="color:var(--text);">Nouveau cours publié</p>
+                  <p class="text-xs" style="color:var(--text-3);">Les apprenants inscrits à un module reçoivent une notification quand un cours est ajouté.</p>
+                </div>
+              </div>
+              <div class="flex items-start gap-3 p-3 rounded-xl" style="background:var(--surface-2);border:1px solid var(--border);">
+                <span class="text-xl">✅</span>
+                <div>
+                  <p class="text-xs font-semibold" style="color:var(--text);">Validation de compte</p>
+                  <p class="text-xs" style="color:var(--text-3);">L'enseignant est notifié dès que son compte est validé ou rejeté.</p>
+                </div>
+              </div>
+              <div class="flex items-start gap-3 p-3 rounded-xl" style="background:var(--surface-2);border:1px solid var(--border);">
+                <span class="text-xl">👥</span>
+                <div>
+                  <p class="text-xs font-semibold" style="color:var(--text);">Inscription d'un apprenant</p>
+                  <p class="text-xs" style="color:var(--text-3);">L'enseignant reçoit une notification quand un apprenant s'inscrit à son module.</p>
+                </div>
+              </div>
+              <div class="flex items-start gap-3 p-3 rounded-xl" style="background:var(--surface-2);border:1px solid var(--border);">
+                <span class="text-xl">💬</span>
+                <div>
+                  <p class="text-xs font-semibold" style="color:var(--text);">Interactions sur les cours</p>
+                  <p class="text-xs" style="color:var(--text-3);">Likes, notes et commentaires génèrent des notifications pour l'enseignant du cours.</p>
+                </div>
+              </div>
+            </div>
+          </div>
 
         </div>
       </ng-container>

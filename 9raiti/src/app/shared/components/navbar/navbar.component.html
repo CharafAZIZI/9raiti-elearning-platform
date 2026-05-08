@@ -32,6 +32,11 @@
 
     <div class="divider-v h-7 hidden sm:block"></div>
 
+    <!-- Cloche notifications -->
+    <app-notification-bell *ngIf="email"></app-notification-bell>
+
+    <div class="divider-v h-7 hidden sm:block"></div>
+
     <!-- User chip (desktop) — clique → profil -->
     <button *ngIf="email" (click)="navigateToProfile()"
             class="hidden sm:flex items-center gap-2.5 rounded-xl px-3 py-1.5 transition-all"

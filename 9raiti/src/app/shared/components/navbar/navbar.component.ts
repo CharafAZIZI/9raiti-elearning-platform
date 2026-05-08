@@ -6,12 +6,14 @@ import { Subscription } from 'rxjs';
 import { TokenService } from '../../../core/services/token.service';
 import { UserStateService } from '../../../core/services/user-state.service';
 import { ThemeService } from '../../../core/services/theme.service';
+import { NotificationService } from '../../../core/services/notification.service';
+import { NotificationBellComponent } from '../notification-bell/notification-bell.component';
 import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, NotificationBellComponent],
   templateUrl: './navbar.component.html',
 })
 export class NavbarComponent implements OnInit, OnDestroy {
@@ -25,11 +27,12 @@ export class NavbarComponent implements OnInit, OnDestroy {
   private subs: Subscription[] = [];
 
   constructor(
-    private tokenService:   TokenService,
-    private userStateService: UserStateService,
-    private themeService:   ThemeService,
-    private router:         Router,
-    private http:           HttpClient
+    private tokenService:      TokenService,
+    private userStateService:  UserStateService,
+    private themeService:      ThemeService,
+    private notifService:      NotificationService,
+    private router:            Router,
+    private http:              HttpClient
   ) {}
 
   ngOnInit(): void {
@@ -40,6 +43,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
           this.role        = user.role  ?? '';
           this.displayName = this.userStateService.getDisplayName();
           this.computeInitials(user);
+          this.notifService.connect();
         }
       })
     );
@@ -48,13 +52,14 @@ export class NavbarComponent implements OnInit, OnDestroy {
     );
   }
 
-  ngOnDestroy(): void { this.subs.forEach(s => s.unsubscribe()); }
+  ngOnDestroy(): void {
+    this.subs.forEach(s => s.unsubscribe());
+    this.notifService.disconnect();
+  }
 
   toggleTheme(): void { this.themeService.toggle(); }
-
   navigateToProfile(): void { this.router.navigate(['/profil']); }
 
-  /** Retourne la route du dashboard selon le rôle */
   getDashboardRoute(): string {
     const r = this.role?.toLowerCase();
     if (r === 'apprenant')  return '/dashboard-apprenant';
@@ -63,7 +68,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
     return '/home';
   }
 
-  /** Badge couleur selon le rôle */
   getRoleBadgeClass(): string {
     const r = this.role?.toLowerCase();
     if (r === 'admin')      return 'b-purple';
@@ -72,7 +76,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
     return 'b-brand';
   }
 
-  /** Libellé français du rôle */
   getRoleLabel(): string {
     const r = this.role?.toLowerCase();
     if (r === 'admin')      return 'Administrateur';
@@ -98,6 +101,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   logout(): void {
     this.logoutLoading = true;
+    this.notifService.disconnect();
     const token   = this.tokenService.getToken();
     const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
     this.http.post(`${environment.apiUrl}/auth/logout`, {}, { headers, responseType: 'text' as const }).subscribe({

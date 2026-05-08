@@ -1,0 +1,75 @@
+<div class="interaction-panel">
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="ia-loading">
+    <svg class="animate-spin-slow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--brand);"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
+    Chargement...
+  </div>
+
+  <ng-container *ngIf="!loading">
+
+    <!-- Barre d'actions -->
+    <div class="ia-bar">
+
+      <!-- Like -->
+      <button class="ia-btn" [class.liked]="userALike" (click)="toggleLike()" [disabled]="likeLoading" title="J'aime">
+        <span>{{ userALike ? '❤️' : '🤍' }}</span>
+        <span class="ia-count">{{ totalLikes }}</span>
+      </button>
+
+      <!-- Étoiles -->
+      <div class="stars-wrap">
+        <button *ngFor="let s of stars" class="star-btn"
+                [class.filled]="s <= (hoverNote || noteUtilisateur)"
+                (mouseenter)="hoverNote = s" (mouseleave)="hoverNote = 0"
+                (click)="noterCours(s)" [disabled]="noteLoading"
+                [title]="s + ' étoile(s)'">★</button>
+        <span *ngIf="moyenneNotes !== null" class="avg-label">{{ moyenneNotes | number:'1.1-1' }}/5 ({{ totalNotes }})</span>
+      </div>
+
+      <!-- Commentaires toggle -->
+      <button class="ia-btn" [class.active]="showComments" (click)="showComments = !showComments" style="margin-left:auto;">
+        <span>💬</span>
+        <span class="ia-count">{{ commentaires.length }}</span>
+        <span style="font-size:10px;color:inherit;">{{ showComments ? '▲' : '▼' }}</span>
+      </button>
+
+    </div>
+
+    <!-- Feedback -->
+    <div *ngIf="feedbackMsg" class="ia-feedback" [class.ok]="!feedbackError" [class.err]="feedbackError">
+      {{ feedbackMsg }}
+    </div>
+
+    <!-- Section commentaires -->
+    <div class="comments-section" *ngIf="showComments">
+
+      <!-- Formulaire -->
+      <div class="comment-form">
+        <textarea class="comment-input" [(ngModel)]="newComment"
+                  placeholder="Votre commentaire..." rows="2" maxlength="500"></textarea>
+        <button class="btn-send" (click)="submitComment()" [disabled]="!newComment.trim() || commentLoading">
+          <svg *ngIf="commentLoading" class="animate-spin-slow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
+          <span *ngIf="!commentLoading">Envoyer</span>
+        </button>
+      </div>
+
+      <!-- Liste -->
+      <div class="comments-list">
+        <div *ngIf="commentaires.length === 0" class="no-comments">Soyez le premier à commenter 💬</div>
+        <div *ngFor="let c of commentaires" class="comment-item">
+          <div class="c-avatar">{{ getInitials(c.auteurNom) }}</div>
+          <div class="c-body">
+            <div class="c-header">
+              <span class="c-author">{{ c.auteurNom || 'Anonyme' }}</span>
+              <span class="c-date">{{ c.dateCreation | date:'dd/MM/yy HH:mm' }}</span>
+              <button *ngIf="canDelete(c)" class="c-del" (click)="deleteComment(c)" title="Supprimer">×</button>
+            </div>
+            <p class="c-text">{{ c.contenu }}</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </ng-container>
+</div>

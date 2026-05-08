@@ -1,8 +1,11 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
+import { CoursInteractionComponent } from '../../components/cours-interaction/cours-interaction.component';
+import { NotificationCenterComponent } from '../../components/notification-center/notification-center.component';
+import { NotificationService } from '../../core/services/notification.service';
 import { TokenService } from '../../core/services/token.service';
 import { UserStateService } from '../../core/services/user-state.service';
 import { CatalogueService } from '../../core/services/catalogue.service';
@@ -24,11 +27,11 @@ const ACCEPTED_MIME_TYPES = [
 @Component({
   selector: 'app-dashboard-enseignant',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, NavbarComponent, DatePipe, RouterModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, NavbarComponent, DatePipe, RouterModule, CoursInteractionComponent, NotificationCenterComponent],
   templateUrl: './dashboard-enseignant.component.html',
   styleUrls: ['./dashboard-enseignant.component.css']
 })
-export class DashboardEnseignantComponent implements OnInit {
+export class DashboardEnseignantComponent implements OnInit, OnDestroy {
 
   userName      = '';
   userEmail     = '';
@@ -109,10 +112,12 @@ export class DashboardEnseignantComponent implements OnInit {
     private catalogueService: CatalogueService,
     private fb:               FormBuilder,
     private inscriptionService: InscriptionService,
-    private cdr:              ChangeDetectorRef
+    private cdr:              ChangeDetectorRef,
+    private notifService:     NotificationService
   ) {}
 
   ngOnInit(): void {
+    this.notifService.connect(); // ← connexion SSE temps réel
     this.userName  = this.tokenService.getDisplayName();
     this.userEmail = this.tokenService.getUser()?.email ?? '';
     this.enseignantConnecteId = this.tokenService.getEnseignantId();
@@ -125,6 +130,8 @@ export class DashboardEnseignantComponent implements OnInit {
     this.loadAll();
     this.loadMesApprenants();
   }
+
+  ngOnDestroy(): void { this.notifService.disconnect(); }
 
   private buildForms(): void {
     this.catForm = this.fb.group({

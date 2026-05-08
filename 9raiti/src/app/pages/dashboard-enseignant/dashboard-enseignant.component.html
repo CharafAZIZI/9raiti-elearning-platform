@@ -40,6 +40,11 @@
           </span>
         </button>
 
+        <button (click)="setSection('notifications')" class="nav-item" [class.active]="activeSection==='notifications'">
+          <span>🔔</span>
+          <span>Notifications</span>
+        </button>
+
       </nav>
 
       <!-- Actions rapides -->
@@ -459,6 +464,8 @@
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                     </button>
                   </div>
+                  <!-- Interactions cours -->
+                  <app-cours-interaction [coursId]="c.idCours!" userRole="enseignant"></app-cours-interaction>
                 </div>
               </div>
             </div>
@@ -686,6 +693,17 @@
         </div>
       </ng-container>
       <!-- FIN SECTION : Mes Apprenants -->
+
+      <!-- ── Section Notifications enseignant ── -->
+      <ng-container *ngIf="activeSection==='notifications'">
+        <div class="animate-fade-in space-y-4">
+          <div class="rounded-2xl p-5" style="background:linear-gradient(135deg,var(--surface),var(--surface-2));border:1.5px solid var(--border);">
+            <h2 class="text-xl font-bold mb-1" style="font-family:'Syne',sans-serif;color:var(--text);">🔔 Mes notifications</h2>
+            <p class="text-sm" style="color:var(--text-2);">Soyez notifié des inscriptions de vos apprenants, interactions sur vos cours et mises à jour.</p>
+          </div>
+          <app-notification-center role="enseignant"></app-notification-center>
+        </div>
+      </ng-container>
 
     </main>
   </div>

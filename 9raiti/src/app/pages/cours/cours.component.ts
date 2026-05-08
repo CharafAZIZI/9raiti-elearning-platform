@@ -11,10 +11,12 @@ import { forkJoin } from 'rxjs';
 
 type Vue = 'grille' | 'liste';
 
+import { CoursInteractionComponent } from '../../components/cours-interaction/cours-interaction.component';
+
 @Component({
   selector: 'app-cours',
   standalone: true,
-  imports: [CommonModule, NavbarComponent, RouterModule, FormsModule],
+  imports: [CommonModule, NavbarComponent, RouterModule, FormsModule, CoursInteractionComponent],
   templateUrl: './cours.component.html',
   styleUrls: ['./cours.component.css']
 })

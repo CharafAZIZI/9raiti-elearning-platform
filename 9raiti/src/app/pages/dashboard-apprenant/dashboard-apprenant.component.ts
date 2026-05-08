@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -6,18 +6,23 @@ import { NavbarComponent } from '../../shared/components/navbar/navbar.component
 import { TokenService } from '../../core/services/token.service';
 import { UserStateService } from '../../core/services/user-state.service';
 import { CatalogueService } from '../../core/services/catalogue.service';
+import { InscriptionService } from '../../core/services/inscription.service';
 import { CategorieDTO } from '../../models/categorie.model';
 import { ModuleDTO } from '../../models/module.model';
 import { CoursDTO } from '../../models/cours.model';
+import { InscriptionDTO } from '../../models/inscription.model';
+import { CoursInteractionComponent } from '../../components/cours-interaction/cours-interaction.component';
+import { NotificationCenterComponent } from '../../components/notification-center/notification-center.component';
+import { NotificationService } from '../../core/services/notification.service';
 
 @Component({
   selector: 'app-dashboard-apprenant',
   standalone: true,
-  imports: [CommonModule, NavbarComponent, RouterModule, FormsModule],
+  imports: [CommonModule, NavbarComponent, RouterModule, FormsModule, CoursInteractionComponent, NotificationCenterComponent],
   templateUrl: './dashboard-apprenant.component.html',
   styleUrls: ['./dashboard-apprenant.component.css']
 })
-export class DashboardApprenantComponent implements OnInit {
+export class DashboardApprenantComponent implements OnInit, OnDestroy {
 
   userName      = '';
   activeSection = 'accueil';
@@ -44,14 +49,25 @@ export class DashboardApprenantComponent implements OnInit {
   loadingModules                    = false;
   loadingCours                      = false;
 
+  // ── Mes modules inscrits ────────────────────────────────────────────────────
+  mesInscriptions: InscriptionDTO[] = [];
+  loadingInscriptions               = false;
+  // Cours chargés par module inscrit { moduleId → CoursDTO[] }
+  coursByModule: Record<number, CoursDTO[]>      = {};
+  loadingCoursByModule: Record<number, boolean>  = {};
+  expandedModuleId: number | null               = null;
+
   constructor(
     private tokenService:     TokenService,
     private userStateService: UserStateService,
     private catalogueService: CatalogueService,
-    private router:           Router
+    private inscriptionService: InscriptionService,
+    private router:           Router,
+    private notifService:     NotificationService
   ) {}
 
   ngOnInit(): void {
+    this.notifService.connect(); // ← connexion SSE temps réel
     this.userName  = this.tokenService.getDisplayName();
     this.userEmail = this.tokenService.getUser()?.email ?? '';
     this.userStateService.user$.subscribe(() => {
@@ -59,7 +75,10 @@ export class DashboardApprenantComponent implements OnInit {
       this.userEmail = this.tokenService.getUser()?.email ?? '';
     });
     this.loadCatalogue();
+    this.loadMesInscriptions();
   }
+
+  ngOnDestroy(): void { this.notifService.disconnect(); }
 
   // ── Catalogue ────────────────────────────────────────────────────────────────
 
@@ -131,6 +150,41 @@ export class DashboardApprenantComponent implements OnInit {
 
   getCoursCount(modId: number): number {
     return this.cours.filter(c => c.moduleId === modId && c.statut === 'PUBLIE').length;
+  }
+
+  // ── Mes modules inscrits ─────────────────────────────────────────────────────
+
+  loadMesInscriptions(): void {
+    this.loadingInscriptions = true;
+    this.inscriptionService.getMesInscriptions().subscribe({
+      next: (ins) => {
+        this.mesInscriptions     = ins;
+        this.loadingInscriptions = false;
+      },
+      error: () => { this.loadingInscriptions = false; }
+    });
+  }
+
+  toggleModule(moduleId: number): void {
+    if (this.expandedModuleId === moduleId) {
+      this.expandedModuleId = null;
+      return;
+    }
+    this.expandedModuleId = moduleId;
+    if (!this.coursByModule[moduleId]) {
+      this.loadingCoursByModule[moduleId] = true;
+      this.catalogueService.getCoursByModule(moduleId).subscribe({
+        next: (c) => {
+          this.coursByModule[moduleId]        = c.filter(x => x.statut === 'PUBLIE');
+          this.loadingCoursByModule[moduleId] = false;
+        },
+        error: () => { this.loadingCoursByModule[moduleId] = false; }
+      });
+    }
+  }
+
+  getCoursForModule(moduleId: number): CoursDTO[] {
+    return this.coursByModule[moduleId] ?? [];
   }
 
   // ── Navigation ───────────────────────────────────────────────────────────────

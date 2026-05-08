@@ -1,0 +1,38 @@
+spring:
+  application:
+    name: microservice-notification
+
+  datasource:
+    url: jdbc:postgresql://notification-postgres:5432/GestionNotification
+    username: postgres
+    password: REMOVED_PASSWORD
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 10000
+      idle-timeout: 300000
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+
+  kafka:
+    bootstrap-servers: kafka:9092
+    consumer:
+      group-id: notification-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+  # Désactiver le timeout MVC pour les SSE
+  mvc:
+    async:
+      request-timeout: -1
+
+server:
+  port: 8083
+
+# Secret JWT identique au dotnet-service
+jwt:
+  secret: REMOVED_JWT_SECRET

@@ -1,0 +1,75 @@
+<div class="broadcast-card">
+  <div class="bc-header">
+    <div class="bc-icon">📢</div>
+    <div>
+      <h3 class="bc-title">Envoyer une notification</h3>
+      <p class="bc-sub">Diffusez un message à tous vos utilisateurs ou par rôle</p>
+    </div>
+  </div>
+
+  <!-- Formulaire -->
+  <div class="bc-form">
+
+    <!-- Type + Cible -->
+    <div class="bc-row">
+      <div class="bc-field">
+        <label class="bc-label">Type de message</label>
+        <select class="bc-select" [(ngModel)]="msgType">
+          <option value="INFO">🔔 Information</option>
+          <option value="MAINTENANCE">🔧 Maintenance</option>
+          <option value="ALERTE">⚠️ Alerte</option>
+          <option value="MISE_A_JOUR">🚀 Mise à jour</option>
+        </select>
+      </div>
+      <div class="bc-field">
+        <label class="bc-label">Destinataires</label>
+        <select class="bc-select" [(ngModel)]="cible">
+          <option value="TOUS">👥 Tous les utilisateurs</option>
+          <option value="APPRENANTS">🎓 Apprenants uniquement</option>
+          <option value="ENSEIGNANTS">👨‍🏫 Enseignants uniquement</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Message -->
+    <div class="bc-field">
+      <label class="bc-label">Message <span style="color:var(--text-3);">({{ message.length }}/300)</span></label>
+      <textarea class="bc-textarea" [(ngModel)]="message"
+                placeholder="Rédigez votre message de notification..."
+                rows="3" maxlength="300"></textarea>
+    </div>
+
+    <!-- Aperçu -->
+    <div *ngIf="message.trim()" class="bc-preview">
+      <span class="bc-preview-label">Aperçu</span>
+      <div class="bc-preview-card">
+        <span class="bc-preview-icon">{{ getTypeIcon() }}</span>
+        <p class="bc-preview-msg">{{ message }}</p>
+      </div>
+    </div>
+
+    <!-- Bouton envoyer -->
+    <button class="bc-send-btn" (click)="envoyer()" [disabled]="!message.trim() || loading">
+      <svg *ngIf="loading" class="animate-spin-slow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
+      <svg *ngIf="!loading" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      {{ loading ? 'Envoi...' : 'Envoyer à ' + getCibleLabel() }}
+    </button>
+
+    <!-- Feedback -->
+    <div *ngIf="feedback" class="bc-feedback" [class.ok]="!feedbackErr" [class.err]="feedbackErr">
+      {{ feedback }}
+    </div>
+  </div>
+
+  <!-- Historique local -->
+  <div *ngIf="historique.length > 0" class="bc-history">
+    <p class="bc-history-title">Derniers envois</p>
+    <div *ngFor="let h of historique" class="bc-history-item">
+      <span>{{ getTypeIcon(h.type) }}</span>
+      <div class="flex-1 min-w-0">
+        <p class="bc-history-msg">{{ h.message }}</p>
+        <p class="bc-history-meta">→ {{ h.cible }} · {{ h.sentAt | date:'HH:mm dd/MM' }}</p>
+      </div>
+    </div>
+  </div>
+</div>

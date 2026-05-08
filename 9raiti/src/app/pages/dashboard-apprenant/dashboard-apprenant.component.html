@@ -27,6 +27,14 @@
           <span class="text-base">🏠</span><span>Accueil</span>
         </button>
 
+        <p class="text-xs font-bold uppercase tracking-widest px-2 mt-5 mb-2" style="color:var(--text-4);">Mes formations</p>
+        <button (click)="setSection('mes-cours')" class="nav-item" [class.active]="activeSection==='mes-cours'">
+          <span class="text-base">🎓</span>
+          <span>Mes modules inscrits</span>
+          <span *ngIf="mesInscriptions.length > 0" class="ml-auto text-xs font-bold px-1.5 py-0.5 rounded-full"
+                style="background:var(--brand-dim);color:var(--brand);">{{ mesInscriptions.length }}</span>
+        </button>
+
         <p class="text-xs font-bold uppercase tracking-widest px-2 mt-5 mb-2" style="color:var(--text-4);">Catalogue</p>
         <a routerLink="/categories" routerLinkActive="active" class="nav-item" style="text-decoration:none;">
           <span class="text-base">📂</span><span>Catégories</span>
@@ -41,6 +49,11 @@
         <p class="text-xs font-bold uppercase tracking-widest px-2 mt-5 mb-2" style="color:var(--text-4);">Compte</p>
         <button (click)="navigateToProfil()" class="nav-item">
           <span class="text-base">👤</span><span>Mon profil</span>
+        </button>
+
+        <p class="text-xs font-bold uppercase tracking-widest px-2 mt-5 mb-2" style="color:var(--text-4);">Notifications</p>
+        <button (click)="setSection('notifications')" class="nav-item" [class.active]="activeSection==='notifications'">
+          <span class="text-base">🔔</span><span>Mes notifications</span>
         </button>
       </nav>
     </aside>
@@ -83,6 +96,88 @@
                 <span *ngIf="!loadingCatalogue">{{s.value}}</span>
               </div>
               <div class="text-xs" style="color:var(--text-3);">{{s.label}}</div>
+            </div>
+          </div>
+
+          <!-- Mes modules inscrits -->
+          <div class="glass rounded-2xl overflow-hidden">
+            <div class="flex items-center justify-between px-5 py-4" style="border-bottom:1px solid var(--border);">
+              <div>
+                <h2 class="font-bold text-base" style="font-family:'Syne',sans-serif;color:var(--text);">🎓 Mes modules inscrits</h2>
+                <p class="text-xs mt-0.5" style="color:var(--text-3);">Accédez aux cours de vos modules et interagissez avec eux</p>
+              </div>
+              <span class="text-xs font-bold px-2 py-1 rounded-lg" style="background:var(--brand-dim);color:var(--brand);">
+                {{ mesInscriptions.length }} module(s)
+              </span>
+            </div>
+
+            <!-- Loading -->
+            <div *ngIf="loadingInscriptions" class="flex justify-center py-8">
+              <svg class="animate-spin-slow" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--brand);"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
+            </div>
+
+            <!-- Aucune inscription -->
+            <div *ngIf="!loadingInscriptions && mesInscriptions.length === 0" class="py-10 text-center">
+              <div class="text-3xl mb-2 opacity-30">📦</div>
+              <p class="font-semibold text-sm" style="color:var(--text-2);">Vous n'êtes inscrit à aucun module.</p>
+              <p class="text-xs mt-1" style="color:var(--text-3);">Parcourez le catalogue ci-dessous pour vous inscrire.</p>
+            </div>
+
+            <!-- Liste des modules inscrits -->
+            <div *ngIf="!loadingInscriptions && mesInscriptions.length > 0">
+              <div *ngFor="let ins of mesInscriptions" style="border-bottom:1px solid var(--border);">
+
+                <!-- Header module (cliquable pour expand) -->
+                <button class="w-full flex items-center gap-3 px-5 py-3 text-left transition-all hover:bg-[var(--hover)]"
+                        (click)="toggleModule(ins.module.id!)">
+                  <div class="w-9 h-9 rounded-xl flex items-center justify-center text-base flex-shrink-0" style="background:var(--brand-dim);">📦</div>
+                  <div class="flex-1 min-w-0">
+                    <div class="font-semibold text-sm" style="color:var(--text);">{{ ins.module.nom }}</div>
+                    <div class="text-xs" style="color:var(--text-3);">Inscrit le {{ ins.dateInscription | date:'dd/MM/yyyy' }}</div>
+                  </div>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                       style="color:var(--text-3);transition:transform .2s;"
+                       [style.transform]="expandedModuleId === ins.module.id ? 'rotate(180deg)' : 'rotate(0deg)'">
+                    <polyline points="6 9 12 15 18 9"/>
+                  </svg>
+                </button>
+
+                <!-- Cours du module (expandé) -->
+                <div *ngIf="expandedModuleId === ins.module.id" style="background:var(--surface);">
+
+                  <!-- Loading cours -->
+                  <div *ngIf="loadingCoursByModule[ins.module.id!]" class="flex justify-center py-5">
+                    <svg class="animate-spin-slow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--brand);"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
+                  </div>
+
+                  <!-- Aucun cours -->
+                  <div *ngIf="!loadingCoursByModule[ins.module.id!] && getCoursForModule(ins.module.id!).length === 0"
+                       class="py-6 text-center text-xs" style="color:var(--text-3);">
+                    Aucun cours publié dans ce module pour l'instant.
+                  </div>
+
+                  <!-- Liste des cours avec interactions -->
+                  <div *ngFor="let c of getCoursForModule(ins.module.id!)"
+                       style="border-top:1px solid var(--border);">
+                    <div class="flex items-center gap-3 px-6 py-3">
+                      <div class="w-8 h-8 rounded-lg flex items-center justify-center text-sm flex-shrink-0" style="background:var(--blue-dim);">📘</div>
+                      <div class="flex-1 min-w-0">
+                        <div class="font-semibold text-sm truncate" style="color:var(--text);">{{ c.titre }}</div>
+                        <div class="flex items-center gap-2 flex-wrap mt-0.5">
+                          <span class="badge text-xs" [class]="getNiveauCls(c.niveau)">{{ c.niveau }}</span>
+                          <span *ngIf="c.dureeMinutes" class="text-xs" style="color:var(--text-3);">⏱ {{ c.dureeMinutes }} min</span>
+                        </div>
+                      </div>
+                      <a [routerLink]="['/cours', c.idCours]" class="btn btn-brand btn-sm flex-shrink-0" style="text-decoration:none;font-size:11px;">Voir →</a>
+                    </div>
+                    <!-- ✅ Interactions : like, étoiles, commentaires -->
+                    <div class="px-6 pb-3">
+                      <app-cours-interaction [coursId]="c.idCours!" userRole="apprenant"></app-cours-interaction>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
             </div>
           </div>
 
@@ -188,23 +283,130 @@
               </div>
               <div *ngIf="!loadingCours && modCours.length > 0" class="divide-y">
                 <div *ngFor="let c of modCours"
-                     class="flex items-center gap-4 px-5 py-3 transition-all"
                      style="border-bottom:1px solid var(--border);">
-                  <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0" style="background:var(--blue-dim);">📘</div>
-                  <div class="flex-1 min-w-0">
-                    <div class="font-semibold text-sm truncate" style="color:var(--text);">{{ c.titre }}</div>
-                    <div class="flex items-center gap-2 mt-0.5 flex-wrap">
-                      <span class="badge text-xs" [class]="getNiveauCls(c.niveau)">{{ c.niveau }}</span>
-                      <span class="badge text-xs" [class]="getStatutCoursCls(c.statut)">{{ c.statut }}</span>
-                      <span *ngIf="c.dureeMinutes" class="text-xs" style="color:var(--text-3);">⏱ {{ c.dureeMinutes }} min</span>
+                  <div class="flex items-center gap-4 px-5 py-3 transition-all">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0" style="background:var(--blue-dim);">📘</div>
+                    <div class="flex-1 min-w-0">
+                      <div class="font-semibold text-sm truncate" style="color:var(--text);">{{ c.titre }}</div>
+                      <div class="flex items-center gap-2 mt-0.5 flex-wrap">
+                        <span class="badge text-xs" [class]="getNiveauCls(c.niveau)">{{ c.niveau }}</span>
+                        <span class="badge text-xs" [class]="getStatutCoursCls(c.statut)">{{ c.statut }}</span>
+                        <span *ngIf="c.dureeMinutes" class="text-xs" style="color:var(--text-3);">⏱ {{ c.dureeMinutes }} min</span>
+                      </div>
                     </div>
+                    <a [routerLink]="['/cours', c.idCours]" class="btn btn-brand btn-sm flex-shrink-0" style="text-decoration:none;">Voir →</a>
                   </div>
-                  <a [routerLink]="['/cours', c.idCours]" class="btn btn-brand btn-sm flex-shrink-0" style="text-decoration:none;">Voir →</a>
+                  <!-- Interactions apprenant -->
+                  <div class="px-5 pb-3">
+                    <app-cours-interaction [coursId]="c.idCours!" userRole="apprenant"></app-cours-interaction>
+                  </div>
                 </div>
               </div>
             </ng-container>
           </div>
 
+        </div>
+      </ng-container>
+
+      <!-- ── Section Mes cours inscrits ── -->
+      <ng-container *ngIf="activeSection==='mes-cours'">
+        <div class="animate-fade-in space-y-4">
+
+          <!-- Header -->
+          <div class="rounded-2xl p-5" style="background:linear-gradient(135deg,var(--surface),var(--surface-2));border:1.5px solid var(--border-brand);">
+            <p class="text-xs font-bold uppercase tracking-widest mb-1" style="color:var(--brand);">Mes formations</p>
+            <h2 class="text-xl font-bold mb-1" style="font-family:'Syne',sans-serif;color:var(--text);">🎓 Mes modules inscrits</h2>
+            <p class="text-sm" style="color:var(--text-2);">Accédez aux cours de vos modules, likez, notez et commentez.</p>
+          </div>
+
+          <!-- Loading -->
+          <div *ngIf="loadingInscriptions" class="flex justify-center py-10">
+            <svg class="animate-spin-slow" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--brand);"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
+          </div>
+
+          <!-- Aucune inscription -->
+          <div *ngIf="!loadingInscriptions && mesInscriptions.length === 0"
+               class="rounded-2xl p-10 text-center" style="background:var(--card);border:1.5px solid var(--border);">
+            <div class="text-4xl mb-3 opacity-30">📦</div>
+            <p class="font-semibold" style="color:var(--text-2);">Vous n'êtes inscrit à aucun module.</p>
+            <p class="text-sm mt-1" style="color:var(--text-3);">Parcourez le catalogue et inscrivez-vous à un module.</p>
+          </div>
+
+          <!-- Modules inscrits -->
+          <div *ngFor="let ins of mesInscriptions" class="rounded-2xl overflow-hidden"
+               style="background:var(--card);border:1.5px solid var(--border);">
+
+            <!-- Header module -->
+            <button class="w-full flex items-center gap-3 px-5 py-4 text-left transition-all hover:bg-[var(--hover)]"
+                    (click)="toggleModule(ins.module.id!)">
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0" style="background:var(--brand-dim);">📦</div>
+              <div class="flex-1 min-w-0">
+                <div class="font-bold text-sm" style="color:var(--text);">{{ ins.module.nom }}</div>
+                <div class="text-xs mt-0.5" style="color:var(--text-3);">
+                  Inscrit le {{ ins.dateInscription | date:'dd/MM/yyyy' }}
+                  <span *ngIf="ins.module.code"> · {{ ins.module.code }}</span>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs px-2 py-0.5 rounded-lg font-semibold" style="background:var(--blue-dim);color:var(--blue);">
+                  {{ getCoursForModule(ins.module.id!).length }} cours
+                </span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     style="color:var(--text-3);transition:transform .2s;flex-shrink:0;"
+                     [style.transform]="expandedModuleId === ins.module.id ? 'rotate(180deg)' : 'rotate(0deg)'">
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </div>
+            </button>
+
+            <!-- Cours (expandés) -->
+            <div *ngIf="expandedModuleId === ins.module.id" style="border-top:1px solid var(--border);">
+
+              <div *ngIf="loadingCoursByModule[ins.module.id!]" class="flex justify-center py-6">
+                <svg class="animate-spin-slow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--brand);"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
+              </div>
+
+              <div *ngIf="!loadingCoursByModule[ins.module.id!] && getCoursForModule(ins.module.id!).length === 0"
+                   class="py-8 text-center text-sm" style="color:var(--text-3);">
+                🕐 Aucun cours publié dans ce module pour l'instant.
+              </div>
+
+              <div *ngFor="let c of getCoursForModule(ins.module.id!)"
+                   style="border-bottom:1px solid var(--border);">
+                <!-- Infos cours -->
+                <div class="flex items-center gap-3 px-5 py-3">
+                  <div class="w-9 h-9 rounded-xl flex items-center justify-center text-base flex-shrink-0" style="background:var(--blue-dim);">📘</div>
+                  <div class="flex-1 min-w-0">
+                    <div class="font-semibold text-sm truncate" style="color:var(--text);">{{ c.titre }}</div>
+                    <div class="flex items-center gap-2 mt-0.5 flex-wrap">
+                      <span class="badge text-xs" [class]="getNiveauCls(c.niveau)">{{ c.niveau }}</span>
+                      <span *ngIf="c.dureeMinutes" class="text-xs" style="color:var(--text-3);">⏱ {{ c.dureeMinutes }} min</span>
+                    </div>
+                  </div>
+                  <a [routerLink]="['/cours', c.idCours]" class="btn btn-brand btn-sm flex-shrink-0" style="text-decoration:none;font-size:11px;">
+                    Voir le cours →
+                  </a>
+                </div>
+                <!-- ✅ Interactions : Like ❤️ · Étoiles ⭐ · Commentaires 💬 -->
+                <div class="px-5 pb-4">
+                  <app-cours-interaction [coursId]="c.idCours!" userRole="apprenant"></app-cours-interaction>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </ng-container>
+
+      <!-- ── Section Notifications ── -->
+      <ng-container *ngIf="activeSection==='notifications'">
+        <div class="animate-fade-in space-y-4">
+          <div class="rounded-2xl p-5" style="background:linear-gradient(135deg,var(--surface),var(--surface-2));border:1.5px solid var(--border);">
+            <h2 class="text-xl font-bold mb-1" style="font-family:'Syne',sans-serif;color:var(--text);">🔔 Mes notifications</h2>
+            <p class="text-sm" style="color:var(--text-2);">Restez informé des nouveaux cours, validations et interactions en temps réel.</p>
+          </div>
+          <app-notification-center role="apprenant"></app-notification-center>
         </div>
       </ng-container>
 

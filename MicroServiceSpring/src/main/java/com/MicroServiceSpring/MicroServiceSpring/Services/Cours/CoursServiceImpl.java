@@ -1,16 +1,21 @@
 package com.MicroServiceSpring.MicroServiceSpring.Services.Cours;
 
 import com.MicroServiceSpring.MicroServiceSpring.DTO.CoursDTO;
+import com.MicroServiceSpring.MicroServiceSpring.DTO.event.CourseContentAddedEvent;
 import com.MicroServiceSpring.MicroServiceSpring.Exceptions.ResourceNotFoundException;
 import com.MicroServiceSpring.MicroServiceSpring.Mappers.CoursMapper;
 import com.MicroServiceSpring.MicroServiceSpring.Models.Cours.Cours;
 import com.MicroServiceSpring.MicroServiceSpring.Models.Cours.StatutCours;
 import com.MicroServiceSpring.MicroServiceSpring.Models.Modules.Module;
 import com.MicroServiceSpring.MicroServiceSpring.Repository.CoursRepository;
+import com.MicroServiceSpring.MicroServiceSpring.Repository.InscriptionRepository;
 import com.MicroServiceSpring.MicroServiceSpring.Repository.ModuleRepository;
 import com.MicroServiceSpring.MicroServiceSpring.Security.JwtUtil;
+import com.MicroServiceSpring.MicroServiceSpring.kafka.producer.EventProducer;
+import com.MicroServiceSpring.MicroServiceSpring.kafka.producer.KafkaEventProducer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -24,20 +29,48 @@ public class CoursServiceImpl implements CoursService {
     private final CoursRepository coursRepository;
     private final ModuleRepository moduleRepository;
     private final CoursMapper coursMapper;
+    private final EventProducer notificationProducer;
+    private final InscriptionRepository inscriptionRepository;
 
     @Override
     @Transactional
     public CoursDTO createCours(CoursDTO dto) {
+
         Long enseignantId = JwtUtil.getCurrentUserId();
         if (enseignantId == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Utilisateur non authentifié.");
         }
+
         Module module = moduleRepository.findById(dto.getModuleId())
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Module introuvable avec l'id : " + dto.getModuleId()));
+
         Cours cours = coursMapper.toEntity(dto, module);
-        cours.setEnseignantId(enseignantId); // ← injection automatique
-        return coursMapper.toDTO(coursRepository.save(cours));
+        cours.setEnseignantId(enseignantId);
+
+        // 🔥 1. SAVE COURS
+        Cours saved = coursRepository.save(cours);
+
+        // 🔥 2. Récupérer étudiants du module
+        List<Long> studentIds = inscriptionRepository
+                .findByModuleId(module.getId())
+                .stream()
+                .map(ins -> ins.getApprenantId())
+                .toList();
+
+        // 🔥 3. SEND EVENT KAFKA
+        notificationProducer.sendCourseContent(
+                new CourseContentAddedEvent(
+                        module.getId(),
+                        saved.getIdCours(),
+                        enseignantId,
+                        saved.getTitre(),
+                        "Un nouveau cours a été ajouté au module " + module.getNom(),
+                        studentIds // 👈 optionnel si tu enrichis ton event
+                )
+        );
+
+        return coursMapper.toDTO(saved);
     }
 
     @Override

@@ -58,6 +58,8 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/GestionCours
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=REMOVED_PASSWORD
+      # Kafka : pointe vers le broker Docker (Bug #5 fix)
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
       # MinIO : surcharge l'application.properties
       - MINIO_URL=http://minio-service:9000
       - MINIO_ACCESS_KEY=minioadmin
@@ -69,6 +71,39 @@ services:
         condition: service_healthy
       minio-service:
         condition: service_healthy
+      kafka:
+        condition: service_started
+    networks:
+      - elearning-net
+
+  # ── Microservice Notification (Spring Boot) ─────────────────────────────────
+  notification-service:
+    build:
+      context: ./MicroServiceNotification
+      dockerfile: Dockerfile
+    container_name: notification-service
+    restart: on-failure
+    ports:
+      - "8083:8083"    # Exposé directement pour les SSE (bypass Ocelot)
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://notification-postgres:5432/GestionNotification
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=REMOVED_PASSWORD
+    depends_on:
+      notification-postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+    networks:
+      - elearning-net
+
+  
+  ai-service:
+    build:
+      context: ./MicroServiceIA
+    container_name: ai-service
+    ports:
+      - "8000:8000"
     networks:
       - elearning-net
 
@@ -93,6 +128,31 @@ services:
       timeout: 5s
       retries: 5
       start_period: 20s
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+    networks:
+      - elearning-net
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      # Important pour Docker
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    networks:
+      - elearning-net
 
   # ── SQL Server (Utilisateurs) ────────────────────────────────────────────────
   sqlserver:
@@ -137,6 +197,27 @@ services:
       retries: 5
       start_period: 10s
 
+  # ── PostgreSQL (Notifications) ───────────────────────────────────────────────
+  notification-postgres:
+    image: postgres:15
+    container_name: notification-postgres
+    environment:
+      - POSTGRES_DB=GestionNotification
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=REMOVED_PASSWORD
+    ports:
+      - "5434:5432"    # Bug #3 fix : port hôte 5434 (5433 était deja pris par postgres)
+    volumes:
+      - notification-postgres-data:/var/lib/postgresql/data
+    networks:
+      - elearning-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
 networks:
   elearning-net:
     driver: bridge
@@ -144,4 +225,5 @@ networks:
 volumes:
   sqlserver-data:
   postgres-data:
-  minio-data:     # Volume persistant pour les fichiers MinIO
+  notification-postgres-data:
+  minio-data:

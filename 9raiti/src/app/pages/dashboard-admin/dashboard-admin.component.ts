@@ -13,6 +13,9 @@ import { ProfileService } from '../../core/services/profile.service';
 import { CategorieDTO } from '../../models/categorie.model';
 import { ModuleDTO, StatutModule } from '../../models/module.model';
 import { CoursDTO, Niveau, StatutCours } from '../../models/cours.model';
+import { AdminBroadcastComponent } from '../../components/admin-broadcast/admin-broadcast.component';
+import { CoursInteractionComponent } from '../../components/cours-interaction/cours-interaction.component';
+import { NotificationCenterComponent } from '../../components/notification-center/notification-center.component';
 
 // Validator mot de passe
 function passwordMatchValidator(group: AbstractControl): ValidationErrors | null {
@@ -29,7 +32,7 @@ function passwordMatchValidator(group: AbstractControl): ValidationErrors | null
 @Component({
   selector: 'app-dashboard-admin',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, ReactiveFormsModule, NavbarComponent],
+  imports: [CommonModule, RouterModule, FormsModule, ReactiveFormsModule, NavbarComponent, AdminBroadcastComponent, CoursInteractionComponent, NotificationCenterComponent],
   templateUrl: './dashboard-admin.component.html',
   styleUrls: ['./dashboard-admin.component.css'],
 })
