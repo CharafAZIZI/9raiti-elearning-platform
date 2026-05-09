@@ -23,6 +23,10 @@ namespace MicroServiceDotNet.Services.ValidateEmailService
             var username = _config["SmtpSettings:Username"];
             var password = _config["SmtpSettings:Password"];
 
+            // Fix SSL pour Docker
+            System.Net.ServicePointManager.ServerCertificateValidationCallback =
+                (sender, certificate, chain, errors) => true;
+
             using var client = new SmtpClient(smtpServer, port)
             {
                 UseDefaultCredentials = false,

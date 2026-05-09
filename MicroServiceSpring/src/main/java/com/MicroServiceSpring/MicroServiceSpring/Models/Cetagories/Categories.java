@@ -26,6 +26,7 @@ public class Categories {
     private String description;
 
     // CORRECTION : initialisation à ArrayList pour éviter NullPointerException
-    @OneToMany(mappedBy = "categorie", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "categorie", fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Module> modules = new ArrayList<>();
 }

@@ -17,12 +17,12 @@ import { environment } from '../../../../environments/environment';
   templateUrl: './navbar.component.html',
 })
 export class NavbarComponent implements OnInit, OnDestroy {
-  email       = '';
-  role        = '';
-  initials    = '?';
-  displayName = '';
+  email         = '';
+  role          = '';
+  initials      = '?';
+  displayName   = '';
   logoutLoading = false;
-  isDark = true;
+  isDark        = true;
 
   private subs: Subscription[] = [];
 
@@ -36,17 +36,25 @@ export class NavbarComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    // ✅ Fix 1 : chargement immédiat depuis localStorage sans attendre user$
+    this.loadFromToken();
+
+    // ✅ Fix 2 : mise à jour dès que user$ émet une valeur non-null
     this.subs.push(
       this.userStateService.user$.subscribe(user => {
         if (user) {
-          this.email       = user.email ?? '';
-          this.role        = user.role  ?? '';
+          this.email       = user.email  ?? this.email;
+          this.role        = user.role   ?? this.role;
           this.displayName = this.userStateService.getDisplayName();
           this.computeInitials(user);
           this.notifService.connect();
+        } else {
+          // user null = pas connecté, on relit quand même le token
+          this.loadFromToken();
         }
       })
     );
+
     this.subs.push(
       this.themeService.theme$.subscribe(t => this.isDark = t === 'dark')
     );
@@ -55,6 +63,18 @@ export class NavbarComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.subs.forEach(s => s.unsubscribe());
     this.notifService.disconnect();
+  }
+
+
+  // ✅ Lit directement localStorage/token sans passer par user$
+  private loadFromToken(): void {
+    const user = this.tokenService.getUser();
+    if (user) {
+      this.email       = user.email  ?? '';
+      this.role        = user.role   ?? '';
+      this.displayName = this.tokenService.getDisplayName();
+      this.computeInitials(user);
+    }
   }
 
   toggleTheme(): void { this.themeService.toggle(); }
@@ -85,17 +105,19 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   private computeInitials(user: any): void {
-    if (user.prenom && user.nom) {
+    if (user?.prenom && user?.nom) {
       this.initials = (user.prenom[0] + user.nom[0]).toUpperCase();
-    } else if (user.prenom) {
+    } else if (user?.prenom) {
       this.initials = user.prenom.substring(0, 2).toUpperCase();
-    } else if (user.displayName) {
+    } else if (user?.displayName) {
       const parts = user.displayName.trim().split(' ');
       this.initials = parts.length >= 2
         ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
         : user.displayName.substring(0, 2).toUpperCase();
-    } else if (user.email) {
+    } else if (user?.email) {
       this.initials = user.email.substring(0, 2).toUpperCase();
+    } else {
+      this.initials = '?';
     }
   }
 
@@ -104,7 +126,10 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.notifService.disconnect();
     const token   = this.tokenService.getToken();
     const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
-    this.http.post(`${environment.apiUrl}/auth/logout`, {}, { headers, responseType: 'text' as const }).subscribe({
+    this.http.post(
+      `${environment.apiUrl}/auth/logout`, {},
+      { headers, responseType: 'text' as const }
+    ).subscribe({
       next:  () => { this.userStateService.clearUser(); this.router.navigate(['/login']); },
       error: () => { this.userStateService.clearUser(); this.router.navigate(['/login']); }
     });

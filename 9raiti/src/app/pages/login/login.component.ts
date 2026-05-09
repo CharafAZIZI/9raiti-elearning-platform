@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit , NgZone  } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
@@ -32,7 +32,8 @@ export class LoginComponent implements OnInit, AfterViewInit {
     private tokenService: TokenService,
     private userStateService: UserStateService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private ngZone: NgZone
   ) {
     this.form = this.fb.group({
       email:        ['', [Validators.required, Validators.email]],
@@ -71,9 +72,14 @@ export class LoginComponent implements OnInit, AfterViewInit {
       if (typeof google !== 'undefined' && btnEl) {
         google.accounts.id.initialize({
           client_id: environment.googleClientId,
-          callback: (response: any) => this.handleGoogleResponse(response)
+          //  Enveloppez le callback dans NgZone
+          callback: (response: any) => this.ngZone.run(() => this.handleGoogleResponse(response))
         });
-        google.accounts.id.renderButton(btnEl, { theme: 'outline', size: 'large', width: btnEl.offsetWidth || 380, text: 'continue_with', locale: 'fr' });
+        google.accounts.id.renderButton(btnEl, {
+          theme: 'outline', size: 'large',
+          width: btnEl.offsetWidth || 380,
+          text: 'continue_with', locale: 'fr'
+        });
         this.googleReady = true;
       } else { setTimeout(tryInit, 150); }
     };

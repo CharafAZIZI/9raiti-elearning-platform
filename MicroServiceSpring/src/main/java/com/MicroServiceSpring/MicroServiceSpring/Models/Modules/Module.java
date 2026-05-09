@@ -2,6 +2,7 @@ package com.MicroServiceSpring.MicroServiceSpring.Models.Modules;
 
 import com.MicroServiceSpring.MicroServiceSpring.Models.Cetagories.Categories;
 import com.MicroServiceSpring.MicroServiceSpring.Models.Cours.Cours;
+import com.MicroServiceSpring.MicroServiceSpring.Models.Inscriptions.Inscription;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -33,9 +34,6 @@ public class Module {
     @Column(nullable = false)
     private boolean actif;
 
-    /**
-     * ID de l'enseignant propriétaire (claim NameIdentifier du JWT .NET).
-     */
     @Column(name = "enseignant_id")
     private Long enseignantId;
 
@@ -44,6 +42,11 @@ public class Module {
     private Categories categorie;
 
     @OneToMany(mappedBy = "module", fetch = FetchType.LAZY,
-               cascade = CascadeType.ALL, orphanRemoval = true)
+            cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Cours> cours = new ArrayList<>();
+
+    // ✅ AJOUT : supprime les inscriptions quand le module est supprimé
+    @OneToMany(mappedBy = "module", fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Inscription> inscriptions = new ArrayList<>();
 }

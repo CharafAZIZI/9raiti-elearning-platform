@@ -101,3 +101,12 @@
 :host ng-container {
   display: contents;
 }
+
+
+/* ============================================================
+   DASHBOARD ADMIN — Responsive additions
+   ============================================================ */
+@media (max-width: 767px) {
+  :host main { padding-left: 16px !important; padding-right: 16px !important; }
+  :host .scroll-x { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+}

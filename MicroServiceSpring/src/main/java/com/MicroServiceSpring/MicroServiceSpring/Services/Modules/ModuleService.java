@@ -1,6 +1,6 @@
 package com.MicroServiceSpring.MicroServiceSpring.Services.Modules;
 
-import com.MicroServiceSpring.MicroServiceSpring.DTO.ModuleDTO;
+import com.MicroServiceSpring.MicroServiceSpring.DTO.Modules.ModuleDTO;
 
 import java.util.List;
 

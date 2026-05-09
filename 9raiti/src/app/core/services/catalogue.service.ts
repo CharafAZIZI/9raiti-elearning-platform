@@ -138,14 +138,23 @@ export class CatalogueService {
    * Upload un fichier (PDF ou vidéo) pour un cours.
    * POST /api/cours/{id}/upload  –  multipart/form-data, champ "file"
    */
+  // uploadCoursFile(id: number, file: File): Observable<{ objectKey: string; message: string }> {
+  //   this.clearCache();
+  //   const fd = new FormData();
+  //   fd.append('file', file);
+  //   return this.http.post<{ objectKey: string; message: string }>(
+  //     `${this.api}/cours/${id}/upload`, fd
+  //   ).pipe(catchError(this.handleError));
+  // }
+
   uploadCoursFile(id: number, file: File): Observable<{ objectKey: string; message: string }> {
-    this.clearCache();
-    const fd = new FormData();
-    fd.append('file', file);
-    return this.http.post<{ objectKey: string; message: string }>(
-      `${this.api}/cours/${id}/upload`, fd
-    ).pipe(catchError(this.handleError));
-  }
+  this.clearCache();
+  const fd = new FormData();
+  fd.append('file', file);
+  return this.http.post<{ objectKey: string; message: string }>(
+    `http://localhost:8080/api/cours/${id}/upload`, fd // ✅ bypass Ocelot pour multipart
+  ).pipe(catchError(this.handleError));
+}
 
   /**
    * Récupère une URL pré-signée valable 15 min pour lire un fichier.

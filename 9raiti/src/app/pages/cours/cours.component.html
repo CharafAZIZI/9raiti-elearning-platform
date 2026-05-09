@@ -5,8 +5,11 @@
 
     <!-- En-tête -->
     <div class="mb-8 animate-fade-in">
-      <a routerLink="/modules"
-         style="color:var(--brand);text-decoration:none;font-size:13px;font-weight:600;">
+      <a [routerLink]="['/modules']"
+        [queryParams]="categorieId
+          ? { categorieId: categorieId, categorieNom: categorieNom }
+          : {}"
+        style="color:var(--brand);text-decoration:none;font-size:13px;font-weight:600;">
         ← Modules
       </a>
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-2">

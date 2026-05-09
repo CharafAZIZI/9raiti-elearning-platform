@@ -3,6 +3,22 @@
   <!-- ── Navbar partagée (gère logout, thème, profil, rôle) ── -->
   <app-navbar></app-navbar>
 
+
+  <!-- ── Mobile bottom nav ──────────────────────────────────── -->
+  <nav class="mobile-nav md:hidden">
+    <button class="mobile-nav-item" [class.active]="activeTab==='dashboard'" (click)="activeTab='dashboard'">
+      <span class="mobile-nav-icon">🏠</span>Vue d'ensemble
+    </button>
+    <button class="mobile-nav-item" [class.active]="activeTab==='users'" (click)="activeTab='users'">
+      <span class="mobile-nav-icon">👥</span>Utilisateurs
+    </button>
+    <button class="mobile-nav-item" [class.active]="activeTab==='content'" (click)="activeTab='content'">
+      <span class="mobile-nav-icon">📚</span>Contenu
+    </button>
+    <button class="mobile-nav-item" [class.active]="activeTab==='profile'" (click)="activeTab='profile'">
+      <span class="mobile-nav-icon">👤</span>Profil
+    </button>
+  </nav>
   <div class="flex h-[calc(100vh-64px)] overflow-hidden">
 
     <!-- ══════════════════════════════════════════════════════════════════════ -->

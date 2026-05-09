@@ -3,14 +3,13 @@ import { authGuard, roleGuard, guestGuard, multiRoleGuard } from './core/guards/
 
 export const routes: Routes = [
 
-  // ── Racine ────────────────────────────────────────────────────────────────
   { path: '', redirectTo: 'home', pathMatch: 'full' },
   {
     path: 'home',
     loadComponent: () => import('./pages/home/home.component').then(m => m.HomeComponent)
   },
 
-  // ── Authentification (invités seulement) ──────────────────────────────────
+  // ── Auth (invités seulement) ──────────────────────────────────────────
   {
     path: 'login',
     canActivate: [guestGuard],
@@ -44,7 +43,7 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/email-invalide/email-invalide.component').then(m => m.EmailInvalideComponent)
   },
 
-  // ── Dashboards (rôle strict) ───────────────────────────────────────────────
+  // ── Dashboards ────────────────────────────────────────────────────────
   {
     path: 'dashboard-apprenant',
     canActivate: [authGuard, roleGuard('apprenant')],
@@ -61,24 +60,24 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/dashboard-admin/dashboard-admin.component').then(m => m.DashboardAdminComponent)
   },
 
-  // ── Profil (tout utilisateur connecté) ────────────────────────────────────
+  // ── Profil ────────────────────────────────────────────────────────────
   {
     path: 'profil',
     canActivate: [authGuard],
     loadComponent: () => import('./pages/profile/profile.component').then(m => m.ProfileComponent)
   },
 
-  // ── Catalogue public (lecture) ────────────────────────────────────────────
+  // ✅ Catalogue — authGuard ajouté sur les 3 routes
   {
     path: 'categories',
+    canActivate: [authGuard],
     loadComponent: () => import('./pages/categories/categories.component').then(m => m.CategoriesComponent)
   },
   {
     path: 'modules',
+    canActivate: [authGuard],
     loadComponent: () => import('./pages/modules/modules.component').then(m => m.ModulesComponent)
   },
-
-  // ── Cours : lecture publique, détail nécessite connexion ─────────────────
   {
     path: 'cours',
     canActivate: [authGuard],
@@ -90,6 +89,5 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/cours-detail/cours-detail.component').then(m => m.CoursDetailComponent)
   },
 
-  // ── Wildcard ──────────────────────────────────────────────────────────────
   { path: '**', redirectTo: 'home' }
 ];

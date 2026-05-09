@@ -1,5 +1,21 @@
 <div class="min-h-screen" style="background:var(--bg);">
   <app-navbar></app-navbar>
+
+  <!-- ── Mobile bottom nav ──────────────────────────────────── -->
+  <nav class="mobile-nav md:hidden">
+    <button class="mobile-nav-item" [class.active]="activeSection==='accueil'" (click)="setSection('accueil')">
+      <span class="mobile-nav-icon">🏠</span>Accueil
+    </button>
+    <a routerLink="/categories" class="mobile-nav-item" routerLinkActive="active">
+      <span class="mobile-nav-icon">📂</span>Catégories
+    </a>
+    <a routerLink="/modules" class="mobile-nav-item" routerLinkActive="active">
+      <span class="mobile-nav-icon">📦</span>Modules
+    </a>
+    <button class="mobile-nav-item" [class.active]="activeSection==='quiz'" (click)="ouvrirSectionQuiz()">
+      <span class="mobile-nav-icon">🎯</span>Quiz
+    </button>
+  </nav>
   <div class="flex h-[calc(100vh-64px)] overflow-hidden">
 
     <!-- SIDEBAR -->
@@ -27,12 +43,22 @@
           <span class="text-base">🏠</span><span>Accueil</span>
         </button>
 
+<<<<<<< HEAD
         <p class="text-xs font-bold uppercase tracking-widest px-2 mt-5 mb-2" style="color:var(--text-4);">Mes formations</p>
         <button (click)="setSection('mes-cours')" class="nav-item" [class.active]="activeSection==='mes-cours'">
           <span class="text-base">🎓</span>
           <span>Mes modules inscrits</span>
           <span *ngIf="mesInscriptions.length > 0" class="ml-auto text-xs font-bold px-1.5 py-0.5 rounded-full"
                 style="background:var(--brand-dim);color:var(--brand);">{{ mesInscriptions.length }}</span>
+=======
+        <button (click)="ouvrirSectionQuiz()" class="nav-item" [class.active]="activeSection==='quiz'">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <span>Mes Quiz</span>
+          <span *ngIf="mesTentatives.length>0" class="ml-auto text-xs font-bold px-1.5 py-0.5 rounded-full"
+                style="background:var(--purple-dim,#ede9fe);color:var(--purple,#7c3aed);">
+            {{ mesTentatives.length }}
+          </span>
+>>>>>>> 61687d52a2add6f997c3079168121caa8bebfd0c
         </button>
 
         <p class="text-xs font-bold uppercase tracking-widest px-2 mt-5 mb-2" style="color:var(--text-4);">Catalogue</p>
@@ -45,6 +71,7 @@
         <a routerLink="/cours" routerLinkActive="active" class="nav-item" style="text-decoration:none;">
           <span class="text-base">📘</span><span>Cours</span>
         </a>
+<<<<<<< HEAD
 
         <p class="text-xs font-bold uppercase tracking-widest px-2 mt-5 mb-2" style="color:var(--text-4);">Compte</p>
         <button (click)="navigateToProfil()" class="nav-item">
@@ -55,6 +82,8 @@
         <button (click)="setSection('notifications')" class="nav-item" [class.active]="activeSection==='notifications'">
           <span class="text-base">🔔</span><span>Mes notifications</span>
         </button>
+=======
+>>>>>>> 61687d52a2add6f997c3079168121caa8bebfd0c
       </nav>
     </aside>
 
@@ -86,7 +115,7 @@
           </div>
 
           <!-- Stats -->
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <div *ngFor="let s of stats; let i=index"
                  class="glass glass-hover rounded-2xl p-5 relative overflow-hidden animate-slide-up" [class]="'d-'+i">
               <div class="stat-accent" [style.background]="s.color"></div>
@@ -308,6 +337,7 @@
         </div>
       </ng-container>
 
+<<<<<<< HEAD
       <!-- ── Section Mes cours inscrits ── -->
       <ng-container *ngIf="activeSection==='mes-cours'">
         <div class="animate-fade-in space-y-4">
@@ -409,7 +439,343 @@
           <app-notification-center role="apprenant"></app-notification-center>
         </div>
       </ng-container>
+=======
+
+      <!-- ════════════════════════════════════════════════════════════════════ -->
+      <!-- SECTION : MES QUIZ (Apprenant)                                       -->
+      <!-- ════════════════════════════════════════════════════════════════════ -->
+      <ng-container *ngIf="activeSection==='quiz'">
+        <div class="animate-fade-in space-y-5">
+
+          <!-- En-tête + onglets -->
+          <div class="flex items-center justify-between flex-wrap gap-3">
+            <div>
+              <h2 class="text-xl font-bold" style="font-family:'Syne',sans-serif;color:var(--text);">🎯 Mes Quiz</h2>
+              <p class="text-sm mt-1" style="color:var(--text-3);">Passez vos quiz et suivez votre progression.</p>
+            </div>
+            <div class="flex gap-2">
+              <button (click)="showHistorique=false" class="btn btn-sm"
+                      [style.background]="!showHistorique?'var(--brand)':'var(--surface-2)'"
+                      [style.color]="!showHistorique?'white':'var(--text-2)'"
+                      style="border:1px solid var(--border);">
+                📋 Quiz disponibles
+              </button>
+              <button (click)="showHistorique=true; chargerHistorique()" class="btn btn-sm"
+                      [style.background]="showHistorique?'var(--brand)':'var(--surface-2)'"
+                      [style.color]="showHistorique?'white':'var(--text-2)'"
+                      style="border:1px solid var(--border);">
+                📊 Mon historique
+              </button>
+            </div>
+          </div>
+
+          <!-- Message erreur runner -->
+          <div *ngIf="runnerError" class="alert alert-red">❌ {{ runnerError }}</div>
+
+          <!-- ── Onglet : Quiz disponibles ── -->
+          <ng-container *ngIf="!showHistorique">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-5">
+
+              <!-- Liste des cours (sidebar gauche) -->
+              <div class="lg:col-span-1">
+                <div class="glass rounded-2xl overflow-hidden">
+                  <div class="px-4 py-3" style="border-bottom:1px solid var(--border);">
+                    <p class="text-xs font-bold uppercase tracking-wider" style="color:var(--text-3);">Mes Cours</p>
+                  </div>
+                  <div *ngIf="tousCours.length===0" class="p-4 text-center">
+                    <p class="text-xs" style="color:var(--text-3);">Aucun cours disponible.</p>
+                  </div>
+                  <div class="divide-y" style="max-height:400px;overflow-y:auto;">
+                    <button *ngFor="let c of tousCours"
+                            (click)="selectionnerCoursQuiz(c)"
+                            class="w-full text-left px-4 py-3 text-sm transition-all"
+                            [style.background]="coursSelectionne?.idCours===c.idCours?'var(--brand-dim)':'transparent'"
+                            [style.color]="coursSelectionne?.idCours===c.idCours?'var(--brand)':'var(--text-2)'"
+                            [style.fontWeight]="coursSelectionne?.idCours===c.idCours?'700':'400'">
+                      📘 {{ c.titre }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quiz du cours sélectionné -->
+              <div class="lg:col-span-3">
+                <div *ngIf="!coursSelectionne" class="glass rounded-2xl flex flex-col items-center justify-center py-16">
+                  <div class="text-5xl mb-3">👈</div>
+                  <p class="font-semibold" style="color:var(--text);">Sélectionnez un cours</p>
+                  <p class="text-sm mt-1" style="color:var(--text-3);">pour voir les quiz disponibles</p>
+                </div>
+
+                <div *ngIf="coursSelectionne && loadingQuizCours" class="flex justify-center py-12">
+                  <svg class="animate-spin-slow" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--brand);"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
+                </div>
+
+                <div *ngIf="coursSelectionne && !loadingQuizCours && quizDuCours.length===0"
+                     class="glass rounded-2xl flex flex-col items-center justify-center py-16">
+                  <div class="text-5xl mb-3">🎯</div>
+                  <p class="font-semibold" style="color:var(--text);">Aucun quiz disponible</p>
+                  <p class="text-sm mt-1" style="color:var(--text-3);">Ce cours n'a pas encore de quiz actif.</p>
+                </div>
+
+                <div *ngIf="coursSelectionne && !loadingQuizCours && quizDuCours.length>0"
+                     class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div *ngFor="let quiz of quizDuCours"
+                       class="glass glass-hover rounded-2xl overflow-hidden flex flex-col">
+                    <!-- Bannière -->
+                    <div class="h-20 flex items-center justify-center relative"
+                         style="background:linear-gradient(135deg,#ede9fe,#ddd6fe);">
+                      <span class="text-3xl relative z-10">🎯</span>
+                      <div class="absolute top-2 right-2 flex gap-1">
+                        <span *ngIf="quiz.config.correctionInstantanee" title="Correction instantanée"
+                              class="text-xs px-1.5 py-0.5 rounded-full"
+                              style="background:rgba(109,40,217,.2);color:#6d28d9;">⚡</span>
+                        <span *ngIf="quiz.config.tempsLimiteMinutes" title="Temps limité"
+                              class="text-xs px-1.5 py-0.5 rounded-full"
+                              style="background:rgba(109,40,217,.2);color:#6d28d9;">⏱ {{ quiz.config.tempsLimiteMinutes }}min</span>
+                        <span *ngIf="quiz.config.randomiserQuestions" title="Aléatoire"
+                              class="text-xs px-1.5 py-0.5 rounded-full"
+                              style="background:rgba(109,40,217,.2);color:#6d28d9;">🔀</span>
+                      </div>
+                    </div>
+                    <!-- Corps -->
+                    <div class="p-4 flex-1 flex flex-col gap-2">
+                      <h4 class="font-bold text-sm" style="font-family:'Syne',sans-serif;color:var(--text);">{{ quiz.titre }}</h4>
+                      <p class="text-xs clamp-2" style="color:var(--text-3);">{{ quiz.description || 'Aucune description' }}</p>
+                      <div class="flex items-center gap-2 text-xs" style="color:var(--text-3);">
+                        <span>❓ {{ quiz.nombreQuestions ?? quiz.questions?.length ?? 0 }} question(s)</span>
+                      </div>
+                      <button (click)="commencerQuiz(quiz)"
+                              class="btn w-full mt-auto"
+                              style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:white;border:none;font-weight:700; padding:10px 20px;">
+                        🚀 Commencer
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+
+          <!-- ── Onglet : Historique ── -->
+          <ng-container *ngIf="showHistorique">
+            <div *ngIf="loadingTentatives" class="flex justify-center py-12">
+              <svg class="animate-spin-slow" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--brand);"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
+            </div>
+            <div *ngIf="!loadingTentatives && mesTentatives.length===0"
+                 class="glass rounded-2xl flex flex-col items-center justify-center py-20">
+              <div class="text-5xl mb-3">📊</div>
+              <p class="font-semibold" style="color:var(--text);">Aucune tentative</p>
+              <p class="text-sm mt-1" style="color:var(--text-3);">Passez votre premier quiz !</p>
+            </div>
+            <div *ngIf="!loadingTentatives && mesTentatives.length>0" class="space-y-3">
+              <div *ngFor="let t of mesTentatives"
+                   class="glass glass-hover rounded-2xl px-5 py-4 flex items-center justify-between cursor-pointer"
+                   (click)="voirDetailsTentative(t)">
+                <div class="flex items-center gap-4">
+                  <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-xl"
+                       style="background:linear-gradient(135deg,#ede9fe,#ddd6fe);">🎯</div>
+                  <div>
+                    <p class="font-semibold text-sm" style="color:var(--text);">{{ t.quizTitre }}</p>
+                    <p class="text-xs mt-0.5" style="color:var(--text-3);">{{ formatDate(t.dateTentative) }}</p>
+                  </div>
+                </div>
+                <div class="flex items-baseline gap-1">
+                  <span class="text-2xl font-black" style="font-family:'Syne',sans-serif;"
+                        [style.color]="t.scoreSur20<10?'var(--red)':t.scoreSur20<=15?'var(--orange)':'var(--green)'">
+                    {{ t.scoreSur20 | number:'1.1-1' }}
+                  </span>
+                  <span class="text-sm" style="color:var(--text-3);">/20</span>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+
+        </div>
+      </ng-container>
+      <!-- FIN SECTION : Mes Quiz -->
+>>>>>>> 61687d52a2add6f997c3079168121caa8bebfd0c
 
     </main>
   </div>
 </div>
+
+<!-- ════════════════════════ QUIZ RUNNER (plein écran) ════════════════════════ -->
+<div *ngIf="showRunner" class="fixed inset-0 z-50 flex flex-col" style="background:var(--bg);">
+
+  <!-- Header runner -->
+  <div class="flex items-center justify-between px-5 py-3 flex-shrink-0"
+       style="background:var(--surface);border-bottom:1px solid var(--border);">
+    <div class="flex items-center gap-3">
+      <button (click)="fermerRunner()" class="btn btn-ghost btn-sm">✕ Quitter</button>
+      <span class="font-bold text-sm" style="color:var(--text);">{{ quizEnCours?.titre }}</span>
+    </div>
+    <div class="flex items-center gap-4">
+      <span class="text-xs" style="color:var(--text-3);">
+        {{ (reponsesSaisies | keyvalue).length }} / {{ questionsRunn.length }} répondu(s)
+      </span>
+      <div *ngIf="timerRestant>0" class="px-3 py-1 rounded-full font-bold text-sm"
+           [style.background]="timerUrgent?'var(--red-dim)':'var(--blue-dim)'"
+           [style.color]="timerUrgent?'var(--red)':'var(--blue)'">
+        ⏱ {{ timerFormate }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Barre progression -->
+  <div style="height:3px;background:var(--surface-2);" class="flex-shrink-0">
+    <div [style.width.%]="progression"
+         style="height:100%;background:linear-gradient(90deg,#7c3aed,#6d28d9);transition:width .3s;"></div>
+  </div>
+
+  <!-- Corps runner -->
+  <div class="flex-1 overflow-y-auto flex flex-col items-center justify-start py-8 px-4">
+    <div class="w-full max-w-2xl space-y-6">
+
+      <!-- ─── RÉSULTATS ─── -->
+      <ng-container *ngIf="quizTermine && resultats">
+        <div class="glass rounded-3xl p-8 text-center">
+          <div class="text-6xl mb-4">{{ resultats.scoreSur20>=14 ? "🎉" : resultats.scoreSur20>=10 ? "👍" : "💪" }}</div>
+          <h2 class="text-3xl font-black mb-2" style="font-family:'Syne',sans-serif;"
+              [style.color]="couleurScore">
+            {{ resultats.scoreSur20 | number:'1.1-1' }} <span class="text-lg font-normal" style="color:var(--text-3);">/20</span>
+          </h2>
+          <p class="text-sm mb-1" style="color:var(--text-3);">{{ resultats.scoreBrut }} / {{ resultats.nombreQuestions }} bonnes réponses</p>
+          <p class="font-semibold mt-3" style="color:var(--text);">{{ messageScore }}</p>
+        </div>
+
+        <!-- Correction détaillée -->
+        <div *ngIf="!quizEnCours?.config?.correctionInstantanee && resultats.resultats?.length"
+             class="space-y-3">
+          <h3 class="font-bold text-sm px-1" style="color:var(--text);">📋 Correction détaillée</h3>
+          <div *ngFor="let r of resultats.resultats; let ri=index"
+               class="rounded-2xl p-4"
+               [style.background]="r.estCorrecte?'var(--green-dim)':'var(--red-dim)'"
+               [style.border]="r.estCorrecte?'1px solid var(--green)':'1px solid var(--red)'">
+            <div class="flex gap-3">
+              <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 text-white"
+                   [style.background]="r.estCorrecte?'var(--green)':'var(--red)'">{{ ri+1 }}</div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold mb-1" style="color:var(--text);">{{ r.questionTexte }}</p>
+                <p class="text-xs" [style.color]="r.estCorrecte?'var(--green)':'var(--red)'">
+                  {{ r.estCorrecte ? '✅' : '❌' }} Votre réponse : <strong>{{ r.reponseSelectionneeTexte }}</strong>
+                </p>
+                <p *ngIf="!r.estCorrecte" class="text-xs mt-0.5" style="color:var(--green);">
+                  ✅ Bonne réponse : <strong>{{ r.reponseCorrecteTexte }}</strong>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex gap-3">
+          <button (click)="fermerRunner()" class="btn btn-ghost flex-1">Fermer</button>
+          <button (click)="recommencerQuiz()" class="btn flex-1"
+                  style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:white;border:none;font-weight:700;">
+            🔄 Recommencer
+          </button>
+        </div>
+      </ng-container>
+
+      <!-- ─── QUESTION EN COURS ─── -->
+      <ng-container *ngIf="!quizTermine && questionCourante">
+
+        <!-- Navigation numéros -->
+        <div class="flex flex-wrap gap-2">
+          <button *ngFor="let q of questionsRunn; let qi=index"
+                  (click)="allerQuestion(qi)"
+                  class="w-8 h-8 rounded-lg text-xs font-bold transition-all"
+                  [style.background]="qi===indexQuestion?'var(--brand)':reponsesSaisies[q.id!]!==undefined?'var(--green-dim)':'var(--surface-2)'"
+                  [style.color]="qi===indexQuestion?'white':reponsesSaisies[q.id!]!==undefined?'var(--green)':'var(--text-3)'"
+                  style="border:1px solid var(--border);">
+            {{ qi+1 }}
+          </button>
+        </div>
+
+        <!-- Carte question -->
+        <div class="glass rounded-2xl p-6 space-y-5">
+          <div>
+            <p class="text-xs font-bold uppercase tracking-wider mb-2" style="color:var(--text-3);">
+              Question {{ indexQuestion+1 }} / {{ questionsRunn.length }}
+            </p>
+            <h3 class="text-base font-bold" style="color:var(--text);">{{ questionCourante.texte }}</h3>
+            <span class="badge text-xs mt-2 inline-block"
+                  [style.background]="questionCourante.type==='QCM'?'var(--blue-dim)':'var(--orange-dim)'"
+                  [style.color]="questionCourante.type==='QCM'?'var(--blue)':'var(--orange)'">
+              {{ questionCourante.type==='QCM'?'QCM':'Vrai / Faux' }}
+            </span>
+          </div>
+
+          <!-- Réponses -->
+          <div class="space-y-2">
+            <button *ngFor="let rep of questionCourante.reponses"
+                    (click)="selectionnerReponse(questionCourante.id!, rep.id!)"
+                    class="w-full text-left rounded-xl px-4 py-3 flex items-center gap-3 transition-all"
+                    [style.border]="getStatutReponse(questionCourante.id!,rep.id!,rep.estCorrecte)==='correcte'?'2px solid var(--green)':getStatutReponse(questionCourante.id!,rep.id!,rep.estCorrecte)==='incorrecte'?'2px solid var(--red)':reponseSelectionnee(questionCourante.id!,rep.id!)?'2px solid var(--brand)':'1px solid var(--border)'"
+                    [style.background]="getStatutReponse(questionCourante.id!,rep.id!,rep.estCorrecte)==='correcte'?'var(--green-dim)':getStatutReponse(questionCourante.id!,rep.id!,rep.estCorrecte)==='incorrecte'?'var(--red-dim)':reponseSelectionnee(questionCourante.id!,rep.id!)?'var(--brand-dim)':'var(--surface-2)'">
+              <div class="w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center"
+                   [style.border-color]="reponseSelectionnee(questionCourante.id!,rep.id!)?'var(--brand)':'var(--border)'">
+                <div *ngIf="reponseSelectionnee(questionCourante.id!,rep.id!)"
+                     class="w-2.5 h-2.5 rounded-full" style="background:var(--brand);"></div>
+              </div>
+              <span class="text-sm" style="color:var(--text);">{{ rep.texte }}</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="flex items-center justify-between">
+          <button (click)="questionPrecedente()" [disabled]="indexQuestion===0"
+                  class="btn btn-ghost" [class.opacity-40]="indexQuestion===0">← Précédent</button>
+          <button *ngIf="indexQuestion<questionsRunn.length-1"
+                  (click)="questionSuivante()" class="btn btn-ghost">Suivant →</button>
+          <button *ngIf="indexQuestion===questionsRunn.length-1"
+                  (click)="soumettrQuiz()" [disabled]="submitting"
+                  class="btn" style="background:linear-gradient(135deg,#059669,#10b981);color:white;border:none;font-weight:700;">
+            <svg *ngIf="submitting" class="animate-spin-slow mr-1" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
+            🏁 Soumettre
+          </button>
+        </div>
+
+      </ng-container>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════ MODAL : Détails tentative ════════════════════════ -->
+<div *ngIf="showTentativeDetails" class="overlay" (click)="fermerDetailsTentative()">
+  <div class="modal" style="max-width:560px;" (click)="$event.stopPropagation()">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-bold text-base" style="font-family:'Syne',sans-serif;color:var(--text);">📊 Détails de la tentative</h3>
+      <button (click)="fermerDetailsTentative()" style="background:none;border:none;cursor:pointer;color:var(--text-3);font-size:22px;">✕</button>
+    </div>
+    <div *ngIf="tentativeDetails" class="space-y-4">
+      <div class="text-center p-4 rounded-2xl"
+           [style.background]="tentativeDetails.scoreSur20<10?'var(--red-dim)':tentativeDetails.scoreSur20<=15?'var(--orange-dim)':'var(--green-dim)'"
+           [style.border]="tentativeDetails.scoreSur20<10?'1px solid var(--red)':tentativeDetails.scoreSur20<=15?'1px solid var(--orange)':'1px solid var(--green)'">
+        <div class="flex items-baseline justify-center gap-1">
+          <span class="text-5xl font-black" style="font-family:'Syne',sans-serif;"
+                [style.color]="tentativeDetails.scoreSur20<10?'var(--red)':tentativeDetails.scoreSur20<=15?'var(--orange)':'var(--green)'">
+            {{ tentativeDetails.scoreSur20 | number:'1.1-1' }}
+          </span>
+          <span style="color:var(--text-3);">/20</span>
+        </div>
+        <p class="text-sm mt-1" style="color:var(--text-3);">{{ tentativeDetails.scoreBrut }}/{{ tentativeDetails.nombreQuestions }} bonnes réponses</p>
+      </div>
+      <div *ngIf="tentativeDetails.resultats?.length" class="space-y-2 max-h-80 overflow-y-auto">
+        <div *ngFor="let r of tentativeDetails.resultats; let ri=index"
+             class="rounded-xl p-3"
+             [style.background]="r.estCorrecte?'var(--green-dim)':'var(--red-dim)'">
+          <p class="text-xs font-bold mb-1" [style.color]="r.estCorrecte?'var(--green)':'var(--red)'">
+            Q{{ ri+1 }}. {{ r.estCorrecte ? '✅' : '❌' }} {{ r.questionTexte }}
+          </p>
+          <p class="text-xs" style="color:var(--text-2);">Votre réponse : <strong>{{ r.reponseSelectionneeTexte }}</strong></p>
+          <p *ngIf="!r.estCorrecte" class="text-xs" style="color:var(--green);">Bonne réponse : <strong>{{ r.reponseCorrecteTexte }}</strong></p>
+        </div>
+      </div>
+    </div>
+    <div class="flex justify-end mt-4">
+      <button (click)="fermerDetailsTentative()" class="btn btn-ghost">Fermer</button>
+    </div>
+  </div>
+</div>
+

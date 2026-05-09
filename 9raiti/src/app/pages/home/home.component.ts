@@ -134,10 +134,28 @@ export class HomeComponent implements OnInit, OnDestroy {
     clearInterval(this.slideInterval);
   }
 
-  loadCatalogue(): void {
-    this.catalogue.getAllCategories().subscribe({ next: c => this.categories = c });
-    this.catalogue.getAllModules().subscribe({ next: m => this.allModules = m });
-  }
+loadCatalogue(): void {
+  // ✅ Vider le cache pour toujours avoir des données fraîches sur la home
+  this.catalogue.clearCache();
+
+  this.catalogue.getAllCategories().subscribe({
+    next: c => {
+      this.categories = c;
+      // ✅ Sélectionner automatiquement la première catégorie si aucune sélectionnée
+      if (this.categories.length > 0 && !this.activeCatId) {
+        this.activeCatId = this.categories[0].id!;
+      }
+    },
+    error: () => { this.categories = []; }
+  });
+
+  this.catalogue.getAllModules().subscribe({
+    next: m => {
+      this.allModules = m;
+    },
+    error: () => { this.allModules = []; }
+  });
+}
 
   setCategory(id: number): void {
     this.activeCatId = this.activeCatId === id ? null : id;

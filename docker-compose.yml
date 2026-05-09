@@ -47,13 +47,15 @@ services:
     networks:
       - elearning-net
 
-  # ── Microservice Spring Boot (Cours) ────────────────────────────────────────
+  # ── Microservice Spring Boot (Cours + Quiz AI) ──────────────────────────────
   spring-service:
     build:
       context: ./MicroServiceSpring
       dockerfile: Dockerfile
     container_name: spring-service
     restart: on-failure
+    ports:
+      - "8080:8080"
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/GestionCours
       - SPRING_DATASOURCE_USERNAME=postgres
@@ -66,6 +68,7 @@ services:
       - MINIO_SECRET_KEY=REMOVED_PASSWORD
       - MINIO_BUCKET=cours
       - MINIO_PUBLIC_URL=http://localhost:9002
+      - GROQ_API_KEY=REMOVED_GROQ_KEY
     depends_on:
       postgres:
         condition: service_healthy
@@ -106,6 +109,12 @@ services:
       - "8000:8000"
     networks:
       - elearning-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   # ── MinIO (Object Storage) ───────────────────────────────────────────────────
   minio-service:
@@ -116,8 +125,8 @@ services:
       - MINIO_ROOT_USER=minioadmin
       - MINIO_ROOT_PASSWORD=REMOVED_PASSWORD
     ports:
-      - "9002:9000"    # API S3 (accès depuis l'hôte pour debug)
-      - "9003:9001"    # Console web MinIO (http://localhost:9003)
+      - "9002:9000"
+      - "9003:9001"
     volumes:
       - minio-data:/data
     networks:

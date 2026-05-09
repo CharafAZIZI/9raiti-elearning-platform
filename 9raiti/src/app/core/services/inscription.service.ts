@@ -9,7 +9,8 @@ import { ApprenantInscritDTO } from '../../models/apprenant-inscrit.model';
 @Injectable({ providedIn: 'root' })
 export class InscriptionService {
 
-  private readonly api = (environment as any).springApiUrl ?? environment.apiUrl;
+  // private readonly api = (environment as any).springApiUrl ?? environment.apiUrl;
+  private readonly api = (environment as any).apiUrl;
 
   constructor(private http: HttpClient) {}
 
