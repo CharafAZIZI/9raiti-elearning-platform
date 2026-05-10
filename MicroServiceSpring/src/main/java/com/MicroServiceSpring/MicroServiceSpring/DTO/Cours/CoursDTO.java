@@ -2,6 +2,7 @@ package com.MicroServiceSpring.MicroServiceSpring.DTO.Cours;
 
 import com.MicroServiceSpring.MicroServiceSpring.Models.Cours.Niveau;
 import com.MicroServiceSpring.MicroServiceSpring.Models.Cours.StatutCours;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -24,6 +25,7 @@ public class CoursDTO {
 
     private StatutCours statut;
 
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime dateCreation;
 
     private Integer dureeMinutes;

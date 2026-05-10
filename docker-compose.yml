@@ -114,8 +114,8 @@ services:
     container_name: minio-service
     command: server /data --console-address ":9001"
     environment:
-      - MINIO_ROOT_USER=minioadmin
-      - MINIO_ROOT_PASSWORD=REMOVED_PASSWORD
+      MINIO_ROOT_USER: minioadmin         # ← doit être ici
+      MINIO_ROOT_PASSWORD: REMOVED_PASSWORD  # ← min 8 caractères
     ports:
       - "9002:9000"
       - "9003:9001"

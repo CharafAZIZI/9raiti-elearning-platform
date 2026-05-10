@@ -18,9 +18,9 @@ export class NotificationService implements OnDestroy {
   private reconnectTimer: any;
   private reconnectDelay = 5000;
 
-  private notifsSubject   = new BehaviorSubject<NotificationDTO[]>([]);
-  private unreadSubject   = new BehaviorSubject<number>(0);
-  private toastSubject    = new Subject<NotificationDTO>();
+  private notifsSubject    = new BehaviorSubject<NotificationDTO[]>([]);
+  private unreadSubject    = new BehaviorSubject<number>(0);
+  private toastSubject     = new Subject<NotificationDTO>();
   private connectedSubject = new BehaviorSubject<boolean>(false);
 
   notifs$    = this.notifsSubject.asObservable();
@@ -37,8 +37,6 @@ export class NotificationService implements OnDestroy {
     if (this.eventSource) return;
     const token = this.tokenService.getToken();
     if (!token) return;
-
-    // Vérifier que le token n'est pas expiré avant de tenter la connexion
     if (!this.tokenService.isLoggedIn()) return;
 
     const url = `${environment.notificationUrl}/notifications/stream?token=${encodeURIComponent(token)}`;
@@ -46,7 +44,7 @@ export class NotificationService implements OnDestroy {
       this.eventSource = new EventSource(url);
 
       this.eventSource.onopen = () => {
-        this.reconnectDelay = 5000; // reset le délai de reconnexion
+        this.reconnectDelay = 5000;
         this.connectedSubject.next(true);
       };
 
@@ -63,7 +61,6 @@ export class NotificationService implements OnDestroy {
         this.eventSource?.close();
         this.eventSource = null;
         clearTimeout(this.reconnectTimer);
-        // Backoff exponentiel : 5s → 10s → 20s → max 60s
         this.reconnectTimer = setTimeout(() => {
           this.reconnectDelay = Math.min(this.reconnectDelay * 2, 60000);
           this.connect();
@@ -80,7 +77,7 @@ export class NotificationService implements OnDestroy {
     this.connectedSubject.next(false);
   }
 
-  // ── Actions locales ──────────────────────────────────────────────────────────
+  // ── Actions locales + API ────────────────────────────────────────────────────
 
   markAsRead(id: string): void {
     const notifs = this.notifsSubject.value.map(n => n.id === id ? { ...n, lue: true } : n);
@@ -94,15 +91,38 @@ export class NotificationService implements OnDestroy {
     this.unreadSubject.next(0);
   }
 
+  /** Supprimer une notification — met à jour la DB puis le state local */
   remove(id: string): void {
-    const notifs = this.notifsSubject.value.filter(n => n.id !== id);
-    this.notifsSubject.next(notifs);
-    this.refreshUnread(notifs);
+    this.http.delete(`${environment.apiUrl}/notifications/${id}`).subscribe({
+      next: () => {
+        const notifs = this.notifsSubject.value.filter(n => n.id !== id);
+        this.notifsSubject.next(notifs);
+        this.refreshUnread(notifs);
+      },
+      error: (err) => {
+        console.error('[NotificationService] Erreur suppression notification', err);
+        // Supprimer quand même localement pour ne pas bloquer l'UX
+        const notifs = this.notifsSubject.value.filter(n => n.id !== id);
+        this.notifsSubject.next(notifs);
+        this.refreshUnread(notifs);
+      }
+    });
   }
 
+  /** Supprimer toutes les notifications — met à jour la DB puis le state local */
   clearAll(): void {
-    this.notifsSubject.next([]);
-    this.unreadSubject.next(0);
+    this.http.delete(`${environment.apiUrl}/notifications/me`).subscribe({
+      next: () => {
+        this.notifsSubject.next([]);
+        this.unreadSubject.next(0);
+      },
+      error: (err) => {
+        console.error('[NotificationService] Erreur suppression toutes notifications', err);
+        // Vider quand même localement
+        this.notifsSubject.next([]);
+        this.unreadSubject.next(0);
+      }
+    });
   }
 
   // ── API calls ────────────────────────────────────────────────────────────────

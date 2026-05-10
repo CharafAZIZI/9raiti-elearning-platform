@@ -2,7 +2,6 @@
 using Ocelot.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
-
 builder.Configuration.AddJsonFile("ocelot.json", optional: false, reloadOnChange: true);
 
 builder.Services.AddCors(options =>
@@ -15,22 +14,18 @@ builder.Services.AddCors(options =>
     });
 });
 
-// HttpClient dédié au microservice notification pour le proxy SSE
 builder.Services.AddHttpClient("notification", client =>
 {
-    client.BaseAddress = new Uri("http://localhost:8083");
-    client.Timeout = Timeout.InfiniteTimeSpan; // SSE = connexion infinie
+    client.BaseAddress = new Uri("http://notification-service:8083");
+    client.Timeout = Timeout.InfiniteTimeSpan;
 });
 
 builder.Services.AddOcelot();
 
 var app = builder.Build();
-
 app.UseCors();
 
 // ─── Proxy SSE manuel AVANT Ocelot ───────────────────────────────────────────
-// Ocelot bufferise les réponses et ne supporte pas les SSE (text/event-stream).
-// Ce middleware intercepte /api/notifications/stream et le proxyfie directement.
 app.Use(async (context, next) =>
 {
     if (!context.Request.Path.StartsWithSegments("/api/notifications/stream"))
@@ -39,35 +34,59 @@ app.Use(async (context, next) =>
         return;
     }
 
+    // ✅ CORS headers ajoutés dès le début, même en cas d'erreur
+    context.Response.Headers["Access-Control-Allow-Origin"] = "http://localhost:4200";
+    context.Response.Headers["Access-Control-Allow-Headers"] = "*";
+    context.Response.Headers["Access-Control-Allow-Methods"] = "GET, OPTIONS";
+
+    // ✅ Gérer le preflight OPTIONS
+    if (context.Request.Method.Equals("OPTIONS", StringComparison.OrdinalIgnoreCase))
+    {
+        context.Response.StatusCode = 204;
+        return;
+    }
+
     var factory = context.RequestServices.GetRequiredService<IHttpClientFactory>();
     var client = factory.CreateClient("notification");
 
-    // Reconstruire l'URL downstream avec le query string (token=...)
     var qs = context.Request.QueryString.Value ?? "";
     var targetUrl = $"/api/notifications/stream{qs}";
 
     using var req = new HttpRequestMessage(HttpMethod.Get, targetUrl);
 
-    // Transférer les headers utiles (Authorization si présent)
     foreach (var header in context.Request.Headers)
     {
         if (header.Key.Equals("Host", StringComparison.OrdinalIgnoreCase)) continue;
         req.Headers.TryAddWithoutValidation(header.Key, (IEnumerable<string>)header.Value!);
     }
 
-    using var resp = await client.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, context.RequestAborted);
+    try
+    {
+        using var resp = await client.SendAsync(
+            req,
+            HttpCompletionOption.ResponseHeadersRead,
+            context.RequestAborted
+        );
 
-    context.Response.StatusCode = (int)resp.StatusCode;
-    context.Response.ContentType = "text/event-stream";
-    context.Response.Headers["Cache-Control"] = "no-cache";
-    context.Response.Headers["X-Accel-Buffering"] = "no";
-    context.Response.Headers["Connection"] = "keep-alive";
+        context.Response.StatusCode = (int)resp.StatusCode;
+        context.Response.ContentType = "text/event-stream";
+        context.Response.Headers["Cache-Control"] = "no-cache";
+        context.Response.Headers["X-Accel-Buffering"] = "no";
+        context.Response.Headers["Connection"] = "keep-alive";
 
-    // Stream infini : copier octet par octet sans bufferiser
-    await resp.Content.CopyToAsync(context.Response.Body, context.RequestAborted);
+        await resp.Content.CopyToAsync(context.Response.Body, context.RequestAborted);
+    }
+    catch (HttpRequestException ex)
+    {
+        context.Response.StatusCode = 502;
+        await context.Response.WriteAsync($"Notification service unavailable: {ex.Message}");
+    }
+    catch (OperationCanceledException)
+    {
+        // Client déconnecté — normal pour SSE, on ignore
+    }
 });
 // ─────────────────────────────────────────────────────────────────────────────
 
 await app.UseOcelot();
-
 app.Run("http://0.0.0.0:9000");

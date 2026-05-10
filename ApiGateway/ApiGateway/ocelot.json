@@ -166,7 +166,12 @@
         }
       ],
       "UpstreamPathTemplate": "/api/notifications/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "OPTIONS" ]
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "OPTIONS" ],
+      "HttpHandlerOptions": {
+        "AllowAutoRedirect": false,
+        "UseCookieContainer": false,
+        "UseTracing": false
+      }
     },
     {
       "DownstreamPathTemplate": "/api/quiz/mes-quiz",
