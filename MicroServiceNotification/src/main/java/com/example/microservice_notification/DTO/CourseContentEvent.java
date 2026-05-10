@@ -1,4 +1,4 @@
-package com.example.microservice_notification.dto;
+package com.example.microservice_notification.DTO;
 
 import lombok.Data;
 

@@ -2,7 +2,7 @@ package com.MicroServiceSpring.MicroServiceSpring.Controllers;
 
 import com.MicroServiceSpring.MicroServiceSpring.DTO.NotificationsDTO.CreateNotificationDTO;
 import com.MicroServiceSpring.MicroServiceSpring.DTO.NotificationsDTO.NotificationDTO;
-import com.MicroServiceSpring.MicroServiceSpring.Services.Notifications.NotificationService;
+import com.MicroServiceSpring.MicroServiceSpring.Services.Notifications.INotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,7 +13,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class NotificationController {
 
-    private final NotificationService notificationService;
+    private final INotificationService notificationService;
 
     @PostMapping
     public NotificationDTO create(@RequestBody CreateNotificationDTO dto) {

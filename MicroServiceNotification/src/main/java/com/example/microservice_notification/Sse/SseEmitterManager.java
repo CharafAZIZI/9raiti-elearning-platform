@@ -1,4 +1,4 @@
-package com.example.microservice_notification.sse;
+package com.example.microservice_notification.Sse;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

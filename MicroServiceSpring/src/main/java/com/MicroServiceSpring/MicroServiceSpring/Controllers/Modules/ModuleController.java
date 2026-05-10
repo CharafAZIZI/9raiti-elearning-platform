@@ -2,7 +2,7 @@ package com.MicroServiceSpring.MicroServiceSpring.Controllers;
 
 import com.MicroServiceSpring.MicroServiceSpring.DTO.Modules.ModuleDTO;
 import com.MicroServiceSpring.MicroServiceSpring.Security.JwtUtil;
-import com.MicroServiceSpring.MicroServiceSpring.Services.Modules.ModuleService;
+import com.MicroServiceSpring.MicroServiceSpring.Services.Modules.IModuleService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,7 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ModuleController {
 
-    private final ModuleService moduleService;
+    private final IModuleService moduleService;
 
     /** Création — enseignantId injecté depuis le JWT */
     @PostMapping

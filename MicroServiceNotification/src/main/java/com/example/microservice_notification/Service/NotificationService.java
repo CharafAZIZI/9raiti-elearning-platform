@@ -1,9 +1,9 @@
-package com.example.microservice_notification.service;
+package com.example.microservice_notification.Service;
 
 import com.example.microservice_notification.Entity.Notification;
 import com.example.microservice_notification.Repository.NotificationRepository;
-import com.example.microservice_notification.dto.*;
-import com.example.microservice_notification.sse.SseEmitterManager;
+import com.example.microservice_notification.DTO.*;
+import com.example.microservice_notification.Sse.SseEmitterManager;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -2,7 +2,7 @@ package com.MicroServiceSpring.MicroServiceSpring.Controllers;
 
 import com.MicroServiceSpring.MicroServiceSpring.DTO.Modules.ApprenantInscritDTO;
 import com.MicroServiceSpring.MicroServiceSpring.DTO.Modules.InscriptionDTO;
-import com.MicroServiceSpring.MicroServiceSpring.Services.Inscriptions.InscriptionService;
+import com.MicroServiceSpring.MicroServiceSpring.Services.Inscriptions.IInscriptionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +29,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class InscriptionController {
 
-    private final InscriptionService inscriptionService;
+    private final IInscriptionService inscriptionService;
 
     // ── APPRENANT ─────────────────────────────────────────────────────────────
 

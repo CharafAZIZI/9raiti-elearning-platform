@@ -1,4 +1,4 @@
-package com.example.microservice_notification.controller;
+package com.example.microservice_notification.Controller;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;

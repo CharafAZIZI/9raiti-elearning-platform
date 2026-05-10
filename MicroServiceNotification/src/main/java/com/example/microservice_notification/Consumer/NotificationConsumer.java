@@ -1,6 +1,6 @@
-package com.example.microservice_notification.consumer;
+package com.example.microservice_notification.Consumer;
 
-import com.example.microservice_notification.service.INotificationService;
+import com.example.microservice_notification.Service.INotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;

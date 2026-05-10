@@ -1,6 +1,6 @@
-package com.example.microservice_notification.service;
+package com.example.microservice_notification.Service;
 
-import com.example.microservice_notification.dto.NotificationPayload;
+import com.example.microservice_notification.DTO.NotificationPayload;
 import java.util.List;
 
 public interface INotificationService {

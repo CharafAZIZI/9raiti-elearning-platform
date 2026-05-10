@@ -1,4 +1,4 @@
-package com.example.microservice_notification.config;
+package com.example.microservice_notification.Config;
 
 import org.springframework.context.annotation.Configuration;
 

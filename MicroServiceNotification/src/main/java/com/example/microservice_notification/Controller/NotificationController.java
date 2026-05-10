@@ -1,10 +1,10 @@
-package com.example.microservice_notification.controller;
+package com.example.microservice_notification.Controller;
 
 import com.example.microservice_notification.Entity.Notification;
 import com.example.microservice_notification.Repository.NotificationRepository;
-import com.example.microservice_notification.dto.NotificationPayload;
-import com.example.microservice_notification.service.INotificationService;
-import com.example.microservice_notification.sse.SseEmitterManager;
+import com.example.microservice_notification.DTO.NotificationPayload;
+import com.example.microservice_notification.Service.INotificationService;
+import com.example.microservice_notification.Sse.SseEmitterManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
