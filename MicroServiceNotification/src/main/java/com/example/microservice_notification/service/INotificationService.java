@@ -10,4 +10,7 @@ public interface INotificationService {
 
     /** Charge les notifications non lues pour un utilisateur (appelé à la connexion SSE) */
     List<NotificationPayload> getPendingNotifications(Long userId, String role);
+
+    void deleteById(Long id);
+    void deleteAllByUserId(Long userId);
 }

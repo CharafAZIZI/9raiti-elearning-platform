@@ -88,4 +88,21 @@ public class NotificationController {
             return ResponseEntity.ok(Map.of("status", "read"));
         }).orElse(ResponseEntity.notFound().build());
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteNotification(@PathVariable Long id) {
+        if (!repository.existsById(id)) return ResponseEntity.notFound().build();
+        notificationService.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    /** Supprimer toutes les notifications de l'utilisateur connecté */
+    @DeleteMapping("/me")
+    public ResponseEntity<Void> deleteAllMyNotifications(
+            @RequestHeader("Authorization") String authHeader) {
+        Long userId = jwtExtractor.extractUserIdFromHeader(authHeader);
+        if (userId == null) return ResponseEntity.status(401).build();
+        notificationService.deleteAllByUserId(userId);
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -16,4 +16,6 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 
     // Broadcast global TOUS (cible = 'TOUS' ou null)
     List<Notification> findByUserIdIsNullAndCibleIsNullOrderByCreatedAtDesc();
+
+    void deleteByUserId(Long userId);
 }

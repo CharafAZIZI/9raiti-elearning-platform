@@ -163,4 +163,18 @@ public class NotificationService implements INotificationService {
     private void save(Long userId, String title, String message, String type) {
         save(userId, title, message, type, null);
     }
+
+    // ── Suppression ────────────────────────────────────────────────────────────
+
+    @Override
+    @org.springframework.transaction.annotation.Transactional
+    public void deleteById(Long id) {
+        repository.deleteById(id);
+    }
+
+    @Override
+    @org.springframework.transaction.annotation.Transactional
+    public void deleteAllByUserId(Long userId) {
+        repository.deleteByUserId(userId);
+    }
 }
