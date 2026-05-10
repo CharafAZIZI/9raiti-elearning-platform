@@ -87,8 +87,10 @@ services:
       - SPRING_DATASOURCE_PASSWORD=REMOVED_PASSWORD
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
     depends_on:
-      - notification-postgres
-      - kafka
+      notification-postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
     networks:
       - elearning-net
 
