@@ -1,5 +1,8 @@
 package com.MicroServiceSpring.MicroServiceSpring.Models.Cours;
 
+import com.MicroServiceSpring.MicroServiceSpring.Models.Interaction.Commentaire;
+import com.MicroServiceSpring.MicroServiceSpring.Models.Interaction.Like;
+import com.MicroServiceSpring.MicroServiceSpring.Models.Interaction.Note;
 import com.MicroServiceSpring.MicroServiceSpring.Models.Modules.Module;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -7,6 +10,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "cours")
@@ -42,15 +47,21 @@ public class Cours {
     @Column(name = "file_path")
     private String filePath;
 
-    /**
-     * ID de l'enseignant propriétaire (claim NameIdentifier du JWT .NET).
-     */
     @Column(name = "enseignant_id")
     private Long enseignantId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "module_id")
     private Module module;
+
+    @OneToMany(mappedBy = "cours", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Commentaire> commentaires = new ArrayList<>();
+
+    @OneToMany(mappedBy = "cours", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Like> likes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "cours", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Note> notes = new ArrayList<>();
 
     public Long getId() {
         return idCours;
