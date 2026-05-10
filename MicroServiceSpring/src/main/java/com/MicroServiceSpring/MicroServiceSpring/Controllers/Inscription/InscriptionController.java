@@ -1,4 +1,4 @@
-package com.MicroServiceSpring.MicroServiceSpring.Controllers;
+package com.MicroServiceSpring.MicroServiceSpring.Controllers.Inscription;
 
 import com.MicroServiceSpring.MicroServiceSpring.DTO.Modules.ApprenantInscritDTO;
 import com.MicroServiceSpring.MicroServiceSpring.DTO.Modules.InscriptionDTO;

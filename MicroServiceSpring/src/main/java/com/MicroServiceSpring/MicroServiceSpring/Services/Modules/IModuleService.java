@@ -4,7 +4,7 @@ import com.MicroServiceSpring.MicroServiceSpring.DTO.Modules.ModuleDTO;
 
 import java.util.List;
 
-public interface ModuleService {
+public interface IModuleService {
     ModuleDTO createModule(ModuleDTO dto);
     ModuleDTO getModuleById(Long id);
     List<ModuleDTO> getAllModules();

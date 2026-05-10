@@ -17,7 +17,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class ModuleServiceImpl implements ModuleService {
+public class ModuleService implements IModuleService {
 
     private final ModuleRepository moduleRepository;
     private final ModuleMapper moduleMapper;

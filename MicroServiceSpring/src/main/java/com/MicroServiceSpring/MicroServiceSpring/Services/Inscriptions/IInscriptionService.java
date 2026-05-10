@@ -5,7 +5,7 @@ import com.MicroServiceSpring.MicroServiceSpring.DTO.Modules.InscriptionDTO;
 
 import java.util.List;
 
-public interface InscriptionService {
+public interface IInscriptionService {
 
     // ── Côté APPRENANT ────────────────────────────────────────────────────────
 

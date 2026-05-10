@@ -2,9 +2,9 @@ package com.MicroServiceSpring.MicroServiceSpring.Services.Notifications;
 
 import com.MicroServiceSpring.MicroServiceSpring.DTO.NotificationsDTO.CreateNotificationDTO;
 import com.MicroServiceSpring.MicroServiceSpring.DTO.NotificationsDTO.NotificationDTO;
-import com.MicroServiceSpring.MicroServiceSpring.Mappers.NotificationMapper;
+import com.MicroServiceSpring.MicroServiceSpring.Mappers.Notification.NotificationMapper;
 import com.MicroServiceSpring.MicroServiceSpring.Models.Notification.Notification;
-import com.MicroServiceSpring.MicroServiceSpring.Repository.NotificationRepository;
+import com.MicroServiceSpring.MicroServiceSpring.Repository.Interaction.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -12,7 +12,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class NotificationServiceImpl implements NotificationService {
+public class NotificationService implements INotificationService {
 
     private final NotificationRepository notificationRepository;
     private final NotificationMapper notificationMapper;

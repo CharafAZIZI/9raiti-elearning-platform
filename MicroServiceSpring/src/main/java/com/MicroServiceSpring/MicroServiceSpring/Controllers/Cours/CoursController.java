@@ -1,8 +1,8 @@
-package com.MicroServiceSpring.MicroServiceSpring.Controllers;
+package com.MicroServiceSpring.MicroServiceSpring.Controllers.Cours;
 
 import com.MicroServiceSpring.MicroServiceSpring.DTO.Cours.CoursDTO;
 import com.MicroServiceSpring.MicroServiceSpring.Security.JwtUtil;
-import com.MicroServiceSpring.MicroServiceSpring.Services.Cours.CoursService;
+import com.MicroServiceSpring.MicroServiceSpring.Services.Cours.ICoursService;
 import com.MicroServiceSpring.MicroServiceSpring.Services.Minio.IMinioService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class CoursController {
 
-    private final CoursService coursService;
+    private final ICoursService coursService;
     private final IMinioService minioService;
 
     // ── CRUD ──────────────────────────────────────────────────────────────────

@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class QuizServiceImpl implements IQuizService {
+public class QuizService implements IQuizService {
 
     private final QuizRepository quizRepository;
     private final QuestionRepository questionRepository;

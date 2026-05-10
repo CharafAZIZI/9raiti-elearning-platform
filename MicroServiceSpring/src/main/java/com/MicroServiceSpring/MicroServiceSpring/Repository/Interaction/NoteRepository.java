@@ -1,4 +1,4 @@
-package com.MicroServiceSpring.MicroServiceSpring.Repository;
+package com.MicroServiceSpring.MicroServiceSpring.Repository.Interaction;
 
 import com.MicroServiceSpring.MicroServiceSpring.Models.Interaction.Note;
 import org.springframework.data.jpa.repository.JpaRepository;

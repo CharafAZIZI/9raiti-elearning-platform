@@ -1,7 +1,7 @@
-package com.MicroServiceSpring.MicroServiceSpring.Controllers;
+package com.MicroServiceSpring.MicroServiceSpring.Controllers.Categories;
 
 import com.MicroServiceSpring.MicroServiceSpring.DTO.Categories.CategoriesDTO;
-import com.MicroServiceSpring.MicroServiceSpring.Services.Categories.CategoriesService;
+import com.MicroServiceSpring.MicroServiceSpring.Services.Categories.ICategoriesService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,7 +15,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CategoriesController {
 
-    private final CategoriesService categoriesService;
+    private final ICategoriesService categoriesService;
 
     @PostMapping
     public ResponseEntity<CategoriesDTO> create(@Valid @RequestBody CategoriesDTO dto) {

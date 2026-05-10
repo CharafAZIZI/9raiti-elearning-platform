@@ -1,4 +1,4 @@
-package com.MicroServiceSpring.MicroServiceSpring.Controllers;
+package com.MicroServiceSpring.MicroServiceSpring.Controllers.Quiz;
 
 import com.MicroServiceSpring.MicroServiceSpring.DTO.Quiz.QuestionDTO;
 import com.MicroServiceSpring.MicroServiceSpring.DTO.Quiz.QuizDTO;

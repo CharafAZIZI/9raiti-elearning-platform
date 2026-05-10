@@ -1,4 +1,4 @@
-package com.MicroServiceSpring.MicroServiceSpring.Controllers;
+package com.MicroServiceSpring.MicroServiceSpring.Controllers.Interaction;
 
 import com.MicroServiceSpring.MicroServiceSpring.Services.Notifications.AdminNotificationService;
 import lombok.Data;

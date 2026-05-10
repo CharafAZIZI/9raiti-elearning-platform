@@ -4,9 +4,9 @@ import com.MicroServiceSpring.MicroServiceSpring.DTO.IA.RecommendationDatasetDTO
 import com.MicroServiceSpring.MicroServiceSpring.Models.Interaction.Commentaire;
 import com.MicroServiceSpring.MicroServiceSpring.Models.Interaction.Like;
 import com.MicroServiceSpring.MicroServiceSpring.Models.Interaction.Note;
-import com.MicroServiceSpring.MicroServiceSpring.Repository.CommentaireRepository;
-import com.MicroServiceSpring.MicroServiceSpring.Repository.LikeRepository;
-import com.MicroServiceSpring.MicroServiceSpring.Repository.NoteRepository;
+import com.MicroServiceSpring.MicroServiceSpring.Repository.Interaction.CommentaireRepository;
+import com.MicroServiceSpring.MicroServiceSpring.Repository.Interaction.LikeRepository;
+import com.MicroServiceSpring.MicroServiceSpring.Repository.Interaction.NoteRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -14,12 +14,13 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
-public class AIDataSetService {
+public class AIDataSetService implements IAIDataSetService {
 
     private final LikeRepository likeRepository;
     private final NoteRepository noteRepository;
     private final CommentaireRepository commentaireRepository;
 
+    @Override
     public List<RecommendationDatasetDTO> buildDataset() {
 
         Map<String, Double> scores = new HashMap<>();

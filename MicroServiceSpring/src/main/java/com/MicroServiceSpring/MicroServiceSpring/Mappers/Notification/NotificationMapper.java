@@ -1,4 +1,4 @@
-package com.MicroServiceSpring.MicroServiceSpring.Mappers;
+package com.MicroServiceSpring.MicroServiceSpring.Mappers.Notification;
 
 import com.MicroServiceSpring.MicroServiceSpring.DTO.NotificationsDTO.CreateNotificationDTO;
 import com.MicroServiceSpring.MicroServiceSpring.DTO.NotificationsDTO.NotificationDTO;

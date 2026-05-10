@@ -7,13 +7,19 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class AdminNotificationService {
+public class AdminNotificationService implements IAdminNotificationService {
 
     private final EventProducer notificationProducer;
 
+    @Override
     public void sendBroadcast(String message, String type, String cible) {
         notificationProducer.sendAdminBroadcast(
-                new AdminBroadcastEvent("Annonce de l'administrateur", message, type, cible)
+                new AdminBroadcastEvent(
+                        "Annonce de l'administrateur",
+                        message,
+                        type,
+                        cible
+                )
         );
     }
 }

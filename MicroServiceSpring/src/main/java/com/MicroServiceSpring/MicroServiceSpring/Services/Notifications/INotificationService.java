@@ -6,7 +6,7 @@ import com.MicroServiceSpring.MicroServiceSpring.DTO.NotificationsDTO.Notificati
 
 import java.util.List;
 
-public interface NotificationService {
+public interface INotificationService {
 
     NotificationDTO createNotification(CreateNotificationDTO dto);
 

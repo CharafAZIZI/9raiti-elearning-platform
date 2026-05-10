@@ -1,9 +1,8 @@
-package com.MicroServiceSpring.MicroServiceSpring.Controllers;
+package com.MicroServiceSpring.MicroServiceSpring.Controllers.Interaction;
 
 import com.MicroServiceSpring.MicroServiceSpring.DTO.IA.RecommendationDatasetDTO;
 import com.MicroServiceSpring.MicroServiceSpring.Services.IA.AIDataSetService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

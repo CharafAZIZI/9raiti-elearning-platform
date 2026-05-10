@@ -4,7 +4,7 @@ import com.MicroServiceSpring.MicroServiceSpring.DTO.Categories.CategoriesDTO;
 
 import java.util.List;
 
-public interface CategoriesService {
+public interface ICategoriesService {
 
     CategoriesDTO createCategory(CategoriesDTO dto);
     List<CategoriesDTO> getAllCategories();

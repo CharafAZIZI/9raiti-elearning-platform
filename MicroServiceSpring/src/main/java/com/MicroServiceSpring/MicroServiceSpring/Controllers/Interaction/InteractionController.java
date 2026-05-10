@@ -1,4 +1,4 @@
-package com.MicroServiceSpring.MicroServiceSpring.Controllers;
+package com.MicroServiceSpring.MicroServiceSpring.Controllers.Interaction;
 
 import com.MicroServiceSpring.MicroServiceSpring.DTO.Interaction.*;
 import com.MicroServiceSpring.MicroServiceSpring.Security.JwtUtil;

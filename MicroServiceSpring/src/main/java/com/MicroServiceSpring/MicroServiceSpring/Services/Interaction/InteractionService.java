@@ -7,8 +7,10 @@ import com.MicroServiceSpring.MicroServiceSpring.Models.Cours.Cours;
 import com.MicroServiceSpring.MicroServiceSpring.Models.Interaction.Commentaire;
 import com.MicroServiceSpring.MicroServiceSpring.Models.Interaction.Like;
 import com.MicroServiceSpring.MicroServiceSpring.Models.Interaction.Note;
-import com.MicroServiceSpring.MicroServiceSpring.Repository.*;
 import com.MicroServiceSpring.MicroServiceSpring.Repository.Cours.CoursRepository;
+import com.MicroServiceSpring.MicroServiceSpring.Repository.Interaction.CommentaireRepository;
+import com.MicroServiceSpring.MicroServiceSpring.Repository.Interaction.LikeRepository;
+import com.MicroServiceSpring.MicroServiceSpring.Repository.Interaction.NoteRepository;
 import com.MicroServiceSpring.MicroServiceSpring.Security.JwtUtil;
 import com.MicroServiceSpring.MicroServiceSpring.kafka.producer.EventProducer;
 import lombok.RequiredArgsConstructor;
@@ -22,16 +24,16 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class InteractionService {
+public class InteractionService implements IInteractionService {
 
     private final CoursRepository coursRepository;
-    private final LikeRepository        likeRepository;
+    private final LikeRepository likeRepository;
     private final CommentaireRepository commentaireRepository;
-    private final NoteRepository        noteRepository;
+    private final NoteRepository noteRepository;
     private final EventProducer         eventProducer;
 
     // ── Résumé complet ────────────────────────────────────────────────────────
-
+    @Override
     @Transactional(readOnly = true)
     public InteractionCoursDTO getInteractions(Long coursId) {
         Long userId = JwtUtil.getCurrentUserId();
@@ -55,7 +57,7 @@ public class InteractionService {
     }
 
     // ── Like ──────────────────────────────────────────────────────────────────
-
+    @Override
     @Transactional
     public LikeResponseDTO toggleLike(Long coursId) {
         Long userId = requireUserId();
@@ -77,7 +79,7 @@ public class InteractionService {
     }
 
     // ── Note ──────────────────────────────────────────────────────────────────
-
+    @Override
     @Transactional
     public NoteResponseDTO noterCours(Long coursId, Integer valeur) {
         Long userId = requireUserId();
@@ -99,14 +101,14 @@ public class InteractionService {
     }
 
     // ── Commentaires ──────────────────────────────────────────────────────────
-
+    @Override
     @Transactional(readOnly = true)
     public List<CommentaireDTO> getCommentaires(Long coursId) {
         return commentaireRepository
                 .findByCoursIdCoursOrderByDateCreationDesc(coursId)
                 .stream().map(this::toCommentaireDTO).toList();
     }
-
+    @Override
     @Transactional
     public CommentaireDTO ajouterCommentaire(Long coursId, String contenu, String auteurNom) {
         Long userId = requireUserId();
@@ -126,7 +128,7 @@ public class InteractionService {
 
         return toCommentaireDTO(saved);
     }
-
+    @Override
     @Transactional
     public void supprimerCommentaire(Long coursId, Long commentaireId) {
         Long userId = requireUserId();

@@ -4,7 +4,7 @@ import com.MicroServiceSpring.MicroServiceSpring.DTO.Cours.CoursDTO;
 
 import java.util.List;
 
-public interface CoursService {
+public interface ICoursService {
     CoursDTO createCours(CoursDTO dto);
     CoursDTO updateCours(Long id, CoursDTO dto);
     CoursDTO getCoursById(Long id);
