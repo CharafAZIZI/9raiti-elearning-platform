@@ -34,13 +34,7 @@
         }
       ],
       "UpstreamPathTemplate": "/api/modules/{everything}",
-      "UpstreamHttpMethod": [
-        "GET",
-        "POST",
-        "PUT",
-        "DELETE",
-        "OPTIONS"
-      ]
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "OPTIONS" ]
     },
     {
       "DownstreamPathTemplate": "/api/cours/mes-cours",
@@ -51,14 +45,6 @@
           "Port": 8080
         }
       ],
-      "UpstreamPathTemplate": "/api/categories/{everything}",
-      "UpstreamHttpMethod": [
-        "GET",
-        "POST",
-        "PUT",
-        "DELETE",
-        "OPTIONS"
-      ]
       "UpstreamPathTemplate": "/api/cours/mes-cours",
       "UpstreamHttpMethod": [ "GET", "OPTIONS" ]
     },
@@ -96,10 +82,7 @@
         }
       ],
       "UpstreamPathTemplate": "/api/inscriptions/mes-apprenants",
-      "UpstreamHttpMethod": [
-        "GET",
-        "OPTIONS"
-      ]
+      "UpstreamHttpMethod": [ "GET", "OPTIONS" ]
     },
     {
       "DownstreamPathTemplate": "/api/inscriptions/module/{moduleId}/apprenants",
@@ -111,10 +94,7 @@
         }
       ],
       "UpstreamPathTemplate": "/api/inscriptions/module/{moduleId}/apprenants",
-      "UpstreamHttpMethod": [
-        "GET",
-        "OPTIONS"
-      ]
+      "UpstreamHttpMethod": [ "GET", "OPTIONS" ]
     },
     {
       "DownstreamPathTemplate": "/api/inscriptions/{everything}",
@@ -126,12 +106,7 @@
         }
       ],
       "UpstreamPathTemplate": "/api/inscriptions/{everything}",
-      "UpstreamHttpMethod": [
-        "GET",
-        "POST",
-        "DELETE",
-        "OPTIONS"
-      ]
+      "UpstreamHttpMethod": [ "GET", "POST", "DELETE", "OPTIONS" ]
     },
     {
       "DownstreamPathTemplate": "/api/inscriptions",
@@ -143,12 +118,7 @@
         }
       ],
       "UpstreamPathTemplate": "/api/inscriptions",
-      "UpstreamHttpMethod": [
-        "GET",
-        "POST",
-        "DELETE",
-        "OPTIONS"
-      ]
+      "UpstreamHttpMethod": [ "GET", "POST", "DELETE", "OPTIONS" ]
     },
     {
       "DownstreamPathTemplate": "/api/interactions/{everything}",
@@ -160,12 +130,7 @@
         }
       ],
       "UpstreamPathTemplate": "/api/interactions/{everything}",
-      "UpstreamHttpMethod": [
-        "GET",
-        "POST",
-        "DELETE",
-        "OPTIONS"
-      ]
+      "UpstreamHttpMethod": [ "GET", "POST", "DELETE", "OPTIONS" ]
     },
     {
       "DownstreamPathTemplate": "/api/notifications/broadcast/role/{role}",
@@ -177,10 +142,7 @@
         }
       ],
       "UpstreamPathTemplate": "/api/notifications/broadcast/role/{role}",
-      "UpstreamHttpMethod": [
-        "POST",
-        "OPTIONS"
-      ]
+      "UpstreamHttpMethod": [ "POST", "OPTIONS" ]
     },
     {
       "DownstreamPathTemplate": "/api/notifications/broadcast",
@@ -192,10 +154,7 @@
         }
       ],
       "UpstreamPathTemplate": "/api/notifications/broadcast",
-      "UpstreamHttpMethod": [
-        "POST",
-        "OPTIONS"
-      ]
+      "UpstreamHttpMethod": [ "POST", "OPTIONS" ]
     },
     {
       "DownstreamPathTemplate": "/api/notifications/{everything}",
@@ -207,13 +166,7 @@
         }
       ],
       "UpstreamPathTemplate": "/api/notifications/{everything}",
-      "UpstreamHttpMethod": [
-        "GET",
-        "POST",
-        "PUT",
-        "DELETE",
-        "OPTIONS"
-      ]
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "OPTIONS" ]
     },
     {
       "DownstreamPathTemplate": "/api/quiz/mes-quiz",
@@ -360,23 +313,16 @@
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "OPTIONS" ]
     },
     {
-      "DownstreamPathTemplate": "/{everything}",
+      "DownstreamPathTemplate": "/recommend/{userId}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "dotnet-service",
-          "Port": 5000
+          "Host": "ai-service",
+          "Port": 8000
         }
       ],
-      "UpstreamPathTemplate": "/dotnet-api/{everything}",
-      "UpstreamHttpMethod": [
-        "GET",
-        "POST",
-        "PUT",
-        "DELETE",
-        "PATCH",
-        "OPTIONS"
-      ]
+      "UpstreamPathTemplate": "/ai/recommend/{userId}",
+      "UpstreamHttpMethod": [ "GET" ]
     },
     {
       "DownstreamPathTemplate": "/api/{everything}",
@@ -388,26 +334,19 @@
         }
       ],
       "UpstreamPathTemplate": "/api/{everything}",
-      "UpstreamHttpMethod": [
-        "GET",
-        "POST",
-        "PUT",
-        "DELETE",
-        "PATCH",
-        "OPTIONS"
-      ]
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS" ]
     },
     {
-      "DownstreamPathTemplate": "/recommend/{userId}",
+      "DownstreamPathTemplate": "/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "ai-service",
-          "Port": 8000
+          "Host": "dotnet-service",
+          "Port": 5000
         }
       ],
-      "UpstreamPathTemplate": "/ai/recommend/{userId}",
-      "UpstreamHttpMethod": [ "GET" ]
+      "UpstreamPathTemplate": "/dotnet-api/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS" ]
     }
   ],
   "GlobalConfiguration": {

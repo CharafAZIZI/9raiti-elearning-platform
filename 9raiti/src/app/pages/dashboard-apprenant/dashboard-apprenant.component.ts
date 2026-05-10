@@ -155,6 +155,11 @@ export class DashboardApprenantComponent implements OnInit, OnDestroy {
 
   expandedModuleId: number | null = null;
 
+  // ── Statut inscription catalogue ──────────────────────────
+  inscriptionStatus  = new Map<number, boolean>();
+  inscriptionLoading = new Map<number, boolean>();
+  toastInscription: { type: 'success' | 'error'; text: string } | null = null;
+
 
   
   userId!: number;
@@ -285,6 +290,8 @@ export class DashboardApprenantComponent implements OnInit, OnDestroy {
                 x.actif &&
                 (!x.statut || x.statut === 'ACTIF')
             );
+
+          this.chargerStatutsInscription(this.catModules);
 
           this.loadingModules = false;
         },
@@ -863,5 +870,100 @@ export class DashboardApprenantComponent implements OnInit, OnDestroy {
         year: 'numeric'
       }
     );
+  }
+
+  // ─── Inscription catalogue modules ────────────────────────
+
+  chargerStatutsInscription(modules: ModuleDTO[]): void {
+    modules.forEach(mod => {
+      if (!mod.id) return;
+      this.inscriptionService.estInscrit(mod.id).subscribe({
+        next:  v  => this.inscriptionStatus.set(mod.id!, v),
+        error: () => this.inscriptionStatus.set(mod.id!, false)
+      });
+    });
+  }
+
+  estInscritModule(moduleId: number): boolean {
+    return this.inscriptionStatus.get(moduleId) ?? false;
+  }
+
+  isLoadingInscription(moduleId: number): boolean {
+    return this.inscriptionLoading.get(moduleId) ?? false;
+  }
+
+  toggleInscription(mod: ModuleDTO): void {
+    if (!mod.id) return;
+    const id = mod.id;
+    this.inscriptionLoading.set(id, true);
+    this.toastInscription = null;
+
+    if (this.estInscritModule(id)) {
+      this.inscriptionService.desinscrire(id).subscribe({
+        next: () => {
+          this.inscriptionStatus.set(id, false);
+          this.inscriptionLoading.set(id, false);
+          this.toastInscription = { type: 'success', text: `Désinscrit de "${mod.nom}".` };
+          this.loadMesInscriptions();
+          setTimeout(() => this.toastInscription = null, 3000);
+        },
+        error: () => {
+          this.inscriptionLoading.set(id, false);
+          this.toastInscription = { type: 'error', text: 'Erreur lors de la désinscription.' };
+          setTimeout(() => this.toastInscription = null, 3000);
+        }
+      });
+    } else {
+      this.inscriptionService.inscrire(id).subscribe({
+        next: () => {
+          this.inscriptionStatus.set(id, true);
+          this.inscriptionLoading.set(id, false);
+          this.toastInscription = { type: 'success', text: `Inscrit à "${mod.nom}" !` };
+          this.loadMesInscriptions();
+          setTimeout(() => this.toastInscription = null, 3000);
+        },
+        error: (e) => {
+          this.inscriptionLoading.set(id, false);
+          this.toastInscription = { type: 'error', text: e.message || 'Erreur lors de l\'inscription.' };
+          setTimeout(() => this.toastInscription = null, 3000);
+        }
+      });
+    }
+  }
+
+  // ─── Helpers couleurs catalogue (style original) ───────────
+
+  getCatStyle(i: number): { dim: string; color: string; icon: string } {
+    const styles = [
+      { dim: 'var(--blue-dim)',          color: 'var(--blue)',          icon: '💻' },
+      { dim: 'var(--brand-dim)',         color: 'var(--brand)',         icon: '🎯' },
+      { dim: 'var(--green-dim)',         color: 'var(--green)',         icon: '🔬' },
+      { dim: 'var(--orange-dim,#ffedd5)',color: 'var(--orange,#f97316)',icon: '📐' },
+      { dim: 'var(--purple-dim,#ede9fe)',color: 'var(--purple,#7c3aed)',icon: '🌐' },
+    ];
+    return styles[i % styles.length];
+  }
+
+  getModColor(i: number): { dim: string; color: string } {
+    const colors = [
+      { dim: 'var(--brand-dim)',          color: 'var(--brand)'          },
+      { dim: 'var(--green-dim)',          color: 'var(--green)'          },
+      { dim: 'var(--blue-dim,#dbeafe)',   color: 'var(--blue,#3b82f6)'  },
+      { dim: 'var(--purple-dim,#ede9fe)', color: 'var(--purple,#7c3aed)'},
+      { dim: 'var(--orange-dim,#ffedd5)', color: 'var(--orange,#f97316)'},
+    ];
+    return colors[i % colors.length];
+  }
+
+  getCoursStatutStyle(s: string): { bg: string; border: string; color: string; label: string } {
+    if (s === 'PUBLIE')  return { bg: 'var(--green-dim)',  border: 'rgba(16,185,129,.2)',  color: 'var(--green)',  label: '✅ Publié'  };
+    if (s === 'ARCHIVE') return { bg: 'var(--red-dim)',    border: 'rgba(239,68,68,.2)',   color: 'var(--red)',    label: '📦 Archivé' };
+    return                      { bg: 'var(--orange-dim)', border: 'rgba(249,115,22,.2)',  color: 'var(--orange)', label: '⏳ Brouillon'};
+  }
+
+  getNiveauStyle(n: string): { label: string } {
+    if (n === 'DEBUTANT')       return { label: '🟢 Débutant'      };
+    if (n === 'INTERMEDIAIRE')  return { label: '🔵 Intermédiaire' };
+    return                             { label: '🔴 Avancé'        };
   }
 }

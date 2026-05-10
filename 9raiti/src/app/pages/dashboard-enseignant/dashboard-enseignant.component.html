@@ -40,11 +40,11 @@
           </span>
         </button>
 
-<<<<<<< HEAD
         <button (click)="setSection('notifications')" class="nav-item" [class.active]="activeSection==='notifications'">
           <span>🔔</span>
           <span>Notifications</span>
-=======
+        </button>
+
         <button (click)="ouvrirSectionQuiz()" class="nav-item" [class.active]="activeSection==='quiz'">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
           <span>Mes Quiz</span>
@@ -52,7 +52,6 @@
                 style="background:var(--purple-dim,#ede9fe);color:var(--purple,#7c3aed);">
             {{ mesQuiz.length }}
           </span>
->>>>>>> 61687d52a2add6f997c3079168121caa8bebfd0c
         </button>
 
       </nav>
@@ -748,7 +747,6 @@
       </ng-container>
       <!-- FIN SECTION : Mes Apprenants -->
 
-<<<<<<< HEAD
       <!-- ── Section Notifications enseignant ── -->
       <ng-container *ngIf="activeSection==='notifications'">
         <div class="animate-fade-in space-y-4">
@@ -759,7 +757,6 @@
           <app-notification-center role="enseignant"></app-notification-center>
         </div>
       </ng-container>
-=======
 
       <!-- ════════════════════════════════════════════════════════════════════ -->
       <!-- SECTION : MES QUIZ (Enseignant)                                      -->
@@ -773,25 +770,19 @@
               <h2 class="text-xl font-bold" style="font-family:'Syne',sans-serif;color:var(--text);">🎯 Mes Quiz</h2>
               <p class="text-sm mt-1" style="color:var(--text-3);">Créez et gérez vos quiz pour vos cours.</p>
             </div>
-            
-            <!-- <button (click)="ouvrirCreerQuiz()" class="btn flex items-center gap-2"
-              style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:white;border:none;font-weight:600;padding:10px 18px;border-radius:8px;">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                Nouveau Quiz
-              </button> -->
-              <div class="flex gap-2">
-                <button (click)="ouvrirCreerQuiz()" class="btn flex items-center gap-2"
-                  style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:white;border:none;font-weight:600;padding:10px 18px;border-radius:8px;">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                    Nouveau Quiz
-                </button>
-                
-                <!-- 🤖 NOUVEAU BOUTON GÉNÉRATION IA -->
-                <button (click)="ouvrirGenerationIA()" class="btn flex items-center gap-2"
-                  style="background:linear-gradient(135deg,#10b981,#059669);color:white;border:none;font-weight:600;padding:10px 18px;border-radius:8px;">
-                    🤖 Générer par IA
-                </button>
-              </div>
+            <div class="flex gap-2">
+              <button (click)="ouvrirCreerQuiz()" class="btn flex items-center gap-2"
+                style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:white;border:none;font-weight:600;padding:10px 18px;border-radius:8px;">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  Nouveau Quiz
+              </button>
+
+              <!-- 🤖 Bouton Génération IA -->
+              <button (click)="ouvrirGenerationIA()" class="btn flex items-center gap-2"
+                style="background:linear-gradient(135deg,#10b981,#059669);color:white;border:none;font-weight:600;padding:10px 18px;border-radius:8px;">
+                  🤖 Générer par IA
+              </button>
+            </div>
           </div>
 
           <!-- Loading -->
@@ -888,7 +879,6 @@
         </div>
       </ng-container>
       <!-- FIN SECTION : Mes Quiz -->
->>>>>>> 61687d52a2add6f997c3079168121caa8bebfd0c
 
     </main>
   </div>

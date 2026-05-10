@@ -1,781 +1,833 @@
 <div class="min-h-screen" style="background:var(--bg);">
   <app-navbar></app-navbar>
-
-  <!-- ── Mobile bottom nav ──────────────────────────────────── -->
-  <nav class="mobile-nav md:hidden">
-    <button class="mobile-nav-item" [class.active]="activeSection==='accueil'" (click)="setSection('accueil')">
-      <span class="mobile-nav-icon">🏠</span>Accueil
-    </button>
-    <a routerLink="/categories" class="mobile-nav-item" routerLinkActive="active">
-      <span class="mobile-nav-icon">📂</span>Catégories
-    </a>
-    <a routerLink="/modules" class="mobile-nav-item" routerLinkActive="active">
-      <span class="mobile-nav-icon">📦</span>Modules
-    </a>
-    <button class="mobile-nav-item" [class.active]="activeSection==='quiz'" (click)="ouvrirSectionQuiz()">
-      <span class="mobile-nav-icon">🎯</span>Quiz
-    </button>
-  </nav>
   <div class="flex h-[calc(100vh-64px)] overflow-hidden">
 
-    <!-- SIDEBAR -->
-    <aside class="hidden md:flex flex-col w-60 flex-shrink-0 overflow-y-auto"
-           style="background:var(--surface);border-right:1px solid var(--border);padding:20px 12px;">
+    <!-- ── SIDEBAR ─────────────────────────────────────────────────────── -->
+    <aside class="hidden md:flex flex-col w-64 flex-shrink-0 overflow-y-auto"
+           style="background:var(--surface);border-right:1px solid var(--border);padding:20px 14px;">
 
       <!-- User card -->
-      <div class="p-3 rounded-2xl mb-6" style="background:var(--brand-dim);border:1px solid var(--border-brand);">
+      <div class="p-4 rounded-2xl mb-5" style="background:var(--green-dim);border:1px solid rgba(16,185,129,.2);">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-base flex-shrink-0"
-               style="background:linear-gradient(135deg,#F59E0B,#D97706);color:white;font-family:'Syne',sans-serif;">
+          <div class="w-11 h-11 rounded-full flex items-center justify-center font-bold text-base flex-shrink-0"
+               style="background:linear-gradient(135deg,#10b981,#059669);color:white;font-family:'Syne',sans-serif;">
             {{ userName ? userName.charAt(0).toUpperCase() : 'A' }}
           </div>
           <div class="min-w-0">
             <div class="text-sm font-bold truncate" style="color:var(--text);">{{ userName }}</div>
-            <div class="text-xs" style="color:var(--brand);">Apprenant</div>
+            <div class="text-xs" style="color:var(--green);">Apprenant</div>
           </div>
         </div>
       </div>
 
-      <!-- Navigation -->
-      <p class="text-xs font-bold uppercase tracking-widest px-2 mb-2" style="color:var(--text-4);">Menu</p>
+      <p class="text-xs font-bold uppercase tracking-widest px-2 mb-2" style="color:var(--text-4);">Navigation</p>
       <nav class="space-y-1 flex-1">
+
         <button (click)="setSection('accueil')" class="nav-item" [class.active]="activeSection==='accueil'">
-          <span class="text-base">🏠</span><span>Accueil</span>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          <span>Tableau de bord</span>
         </button>
 
-<<<<<<< HEAD
-        <p class="text-xs font-bold uppercase tracking-widest px-2 mt-5 mb-2" style="color:var(--text-4);">Mes formations</p>
-        <button (click)="setSection('mes-cours')" class="nav-item" [class.active]="activeSection==='mes-cours'">
-          <span class="text-base">🎓</span>
-          <span>Mes modules inscrits</span>
-          <span *ngIf="mesInscriptions.length > 0" class="ml-auto text-xs font-bold px-1.5 py-0.5 rounded-full"
-                style="background:var(--brand-dim);color:var(--brand);">{{ mesInscriptions.length }}</span>
-=======
+        <button (click)="setSection('catalogue')" class="nav-item" [class.active]="activeSection==='catalogue'">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+          <span>Catalogue</span>
+        </button>
+
+        <button (click)="setSection('inscriptions')" class="nav-item" [class.active]="activeSection==='inscriptions'">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          <span>Mes inscriptions</span>
+          <span *ngIf="mesInscriptions.length > 0"
+                class="ml-auto text-xs font-bold px-1.5 py-0.5 rounded-full"
+                style="background:var(--brand-dim);color:var(--brand);">
+            {{ mesInscriptions.length }}
+          </span>
+        </button>
+
         <button (click)="ouvrirSectionQuiz()" class="nav-item" [class.active]="activeSection==='quiz'">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
           <span>Mes Quiz</span>
-          <span *ngIf="mesTentatives.length>0" class="ml-auto text-xs font-bold px-1.5 py-0.5 rounded-full"
+          <span *ngIf="mesTentatives.length > 0"
+                class="ml-auto text-xs font-bold px-1.5 py-0.5 rounded-full"
                 style="background:var(--purple-dim,#ede9fe);color:var(--purple,#7c3aed);">
             {{ mesTentatives.length }}
           </span>
->>>>>>> 61687d52a2add6f997c3079168121caa8bebfd0c
         </button>
 
-        <p class="text-xs font-bold uppercase tracking-widest px-2 mt-5 mb-2" style="color:var(--text-4);">Catalogue</p>
-        <a routerLink="/categories" routerLinkActive="active" class="nav-item" style="text-decoration:none;">
-          <span class="text-base">📂</span><span>Catégories</span>
-        </a>
-        <a routerLink="/modules" routerLinkActive="active" class="nav-item" style="text-decoration:none;">
-          <span class="text-base">📦</span><span>Modules</span>
-        </a>
-        <a routerLink="/cours" routerLinkActive="active" class="nav-item" style="text-decoration:none;">
-          <span class="text-base">📘</span><span>Cours</span>
-        </a>
-<<<<<<< HEAD
-
-        <p class="text-xs font-bold uppercase tracking-widest px-2 mt-5 mb-2" style="color:var(--text-4);">Compte</p>
-        <button (click)="navigateToProfil()" class="nav-item">
-          <span class="text-base">👤</span><span>Mon profil</span>
-        </button>
-
-        <p class="text-xs font-bold uppercase tracking-widest px-2 mt-5 mb-2" style="color:var(--text-4);">Notifications</p>
         <button (click)="setSection('notifications')" class="nav-item" [class.active]="activeSection==='notifications'">
-          <span class="text-base">🔔</span><span>Mes notifications</span>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+          <span>Notifications</span>
         </button>
-=======
->>>>>>> 61687d52a2add6f997c3079168121caa8bebfd0c
+
       </nav>
+
+      <div class="mt-4 pt-4" style="border-top:1px solid var(--border);">
+        <button (click)="navigateToProfil()" class="btn btn-ghost w-full"
+                style="font-size:12px;padding:8px 12px;justify-content:flex-start;gap:6px;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+          Mon profil
+        </button>
+      </div>
     </aside>
 
-    <!-- MAIN -->
+    <!-- ── Mobile nav ────────────────────────────────────────────────── -->
+    <nav class="mobile-nav md:hidden">
+      <button class="mobile-nav-item" [class.active]="activeSection==='accueil'" (click)="setSection('accueil')">
+        <span class="mobile-nav-icon">🏠</span>Accueil
+      </button>
+      <button class="mobile-nav-item" [class.active]="activeSection==='catalogue'" (click)="setSection('catalogue')">
+        <span class="mobile-nav-icon">📚</span>Catalogue
+      </button>
+      <button class="mobile-nav-item" [class.active]="activeSection==='inscriptions'" (click)="setSection('inscriptions')">
+        <span class="mobile-nav-icon">🎓</span>Modules
+      </button>
+      <button class="mobile-nav-item" [class.active]="activeSection==='quiz'" (click)="ouvrirSectionQuiz()">
+        <span class="mobile-nav-icon">🎯</span>Quiz
+      </button>
+    </nav>
+
+    <!-- ── MAIN ─────────────────────────────────────────────────────── -->
     <main class="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-6 space-y-5">
 
-      <!-- SECTION : Accueil -->
+      <!-- ══════════════════════════════════════════════════════════════ -->
+      <!-- SECTION : Accueil — style original restauré                    -->
+      <!-- ══════════════════════════════════════════════════════════════ -->
       <ng-container *ngIf="activeSection==='accueil'">
         <div class="animate-fade-in space-y-5">
 
           <!-- Hero -->
           <div class="relative overflow-hidden rounded-2xl p-6 sm:p-8"
-               style="background:linear-gradient(135deg,var(--surface),var(--surface-2));border:1px solid var(--border-brand);">
+               style="background:linear-gradient(135deg,var(--surface),var(--surface-2));border:1px solid rgba(16,185,129,.25);">
             <div class="absolute top-0 left-0 right-0 h-0.5 rounded-t-2xl"
-                 style="background:linear-gradient(90deg,transparent,var(--brand),transparent);"></div>
+                 style="background:linear-gradient(90deg,transparent,var(--green),transparent);"></div>
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <p class="text-xs font-bold uppercase tracking-[3px] mb-2" style="color:var(--brand);">Espace Apprenant</p>
+                <p class="text-xs font-bold uppercase tracking-[3px] mb-2" style="color:var(--green);">Espace Apprenant</p>
                 <h1 class="text-2xl sm:text-3xl font-bold mb-2" style="font-family:'Syne',sans-serif;color:var(--text);">
-                  Bonjour, <span style="color:var(--brand);">{{ userName }}</span> 👋
+                  Bonjour, <span style="color:var(--green);">{{ userName }}</span> 👋
                 </h1>
-                <p class="text-sm" style="color:var(--text-2);">Explorez le catalogue de formations et trouvez votre prochain cours.</p>
+                <p class="text-sm" style="color:var(--text-2);">Explorez les cours, passez des quiz et suivez votre progression.</p>
               </div>
-              <a routerLink="/cours" class="btn btn-brand self-start sm:self-auto flex-shrink-0" style="text-decoration:none;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3l14 9-14 9V3z"/></svg>
-                Voir les cours
-              </a>
+              <button (click)="setSection('catalogue')" class="btn btn-brand self-start sm:self-auto flex-shrink-0">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+                Parcourir le catalogue
+              </button>
             </div>
           </div>
 
           <!-- Stats -->
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <div *ngFor="let s of stats; let i=index"
                  class="glass glass-hover rounded-2xl p-5 relative overflow-hidden animate-slide-up" [class]="'d-'+i">
               <div class="stat-accent" [style.background]="s.color"></div>
               <div class="w-11 h-11 rounded-xl flex items-center justify-center text-xl mb-3" [style.background]="s.dim">{{s.icon}}</div>
-              <div class="text-2xl font-bold mb-0.5" style="font-family:'Syne',sans-serif;color:var(--text);">
-                <span *ngIf="loadingCatalogue">–</span>
-                <span *ngIf="!loadingCatalogue">{{s.value}}</span>
-              </div>
+              <div class="text-2xl font-bold mb-0.5" style="font-family:'Syne',sans-serif;color:var(--text);">{{s.value}}</div>
               <div class="text-xs" style="color:var(--text-3);">{{s.label}}</div>
             </div>
           </div>
 
-          <!-- Mes modules inscrits -->
-          <div class="glass rounded-2xl overflow-hidden">
-            <div class="flex items-center justify-between px-5 py-4" style="border-bottom:1px solid var(--border);">
-              <div>
-                <h2 class="font-bold text-base" style="font-family:'Syne',sans-serif;color:var(--text);">🎓 Mes modules inscrits</h2>
-                <p class="text-xs mt-0.5" style="color:var(--text-3);">Accédez aux cours de vos modules et interagissez avec eux</p>
-              </div>
-              <span class="text-xs font-bold px-2 py-1 rounded-lg" style="background:var(--brand-dim);color:var(--brand);">
-                {{ mesInscriptions.length }} module(s)
-              </span>
-            </div>
-
-            <!-- Loading -->
-            <div *ngIf="loadingInscriptions" class="flex justify-center py-8">
-              <svg class="animate-spin-slow" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--brand);"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
-            </div>
-
-            <!-- Aucune inscription -->
-            <div *ngIf="!loadingInscriptions && mesInscriptions.length === 0" class="py-10 text-center">
-              <div class="text-3xl mb-2 opacity-30">📦</div>
-              <p class="font-semibold text-sm" style="color:var(--text-2);">Vous n'êtes inscrit à aucun module.</p>
-              <p class="text-xs mt-1" style="color:var(--text-3);">Parcourez le catalogue ci-dessous pour vous inscrire.</p>
-            </div>
-
-            <!-- Liste des modules inscrits -->
-            <div *ngIf="!loadingInscriptions && mesInscriptions.length > 0">
-              <div *ngFor="let ins of mesInscriptions" style="border-bottom:1px solid var(--border);">
-
-                <!-- Header module (cliquable pour expand) -->
-                <button class="w-full flex items-center gap-3 px-5 py-3 text-left transition-all hover:bg-[var(--hover)]"
-                        (click)="toggleModule(ins.module.id!)">
-                  <div class="w-9 h-9 rounded-xl flex items-center justify-center text-base flex-shrink-0" style="background:var(--brand-dim);">📦</div>
-                  <div class="flex-1 min-w-0">
-                    <div class="font-semibold text-sm" style="color:var(--text);">{{ ins.module.nom }}</div>
-                    <div class="text-xs" style="color:var(--text-3);">Inscrit le {{ ins.dateInscription | date:'dd/MM/yyyy' }}</div>
-                  </div>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                       style="color:var(--text-3);transition:transform .2s;"
-                       [style.transform]="expandedModuleId === ins.module.id ? 'rotate(180deg)' : 'rotate(0deg)'">
-                    <polyline points="6 9 12 15 18 9"/>
-                  </svg>
-                </button>
-
-                <!-- Cours du module (expandé) -->
-                <div *ngIf="expandedModuleId === ins.module.id" style="background:var(--surface);">
-
-                  <!-- Loading cours -->
-                  <div *ngIf="loadingCoursByModule[ins.module.id!]" class="flex justify-center py-5">
-                    <svg class="animate-spin-slow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--brand);"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
-                  </div>
-
-                  <!-- Aucun cours -->
-                  <div *ngIf="!loadingCoursByModule[ins.module.id!] && getCoursForModule(ins.module.id!).length === 0"
-                       class="py-6 text-center text-xs" style="color:var(--text-3);">
-                    Aucun cours publié dans ce module pour l'instant.
-                  </div>
-
-                  <!-- Liste des cours avec interactions -->
-                  <div *ngFor="let c of getCoursForModule(ins.module.id!)"
-                       style="border-top:1px solid var(--border);">
-                    <div class="flex items-center gap-3 px-6 py-3">
-                      <div class="w-8 h-8 rounded-lg flex items-center justify-center text-sm flex-shrink-0" style="background:var(--blue-dim);">📘</div>
-                      <div class="flex-1 min-w-0">
-                        <div class="font-semibold text-sm truncate" style="color:var(--text);">{{ c.titre }}</div>
-                        <div class="flex items-center gap-2 flex-wrap mt-0.5">
-                          <span class="badge text-xs" [class]="getNiveauCls(c.niveau)">{{ c.niveau }}</span>
-                          <span *ngIf="c.dureeMinutes" class="text-xs" style="color:var(--text-3);">⏱ {{ c.dureeMinutes }} min</span>
-                        </div>
-                      </div>
-                      <a [routerLink]="['/cours', c.idCours]" class="btn btn-brand btn-sm flex-shrink-0" style="text-decoration:none;font-size:11px;">Voir →</a>
-                    </div>
-                    <!-- ✅ Interactions : like, étoiles, commentaires -->
-                    <div class="px-6 pb-3">
-                      <app-cours-interaction [coursId]="c.idCours!" userRole="apprenant"></app-cours-interaction>
-                    </div>
-                  </div>
-
-                </div>
-              </div>
-            </div>
+          <!-- ✦ AI Recommandations -->
+          <div class="glass rounded-2xl p-5">
+            <app-ai-recommendations [userId]="userId"></app-ai-recommendations>
           </div>
 
-          <!-- Catalogue hiérarchique -->
-          <div class="glass rounded-2xl overflow-hidden">
-            <!-- Header + fil d'Ariane -->
-            <div class="flex items-center justify-between px-5 py-4" style="border-bottom:1px solid var(--border);">
-              <div>
-                <h2 class="font-bold text-base" style="font-family:'Syne',sans-serif;color:var(--text);">
-                  Catalogue de formations
-                </h2>
-                <nav class="flex items-center gap-2 text-xs mt-1 flex-wrap" style="color:var(--text-3);">
-                  <button (click)="retourCategories()" style="background:none;border:none;cursor:pointer;padding:0;"
-                          [style.color]="catalogNiveau>0 ? 'var(--brand)' : 'var(--text-3)'">
-                    📂 Catégories
-                  </button>
-                  <ng-container *ngIf="catalogNiveau >= 1 && selectedCat">
-                    <span>›</span>
-                    <button (click)="retourModules()" style="background:none;border:none;cursor:pointer;padding:0;"
-                            [style.color]="catalogNiveau > 1 ? 'var(--brand)' : 'var(--text)'">
-                      📦 {{ selectedCat.nom }}
-                    </button>
-                  </ng-container>
-                  <ng-container *ngIf="catalogNiveau === 2 && selectedMod">
-                    <span>›</span>
-                    <span style="color:var(--text);">📘 {{ selectedMod.nom }}</span>
-                  </ng-container>
-                </nav>
-              </div>
-              <button *ngIf="catalogNiveau > 0" (click)="catalogNiveau === 1 ? retourCategories() : retourModules()"
-                      class="btn btn-ghost btn-sm">← Retour</button>
-            </div>
+          <!-- Aperçu rapide -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
-            <!-- Niveau 0 : Catégories -->
-            <ng-container *ngIf="catalogNiveau === 0">
-              <div *ngIf="loadingCatalogue" class="flex justify-center py-12">
-                <svg class="animate-spin-slow" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--brand);"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
+            <!-- Modules inscrits -->
+            <div class="glass rounded-2xl p-5">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="font-bold text-sm" style="font-family:'Syne',sans-serif;color:var(--text);">
+                  Mes modules inscrits <span class="badge b-brand ml-1">{{mesInscriptions.length}}</span>
+                </h3>
+                <button (click)="setSection('inscriptions')" class="text-xs font-semibold"
+                        style="color:var(--green);background:none;border:none;cursor:pointer;">Voir tout →</button>
               </div>
-              <div *ngIf="!loadingCatalogue && categories.length === 0" class="py-12 text-center">
-                <div class="text-3xl mb-2 opacity-30">📂</div>
-                <p style="color:var(--text-3);">Aucune catégorie disponible.</p>
-              </div>
-              <div *ngIf="!loadingCatalogue && categories.length > 0"
-                   class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 p-4">
-                <button *ngFor="let cat of categories"
-                        (click)="selectionnerCategorie(cat)"
-                        class="text-left rounded-2xl p-4 glass-hover transition-all"
-                        style="background:var(--surface-2);border:1px solid var(--border);cursor:pointer;">
-                  <div class="flex items-center gap-3 mb-2">
-                    <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0" style="background:var(--brand-dim);">📂</div>
-                    <div class="min-w-0">
-                      <div class="font-bold text-sm truncate" style="color:var(--text);font-family:'Syne',sans-serif;">{{ cat.nom }}</div>
-                      <div class="text-xs" style="color:var(--text-3);">{{ getModulesCount(cat.id!) }} module(s)</div>
-                    </div>
-                  </div>
-                  <p class="text-xs line-clamp-2 mb-3" style="color:var(--text-3);">{{ cat.description || 'Aucune description' }}</p>
-                  <div class="flex items-center gap-1 text-xs font-semibold" style="color:var(--brand);">
-                    <span>Explorer</span><span>→</span>
-                  </div>
-                </button>
-              </div>
-            </ng-container>
-
-            <!-- Niveau 1 : Modules -->
-            <ng-container *ngIf="catalogNiveau === 1">
-              <div *ngIf="loadingModules" class="flex justify-center py-12">
-                <svg class="animate-spin-slow" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--brand);"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
-              </div>
-              <div *ngIf="!loadingModules && catModules.length === 0" class="py-12 text-center">
-                <div class="text-3xl mb-2 opacity-30">📦</div>
-                <p class="font-semibold" style="color:var(--text-2);">Aucun module actif dans cette catégorie.</p>
-              </div>
-              <div *ngIf="!loadingModules && catModules.length > 0"
-                   class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 p-4">
-                <button *ngFor="let mod of catModules"
-                        (click)="selectionnerModule(mod)"
-                        class="text-left rounded-2xl p-4 glass-hover transition-all"
-                        style="background:var(--surface-2);border:1px solid var(--border);cursor:pointer;">
-                  <div class="flex items-center gap-3 mb-2">
-                    <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0" style="background:var(--brand-dim);">📦</div>
-                    <div class="min-w-0">
-                      <div class="font-bold text-sm truncate" style="color:var(--text);font-family:'Syne',sans-serif;">{{ mod.nom }}</div>
-                      <div class="text-xs font-mono" style="color:var(--text-4);">{{ mod.code }}</div>
-                    </div>
-                  </div>
-                  <p class="text-xs line-clamp-2 mb-3" style="color:var(--text-3);">{{ mod.description }}</p>
-                  <div class="flex items-center justify-between">
-                    <span class="badge text-xs" [class.b-green]="mod.actif" [class.b-red]="!mod.actif">{{ mod.actif ? 'Actif' : 'Inactif' }}</span>
-                    <span class="text-xs font-semibold" style="color:var(--brand);">{{ getCoursCount(mod.id!) }} cours →</span>
-                  </div>
-                </button>
-              </div>
-            </ng-container>
-
-            <!-- Niveau 2 : Cours -->
-            <ng-container *ngIf="catalogNiveau === 2">
-              <div *ngIf="loadingCours" class="flex justify-center py-12">
-                <svg class="animate-spin-slow" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--brand);"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
-              </div>
-              <div *ngIf="!loadingCours && modCours.length === 0" class="py-12 text-center">
-                <div class="text-3xl mb-2 opacity-30">📘</div>
-                <p class="font-semibold" style="color:var(--text-2);">Aucun cours publié dans ce module.</p>
-              </div>
-              <div *ngIf="!loadingCours && modCours.length > 0" class="divide-y">
-                <div *ngFor="let c of modCours"
-                     style="border-bottom:1px solid var(--border);">
-                  <div class="flex items-center gap-4 px-5 py-3 transition-all">
-                    <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0" style="background:var(--blue-dim);">📘</div>
-                    <div class="flex-1 min-w-0">
-                      <div class="font-semibold text-sm truncate" style="color:var(--text);">{{ c.titre }}</div>
-                      <div class="flex items-center gap-2 mt-0.5 flex-wrap">
-                        <span class="badge text-xs" [class]="getNiveauCls(c.niveau)">{{ c.niveau }}</span>
-                        <span class="badge text-xs" [class]="getStatutCoursCls(c.statut)">{{ c.statut }}</span>
-                        <span *ngIf="c.dureeMinutes" class="text-xs" style="color:var(--text-3);">⏱ {{ c.dureeMinutes }} min</span>
-                      </div>
-                    </div>
-                    <a [routerLink]="['/cours', c.idCours]" class="btn btn-brand btn-sm flex-shrink-0" style="text-decoration:none;">Voir →</a>
-                  </div>
-                  <!-- Interactions apprenant -->
-                  <div class="px-5 pb-3">
-                    <app-cours-interaction [coursId]="c.idCours!" userRole="apprenant"></app-cours-interaction>
-                  </div>
-                </div>
-              </div>
-            </ng-container>
-          </div>
-
-        </div>
-      </ng-container>
-
-<<<<<<< HEAD
-      <!-- ── Section Mes cours inscrits ── -->
-      <ng-container *ngIf="activeSection==='mes-cours'">
-        <div class="animate-fade-in space-y-4">
-
-          <!-- Header -->
-          <div class="rounded-2xl p-5" style="background:linear-gradient(135deg,var(--surface),var(--surface-2));border:1.5px solid var(--border-brand);">
-            <p class="text-xs font-bold uppercase tracking-widest mb-1" style="color:var(--brand);">Mes formations</p>
-            <h2 class="text-xl font-bold mb-1" style="font-family:'Syne',sans-serif;color:var(--text);">🎓 Mes modules inscrits</h2>
-            <p class="text-sm" style="color:var(--text-2);">Accédez aux cours de vos modules, likez, notez et commentez.</p>
-          </div>
-
-          <!-- Loading -->
-          <div *ngIf="loadingInscriptions" class="flex justify-center py-10">
-            <svg class="animate-spin-slow" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--brand);"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
-          </div>
-
-          <!-- Aucune inscription -->
-          <div *ngIf="!loadingInscriptions && mesInscriptions.length === 0"
-               class="rounded-2xl p-10 text-center" style="background:var(--card);border:1.5px solid var(--border);">
-            <div class="text-4xl mb-3 opacity-30">📦</div>
-            <p class="font-semibold" style="color:var(--text-2);">Vous n'êtes inscrit à aucun module.</p>
-            <p class="text-sm mt-1" style="color:var(--text-3);">Parcourez le catalogue et inscrivez-vous à un module.</p>
-          </div>
-
-          <!-- Modules inscrits -->
-          <div *ngFor="let ins of mesInscriptions" class="rounded-2xl overflow-hidden"
-               style="background:var(--card);border:1.5px solid var(--border);">
-
-            <!-- Header module -->
-            <button class="w-full flex items-center gap-3 px-5 py-4 text-left transition-all hover:bg-[var(--hover)]"
-                    (click)="toggleModule(ins.module.id!)">
-              <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0" style="background:var(--brand-dim);">📦</div>
-              <div class="flex-1 min-w-0">
-                <div class="font-bold text-sm" style="color:var(--text);">{{ ins.module.nom }}</div>
-                <div class="text-xs mt-0.5" style="color:var(--text-3);">
-                  Inscrit le {{ ins.dateInscription | date:'dd/MM/yyyy' }}
-                  <span *ngIf="ins.module.code"> · {{ ins.module.code }}</span>
-                </div>
-              </div>
-              <div class="flex items-center gap-2">
-                <span class="text-xs px-2 py-0.5 rounded-lg font-semibold" style="background:var(--blue-dim);color:var(--blue);">
-                  {{ getCoursForModule(ins.module.id!).length }} cours
-                </span>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                     style="color:var(--text-3);transition:transform .2s;flex-shrink:0;"
-                     [style.transform]="expandedModuleId === ins.module.id ? 'rotate(180deg)' : 'rotate(0deg)'">
-                  <polyline points="6 9 12 15 18 9"/>
-                </svg>
-              </div>
-            </button>
-
-            <!-- Cours (expandés) -->
-            <div *ngIf="expandedModuleId === ins.module.id" style="border-top:1px solid var(--border);">
-
-              <div *ngIf="loadingCoursByModule[ins.module.id!]" class="flex justify-center py-6">
+              <div *ngIf="loadingInscriptions" class="flex justify-center py-4">
                 <svg class="animate-spin-slow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--brand);"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
               </div>
-
-              <div *ngIf="!loadingCoursByModule[ins.module.id!] && getCoursForModule(ins.module.id!).length === 0"
-                   class="py-8 text-center text-sm" style="color:var(--text-3);">
-                🕐 Aucun cours publié dans ce module pour l'instant.
+              <div *ngIf="!loadingInscriptions" class="space-y-2">
+                <div *ngFor="let ins of mesInscriptions.slice(0,4)"
+                     class="flex items-center justify-between p-2.5 rounded-xl"
+                     style="background:var(--surface-2);border:1px solid var(--border);">
+                  <div class="min-w-0 flex-1">
+                    <div class="text-sm font-semibold truncate" style="color:var(--text);">{{ins.module.nom}}</div>
+                    <div class="text-xs font-mono" style="color:var(--text-3);">{{ins.module.code}}</div>
+                  </div>
+                  <span class="badge b-green ml-2">Inscrit</span>
+                </div>
+                <div *ngIf="mesInscriptions.length === 0" class="text-xs text-center py-3" style="color:var(--text-3);">
+                  Aucune inscription.
+                  <button (click)="setSection('catalogue')" style="background:none;border:none;cursor:pointer;color:var(--brand);font-weight:700;">Explorer →</button>
+                </div>
               </div>
+            </div>
 
-              <div *ngFor="let c of getCoursForModule(ins.module.id!)"
-                   style="border-bottom:1px solid var(--border);">
-                <!-- Infos cours -->
-                <div class="flex items-center gap-3 px-5 py-3">
-                  <div class="w-9 h-9 rounded-xl flex items-center justify-center text-base flex-shrink-0" style="background:var(--blue-dim);">📘</div>
+            <!-- Tentatives récentes -->
+            <div class="glass rounded-2xl p-5">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="font-bold text-sm" style="font-family:'Syne',sans-serif;color:var(--text);">
+                  Tentatives récentes <span class="badge b-purple ml-1">{{mesTentatives.length}}</span>
+                </h3>
+                <button (click)="ouvrirSectionQuiz()" class="text-xs font-semibold"
+                        style="color:var(--green);background:none;border:none;cursor:pointer;">Voir tout →</button>
+              </div>
+              <div *ngIf="loadingTentatives" class="flex justify-center py-4">
+                <svg class="animate-spin-slow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--brand);"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
+              </div>
+              <div *ngIf="!loadingTentatives" class="space-y-2">
+                <div *ngFor="let t of mesTentatives.slice(0,4)"
+                     class="flex items-center justify-between p-2.5 rounded-xl cursor-pointer"
+                     style="background:var(--surface-2);border:1px solid var(--border);"
+                     (click)="voirDetailsTentative(t)">
+                  <div class="min-w-0 flex-1">
+                    <div class="text-sm font-semibold truncate" style="color:var(--text);">{{t.quizTitre || 'Quiz #'+t.quizId}}</div>
+                    <div class="text-xs" style="color:var(--text-3);">{{formatDate(t.dateTentative)}}</div>
+                  </div>
+                  <span class="badge ml-2 font-bold"
+                        [style.background]="t.scoreSur20 >= 10 ? 'var(--green-dim)' : 'var(--red-dim)'"
+                        [style.color]="t.scoreSur20 >= 10 ? 'var(--green)' : 'var(--red)'">
+                    {{t.scoreSur20}}/20
+                  </span>
+                </div>
+                <div *ngIf="mesTentatives.length === 0" class="text-xs text-center py-3" style="color:var(--text-3);">
+                  Aucun quiz passé.
+                  <button (click)="ouvrirSectionQuiz()" style="background:none;border:none;cursor:pointer;color:var(--brand);font-weight:700;">Commencer →</button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </ng-container>
+      <!-- FIN SECTION : Accueil -->
+
+
+      <!-- ══════════════════════════════════════════════════════════════ -->
+      <!-- SECTION : Catalogue — style original (premier zip)            -->
+      <!-- ══════════════════════════════════════════════════════════════ -->
+      <ng-container *ngIf="activeSection==='catalogue'">
+        <div class="animate-fade-in space-y-5">
+
+          <!-- Toast inscription -->
+          <div *ngIf="toastInscription"
+               class="alert animate-fade-in"
+               [class.alert-green]="toastInscription.type === 'success'"
+               [class.alert-red]="toastInscription.type === 'error'">
+            {{ toastInscription.text }}
+          </div>
+
+          <!-- Header + fil d'Ariane -->
+          <div class="flex items-center justify-between flex-wrap gap-3">
+            <div>
+              <h2 class="text-xl font-bold" style="font-family:'Syne',sans-serif;color:var(--text);">Mon catalogue</h2>
+              <nav class="flex items-center gap-2 text-sm mt-1 flex-wrap" style="color:var(--text-3);">
+                <button (click)="retourCategories()" class="font-semibold hover:underline"
+                        [style.color]="catalogNiveau > 0 ? 'var(--brand)' : 'var(--text)'"
+                        style="background:none;border:none;cursor:pointer;padding:0;">
+                  🗂 Catégories
+                </button>
+                <ng-container *ngIf="catalogNiveau >= 1 && selectedCat">
+                  <span>›</span>
+                  <button (click)="retourModules()" class="font-semibold hover:underline"
+                          [style.color]="catalogNiveau > 1 ? 'var(--brand)' : 'var(--text)'"
+                          style="background:none;border:none;cursor:pointer;padding:0;">
+                    📦 {{ selectedCat.nom }}
+                  </button>
+                </ng-container>
+                <ng-container *ngIf="catalogNiveau === 2 && selectedMod">
+                  <span>›</span>
+                  <span style="color:var(--text);">📘 {{ selectedMod.nom }}</span>
+                </ng-container>
+              </nav>
+            </div>
+            <div *ngIf="catalogNiveau > 0">
+              <button (click)="catalogNiveau === 1 ? retourCategories() : retourModules()"
+                      class="btn btn-ghost btn-sm">← Retour</button>
+            </div>
+          </div>
+
+          <!-- ── Niveau 0 : Catégories ── -->
+          <ng-container *ngIf="catalogNiveau === 0">
+            <!-- Skeleton -->
+            <div *ngIf="loadingCatalogue" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div *ngFor="let s of [1,2,3,4,5,6]" class="glass rounded-2xl overflow-hidden">
+                <div class="h-24 skeleton"></div>
+                <div class="p-4 space-y-3">
+                  <div class="skeleton h-4 w-3/4 rounded-lg"></div>
+                  <div class="skeleton h-3 w-full rounded-lg"></div>
+                </div>
+              </div>
+            </div>
+            <!-- Vide -->
+            <div *ngIf="!loadingCatalogue && categories.length === 0"
+                 class="flex flex-col items-center justify-center py-14 rounded-2xl"
+                 style="background:var(--surface);border:1px dashed var(--border);">
+              <div class="text-4xl mb-3">📂</div>
+              <p class="font-semibold" style="color:var(--text);">Aucune catégorie disponible</p>
+            </div>
+            <!-- Grille catégories — style original -->
+            <div *ngIf="!loadingCatalogue && categories.length > 0"
+                 class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+              <div *ngFor="let cat of categories; let i=index"
+                   class="glass glass-hover rounded-2xl overflow-hidden animate-slide-up flex flex-col"
+                   [class]="'d-' + (i % 5)"
+                   style="cursor:pointer;">
+                <!-- Bannière colorée cliquable -->
+                <div (click)="selectionnerCategorie(cat)"
+                     class="h-28 flex flex-col items-center justify-center gap-2 relative"
+                     [style.background]="getCatStyle(i).dim">
+                  <div class="absolute inset-0 opacity-10"
+                       style="background:linear-gradient(135deg,transparent,rgba(0,0,0,.5));"></div>
+                  <span class="relative z-10 text-4xl">{{ getCatStyle(i).icon }}</span>
+                  <div class="absolute bottom-0 left-0 right-0 h-0.5"
+                       [style.background]="getCatStyle(i).color"></div>
+                </div>
+                <!-- Contenu -->
+                <div class="p-4 flex-1 flex flex-col">
+                  <h3 (click)="selectionnerCategorie(cat)"
+                      class="font-bold text-base mb-1 clamp-2"
+                      style="font-family:'Syne',sans-serif;color:var(--text);">{{ cat.nom }}</h3>
+                  <p class="text-xs leading-relaxed clamp-2 mb-3 flex-1" style="color:var(--text-3);">
+                    {{ cat.description || 'Pas de description' }}
+                  </p>
+                  <div class="flex items-center justify-between pt-3" style="border-top:1px solid var(--border);">
+                    <button (click)="selectionnerCategorie(cat)"
+                            class="badge text-xs"
+                            [style.background]="getCatStyle(i).dim"
+                            [style.border-color]="getCatStyle(i).color"
+                            [style.color]="getCatStyle(i).color"
+                            style="cursor:pointer;">
+                      Voir les modules →
+                    </button>
+                    <span class="text-xs" style="color:var(--text-3);">{{getModulesCount(cat.id!)}} module(s)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+
+          <!-- ── Niveau 1 : Modules ── -->
+          <ng-container *ngIf="catalogNiveau === 1">
+            <!-- Skeleton -->
+            <div *ngIf="loadingModules" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              <div *ngFor="let s of [1,2,3,4,5,6]" class="glass rounded-2xl p-5 space-y-4">
+                <div class="flex gap-3">
+                  <div class="skeleton w-12 h-12 rounded-xl flex-shrink-0"></div>
+                  <div class="flex-1 space-y-2">
+                    <div class="skeleton h-4 w-3/4 rounded-lg"></div>
+                    <div class="skeleton h-3 w-1/2 rounded-lg"></div>
+                  </div>
+                </div>
+                <div class="skeleton h-3 w-full rounded-lg"></div>
+                <div class="skeleton h-8 w-full rounded-xl"></div>
+              </div>
+            </div>
+            <!-- Vide -->
+            <div *ngIf="!loadingModules && catModules.length === 0"
+                 class="flex flex-col items-center justify-center py-14 rounded-2xl"
+                 style="background:var(--surface);border:1px dashed var(--border);">
+              <div class="text-4xl mb-3">📦</div>
+              <p class="font-semibold" style="color:var(--text);">Aucun module dans cette catégorie</p>
+            </div>
+            <!-- Grille modules — style original -->
+            <div *ngIf="!loadingModules && catModules.length > 0"
+                 class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              <div *ngFor="let mod of catModules; let i=index"
+                   class="glass glass-hover rounded-2xl p-5 animate-slide-up flex flex-col"
+                   [class]="'d-' + (i % 5)">
+                <!-- Header -->
+                <div class="flex items-start gap-3 mb-4">
+                  <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0"
+                       [style.background]="getModColor(i).dim">📦</div>
                   <div class="flex-1 min-w-0">
-                    <div class="font-semibold text-sm truncate" style="color:var(--text);">{{ c.titre }}</div>
-                    <div class="flex items-center gap-2 mt-0.5 flex-wrap">
-                      <span class="badge text-xs" [class]="getNiveauCls(c.niveau)">{{ c.niveau }}</span>
-                      <span *ngIf="c.dureeMinutes" class="text-xs" style="color:var(--text-3);">⏱ {{ c.dureeMinutes }} min</span>
+                    <h3 class="font-bold text-sm clamp-2 mb-1"
+                        style="font-family:'Syne',sans-serif;color:var(--text);">{{ mod.nom }}</h3>
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <span class="text-xs font-mono px-2 py-0.5 rounded-md"
+                            style="background:var(--surface-2);color:var(--brand);border:1px solid var(--border);">
+                        {{ mod.code }}
+                      </span>
+                      <span class="badge b-green text-xs">Actif</span>
                     </div>
                   </div>
-                  <a [routerLink]="['/cours', c.idCours]" class="btn btn-brand btn-sm flex-shrink-0" style="text-decoration:none;font-size:11px;">
-                    Voir le cours →
-                  </a>
                 </div>
-                <!-- ✅ Interactions : Like ❤️ · Étoiles ⭐ · Commentaires 💬 -->
-                <div class="px-5 pb-4">
+                <!-- Description -->
+                <p class="text-xs leading-relaxed mb-4 flex-1 clamp-2" style="color:var(--text-3);">
+                  {{ mod.description || 'Aucune description' }}
+                </p>
+                <div style="border-top:1px solid var(--border);margin-bottom:12px;"></div>
+                <!-- CTA -->
+                <!-- Bouton S'inscrire / Se désinscrire -->
+                <button
+                  (click)="toggleInscription(mod)"
+                  [disabled]="isLoadingInscription(mod.id!)"
+                  class="btn btn-sm w-full"
+                  [style.background]="estInscritModule(mod.id!) ? 'rgba(239,68,68,.1)' : 'var(--green-dim)'"
+                  [style.color]="estInscritModule(mod.id!) ? 'var(--red)' : 'var(--green)'"
+                  [style.border]="estInscritModule(mod.id!) ? '1px solid var(--red)' : '1px solid var(--green)'"
+                  style="font-weight:600;gap:6px;display:flex;align-items:center;justify-content:center;transition:all .2s;margin-bottom:8px;">
+                  <ng-container *ngIf="isLoadingInscription(mod.id!)">
+                    <svg class="animate-spin-slow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
+                    Chargement...
+                  </ng-container>
+                  <ng-container *ngIf="!isLoadingInscription(mod.id!) && !estInscritModule(mod.id!)">
+                    🎓 S'inscrire
+                  </ng-container>
+                  <ng-container *ngIf="!isLoadingInscription(mod.id!) && estInscritModule(mod.id!)">
+                    ❌ Se désinscrire
+                  </ng-container>
+                </button>
+                <button (click)="selectionnerModule(mod)"
+                        class="btn btn-brand btn-sm flex-1"
+                        style="display:flex;align-items:center;justify-content:center;gap:6px;">
+                  <span>📘</span> Voir les cours
+                </button>
+              </div>
+            </div>
+          </ng-container>
+
+          <!-- ── Niveau 2 : Cours ── -->
+          <ng-container *ngIf="catalogNiveau === 2">
+            <!-- Skeleton -->
+            <div *ngIf="loadingCours" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+              <div *ngFor="let s of [1,2,3,4,5,6]" class="glass rounded-2xl overflow-hidden">
+                <div class="skeleton h-28"></div>
+                <div class="p-4 space-y-3">
+                  <div class="skeleton h-4 w-3/4 rounded-lg"></div>
+                  <div class="skeleton h-3 w-full rounded-lg"></div>
+                  <div class="grid grid-cols-2 gap-2">
+                    <div class="skeleton h-10 rounded-lg"></div>
+                    <div class="skeleton h-10 rounded-lg"></div>
+                  </div>
+                  <div class="skeleton h-9 rounded-xl"></div>
+                </div>
+              </div>
+            </div>
+            <!-- Vide -->
+            <div *ngIf="!loadingCours && modCours.length === 0"
+                 class="flex flex-col items-center justify-center py-14 rounded-2xl"
+                 style="background:var(--surface);border:1px dashed var(--border);">
+              <div class="text-4xl mb-3">📘</div>
+              <p class="font-semibold" style="color:var(--text);">Aucun cours publié dans ce module</p>
+            </div>
+            <!-- Grille cours — style original -->
+            <div *ngIf="!loadingCours && modCours.length > 0"
+                 class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+              <div *ngFor="let c of modCours; let i=index"
+                   class="glass glass-hover rounded-2xl overflow-hidden animate-slide-up flex flex-col"
+                   [class]="'d-' + (i % 5)">
+                <!-- Bannière -->
+                <div class="h-28 flex items-center justify-center text-4xl relative"
+                     [style.background]="getModColor(i).dim">
+                  <div class="absolute inset-0 opacity-10"
+                       style="background:linear-gradient(135deg,transparent,rgba(0,0,0,.5));"></div>
+                  <span class="relative z-10">📖</span>
+                  <!-- Statut top-right -->
+                  <div class="absolute top-3 right-3">
+                    <span class="badge text-xs"
+                          [style.background]="getCoursStatutStyle(c.statut ?? '').bg"
+                          [style.border-color]="getCoursStatutStyle(c.statut ?? '').border"
+                          [style.color]="getCoursStatutStyle(c.statut ?? '').color">
+                      {{ getCoursStatutStyle(c.statut ?? '').label }}
+                    </span>
+                  </div>
+                  <!-- Niveau top-left -->
+                  <div *ngIf="c.niveau" class="absolute top-3 left-3">
+                    <span class="badge text-xs"
+                          style="background:rgba(0,0,0,.45);border-color:transparent;color:white;">
+                      {{ getNiveauStyle(c.niveau).label }}
+                    </span>
+                  </div>
+                  <div class="absolute bottom-0 left-0 right-0 h-0.5"
+                       [style.background]="getModColor(i).color"></div>
+                </div>
+                <!-- Contenu -->
+                <div class="p-4 flex flex-col flex-1">
+                  <h3 class="font-bold text-sm mb-1 clamp-2"
+                      style="font-family:'Syne',sans-serif;color:var(--text);">{{ c.titre }}</h3>
+                  <p class="text-xs leading-relaxed mb-4 clamp-2" style="color:var(--text-3);">{{ c.description || 'Aucune description' }}</p>
+                  <!-- Métadonnées -->
+                  <div class="grid grid-cols-2 gap-2 mb-4 mt-auto">
+                    <div class="flex items-center gap-1.5 p-2 rounded-lg col-span-2"
+                         style="background:var(--surface-2);border:1px solid var(--border);">
+                      <span>📅</span>
+                      <span class="text-xs" style="color:var(--text-3);">Ajouté le {{ formatDate(c.dateCreation) }}</span>
+                    </div>
+                  </div>
+                  <!-- CTA -->
+                  <a [routerLink]="['/cours', c.idCours]" class="btn btn-brand btn-sm"
+                     style="text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px;">
+                    ▶ Voir le cours
+                  </a>
+                  <!-- Interactions : J'aime, étoiles, commentaires -->
                   <app-cours-interaction [coursId]="c.idCours!" userRole="apprenant"></app-cours-interaction>
                 </div>
               </div>
+            </div>
+          </ng-container>
 
+        </div>
+      </ng-container>
+      <!-- FIN SECTION : Catalogue -->
+
+
+      <!-- ══ Mes inscriptions ══ -->
+      <ng-container *ngIf="activeSection==='inscriptions'">
+        <div class="animate-fade-in space-y-5">
+          <div>
+            <h2 class="text-xl font-bold" style="font-family:'Syne',sans-serif;color:var(--text);">🎓 Mes modules inscrits</h2>
+            <p class="text-sm mt-1" style="color:var(--text-3);">Tous les modules auxquels vous êtes inscrit(e).</p>
+          </div>
+
+          <div *ngIf="loadingInscriptions" class="flex justify-center py-16">
+            <svg class="animate-spin-slow" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--brand);"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
+          </div>
+
+          <div *ngIf="!loadingInscriptions && mesInscriptions.length === 0"
+               class="flex flex-col items-center justify-center py-20 rounded-2xl"
+               style="background:var(--surface);border:1px dashed var(--border);">
+            <div class="text-6xl mb-4">🎓</div>
+            <p class="font-bold text-lg mb-2" style="color:var(--text);">Aucune inscription</p>
+            <p class="text-sm mb-5" style="color:var(--text-3);">Explorez le catalogue pour vous inscrire à des modules.</p>
+            <button (click)="setSection('catalogue')" class="btn btn-brand">Explorer le catalogue</button>
+          </div>
+
+          <div *ngIf="!loadingInscriptions && mesInscriptions.length > 0" class="space-y-3">
+            <div *ngFor="let ins of mesInscriptions" class="glass rounded-2xl overflow-hidden">
+              <div class="flex items-center justify-between p-4 cursor-pointer"
+                   (click)="toggleModule(ins.module.id!)">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
+                       style="background:var(--brand-dim);">📦</div>
+                  <div>
+                    <div class="font-bold text-sm" style="color:var(--text);">{{ins.module.nom}}</div>
+                    <div class="text-xs font-mono mt-0.5" style="color:var(--text-3);">
+                      {{ins.module.code}} · Inscrit le {{formatDate(ins.dateInscription)}}
+                    </div>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="badge b-green">Inscrit</span>
+                  <svg [style.transform]="expandedModuleId === ins.module.id ? 'rotate(180deg)' : ''"
+                       style="transition:transform .2s;flex-shrink:0;"
+                       width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 12 15 18 9"/>
+                  </svg>
+                </div>
+              </div>
+              <div *ngIf="expandedModuleId === ins.module.id" class="px-4 pb-4">
+                <div *ngIf="loadingCoursByModule[ins.module.id!]" class="flex justify-center py-4">
+                  <svg class="animate-spin-slow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--brand);"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
+                </div>
+                <div *ngIf="!loadingCoursByModule[ins.module.id!]" class="space-y-2">
+                  <div *ngIf="getCoursForModule(ins.module.id!).length === 0"
+                       class="text-xs text-center py-3" style="color:var(--text-3);">
+                    Aucun cours publié dans ce module.
+                  </div>
+                  <div *ngFor="let c of getCoursForModule(ins.module.id!)"
+                       class="flex items-center justify-between p-3 rounded-xl"
+                       style="background:var(--surface-2);border:1px solid var(--border);">
+                    <div class="min-w-0 flex-1">
+                      <div class="text-sm font-semibold truncate" style="color:var(--text);">{{c.titre}}</div>
+                      <span class="badge text-xs" [class]="getNiveauCls(c.niveau)">{{c.niveau || '–'}}</span>
+                    </div>
+                    <a [routerLink]="['/cours', c.idCours]"
+                       class="btn btn-brand btn-sm ml-3 flex-shrink-0"
+                       style="text-decoration:none;font-size:11px;">▶ Voir</a>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
+        </div>
+      </ng-container>
+
+
+      <!-- ══ Quiz ══ -->
+      <ng-container *ngIf="activeSection==='quiz'">
+        <div class="animate-fade-in space-y-5">
+
+          <div class="flex items-center justify-between flex-wrap gap-3">
+            <div>
+              <h2 class="text-xl font-bold" style="font-family:'Syne',sans-serif;color:var(--text);">🎯 Mes Quiz</h2>
+              <p class="text-sm mt-1" style="color:var(--text-3);">Passez des quiz sur les cours disponibles.</p>
+            </div>
+            <button *ngIf="!showRunner" (click)="showHistorique = !showHistorique" class="btn btn-ghost" style="font-size:12px;">
+              {{showHistorique ? '← Retour aux quiz' : '📋 Historique'}}
+            </button>
+          </div>
+
+          <!-- Sélection cours + quiz disponibles -->
+          <ng-container *ngIf="!showHistorique && !showRunner">
+            <div class="glass rounded-2xl p-5">
+              <h3 class="font-bold text-sm mb-3" style="color:var(--text);">Choisir un cours</h3>
+              <div *ngIf="loadingTousCours" class="flex justify-center py-4">
+                <svg class="animate-spin-slow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:#7c3aed;"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
+              </div>
+              <div *ngIf="!loadingTousCours && tousCours.length === 0" class="text-sm text-center py-4" style="color:var(--text-3);">
+                Aucun cours publié disponible.
+              </div>
+              <div *ngIf="!loadingTousCours && tousCours.length > 0" class="flex flex-wrap gap-2">
+                <button *ngFor="let c of tousCours" (click)="selectionnerCoursQuiz(c)" class="btn btn-sm"
+                        [style.background]="coursSelectionne?.idCours === c.idCours ? 'linear-gradient(135deg,#7c3aed,#6d28d9)' : 'var(--surface-2)'"
+                        [style.color]="coursSelectionne?.idCours === c.idCours ? 'white' : 'var(--text)'"
+                        style="border:1px solid var(--border);font-size:12px;">
+                  {{c.titre}}
+                </button>
+              </div>
+            </div>
+
+            <ng-container *ngIf="coursSelectionne">
+              <div *ngIf="loadingQuizCours" class="flex justify-center py-10">
+                <svg class="animate-spin-slow" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:#7c3aed;"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
+              </div>
+              <div *ngIf="!loadingQuizCours && quizDuCours.length === 0"
+                   class="flex flex-col items-center py-14 rounded-2xl"
+                   style="background:var(--surface);border:1px dashed var(--border);">
+                <div class="text-5xl mb-3">🎯</div>
+                <p style="color:var(--text-3);">Aucun quiz disponible pour ce cours.</p>
+              </div>
+              <div *ngIf="!loadingQuizCours && quizDuCours.length > 0"
+                   class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+                <div *ngFor="let q of quizDuCours; let i=index"
+                     class="glass glass-hover rounded-2xl overflow-hidden flex flex-col animate-slide-up" [class]="'d-'+(i%5)">
+                  <div class="h-20 flex items-center justify-center relative"
+                       style="background:linear-gradient(135deg,#ede9fe,#ddd6fe);">
+                    <span class="relative z-10 text-3xl">🎯</span>
+                    <div class="absolute top-2 right-2 flex gap-1">
+                      <span *ngIf="q.config.correctionInstantanee" title="Correction instantanée"
+                            class="text-xs px-1.5 py-0.5 rounded-full"
+                            style="background:rgba(109,40,217,.15);color:#6d28d9;">⚡</span>
+                      <span *ngIf="q.config.tempsLimiteMinutes" title="Timer"
+                            class="text-xs px-1.5 py-0.5 rounded-full"
+                            style="background:rgba(109,40,217,.15);color:#6d28d9;">⏱ {{q.config.tempsLimiteMinutes}}min</span>
+                    </div>
+                    <div class="absolute bottom-0 left-0 right-0 h-0.5"
+                         style="background:linear-gradient(90deg,#7c3aed,#6d28d9);"></div>
+                  </div>
+                  <div class="p-4 flex-1 flex flex-col gap-3">
+                    <div>
+                      <h3 class="font-bold text-sm mb-1" style="font-family:'Syne',sans-serif;color:var(--text);">{{q.titre}}</h3>
+                      <p class="text-xs" style="color:var(--text-3);">{{q.description || 'Aucune description'}}</p>
+                    </div>
+                    <span class="badge text-xs" style="background:var(--surface-2);color:var(--text-3);">
+                      ❓ {{q.nombreQuestions ?? q.questions?.length ?? 0}} questions
+                    </span>
+                    <button (click)="commencerQuiz(q)" class="btn mt-auto"
+                            style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:white;border:none;font-weight:600;">
+                      ▶ Commencer
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </ng-container>
+
+            <div *ngIf="runnerError" class="alert alert-red">{{runnerError}}</div>
+          </ng-container>
+
+          <!-- Quiz Runner -->
+          <ng-container *ngIf="showRunner && !quizTermine">
+            <div class="glass rounded-2xl p-5 sm:p-8 space-y-6">
+              <div class="flex items-center justify-between flex-wrap gap-3">
+                <div>
+                  <h3 class="font-bold text-lg" style="font-family:'Syne',sans-serif;color:var(--text);">{{quizEnCours?.titre}}</h3>
+                  <p class="text-sm mt-0.5" style="color:var(--text-3);">Question {{indexQuestion + 1}} / {{questionsRunn.length}}</p>
+                </div>
+                <div class="flex items-center gap-3">
+                  <div *ngIf="timerRestant > 0" class="px-3 py-1.5 rounded-xl font-bold text-sm font-mono"
+                       [style.background]="timerUrgent ? 'var(--red-dim)' : 'var(--surface-2)'"
+                       [style.color]="timerUrgent ? 'var(--red)' : 'var(--text)'">
+                    ⏱ {{timerFormate}}
+                  </div>
+                  <button (click)="fermerRunner()" class="btn btn-ghost btn-sm">✕ Quitter</button>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex justify-between text-xs mb-1" style="color:var(--text-3);">
+                  <span>Progression</span><span>{{progression}}%</span>
+                </div>
+                <div class="h-2 rounded-full" style="background:var(--surface-2);">
+                  <div class="h-2 rounded-full transition-all"
+                       style="background:linear-gradient(90deg,#7c3aed,#6d28d9);"
+                       [style.width]="progression + '%'"></div>
+                </div>
+              </div>
+
+              <div class="flex flex-wrap gap-1.5">
+                <button *ngFor="let q of questionsRunn; let qi=index"
+                        (click)="allerQuestion(qi)"
+                        class="w-8 h-8 rounded-lg text-xs font-bold transition-all"
+                        [style.background]="reponsesSaisies[q.id!] != null ? 'linear-gradient(135deg,#7c3aed,#6d28d9)' : (qi === indexQuestion ? 'var(--surface-2)' : 'var(--surface)')"
+                        [style.color]="reponsesSaisies[q.id!] != null ? 'white' : 'var(--text)'"
+                        [style.border]="qi === indexQuestion ? '2px solid #7c3aed' : '1px solid var(--border)'">
+                  {{qi + 1}}
+                </button>
+              </div>
+
+              <div *ngIf="questionCourante" class="space-y-4">
+                <div class="p-5 rounded-2xl" style="background:var(--surface-2);border:1px solid var(--border);">
+                  <p class="font-semibold text-base" style="color:var(--text);">{{questionCourante.texte}}</p>
+                </div>
+                <div class="space-y-2">
+                  <button *ngFor="let r of questionCourante.reponses"
+                          (click)="selectionnerReponse(questionCourante.id!, r.id!)"
+                          [disabled]="quizTermine"
+                          class="w-full text-left p-4 rounded-xl transition-all font-medium text-sm"
+                          [style.background]="reponseSelectionnee(questionCourante.id!, r.id!) ? 'linear-gradient(135deg,rgba(124,58,237,.15),rgba(109,40,217,.1))' : 'var(--surface-2)'"
+                          [style.border]="reponseSelectionnee(questionCourante.id!, r.id!) ? '2px solid #7c3aed' : '1px solid var(--border)'"
+                          [style.color]="getStatutReponse(questionCourante.id!, r.id!, r.estCorrecte) === 'correcte' ? 'var(--green)' : (getStatutReponse(questionCourante.id!, r.id!, r.estCorrecte) === 'incorrecte' ? 'var(--red)' : 'var(--text)')">
+                    {{r.texte}}
+                    <span *ngIf="getStatutReponse(questionCourante.id!, r.id!, r.estCorrecte) === 'correcte'"> ✅</span>
+                    <span *ngIf="getStatutReponse(questionCourante.id!, r.id!, r.estCorrecte) === 'incorrecte'"> ❌</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="flex justify-between gap-3 pt-2">
+                <button (click)="questionPrecedente()" [disabled]="indexQuestion === 0" class="btn btn-ghost" style="font-size:13px;">← Précédente</button>
+                <button *ngIf="indexQuestion < questionsRunn.length - 1" (click)="questionSuivante()" class="btn btn-brand" style="font-size:13px;">Suivante →</button>
+                <button *ngIf="indexQuestion === questionsRunn.length - 1"
+                        (click)="soumettrQuiz()" [disabled]="submitting" class="btn"
+                        style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:white;border:none;font-weight:600;font-size:13px;">
+                  <span *ngIf="!submitting">✅ Soumettre</span>
+                  <span *ngIf="submitting">Envoi…</span>
+                </button>
+              </div>
+            </div>
+          </ng-container>
+
+          <!-- Résultats -->
+          <ng-container *ngIf="showRunner && quizTermine && resultats">
+            <div class="glass rounded-2xl p-6 sm:p-8 text-center space-y-5">
+              <div class="text-6xl">{{ resultats.scoreSur20 >= 10 ? '🎉' : '📚' }}</div>
+              <div>
+                <h3 class="text-2xl font-bold mb-1" style="font-family:'Syne',sans-serif;" [style.color]="couleurScore">
+                  {{resultats.scoreSur20}}/20
+                </h3>
+                <p class="font-semibold text-base" [style.color]="couleurScore">{{messageScore}}</p>
+              </div>
+              <div class="grid grid-cols-2 gap-4 max-w-xs mx-auto text-sm">
+                <div class="p-3 rounded-xl" style="background:var(--surface-2);">
+                  <div class="font-bold" style="color:var(--text);">{{resultats.scoreBrut}}/{{resultats.nombreQuestions}}</div>
+                  <div style="color:var(--text-3);">Bonnes réponses</div>
+                </div>
+                <div class="p-3 rounded-xl" style="background:var(--surface-2);">
+                  <div class="font-bold" style="color:var(--text);">{{resultats.scoreSur20}}/20</div>
+                  <div style="color:var(--text-3);">Score final</div>
+                </div>
+              </div>
+              <div *ngIf="resultats.resultats && resultats.resultats.length > 0" class="text-left space-y-2 mt-4">
+                <h4 class="font-bold text-sm mb-2" style="color:var(--text);">Détail des réponses</h4>
+                <div *ngFor="let r of resultats.resultats" class="p-3 rounded-xl flex items-start gap-3"
+                     [style.background]="r.estCorrecte ? 'var(--green-dim)' : 'rgba(239,68,68,.08)'"
+                     [style.border]="r.estCorrecte ? '1px solid rgba(16,185,129,.2)' : '1px solid rgba(239,68,68,.2)'">
+                  <span>{{r.estCorrecte ? '✅' : '❌'}}</span>
+                  <div class="flex-1 text-xs">
+                    <div class="font-semibold mb-0.5" style="color:var(--text);">{{r.questionTexte}}</div>
+                    <div style="color:var(--text-3);">Votre réponse : {{r.reponseSelectionneeTexte}}</div>
+                    <div *ngIf="!r.estCorrecte && r.reponseCorrecteTexte" style="color:var(--green);">✓ Bonne réponse : {{r.reponseCorrecteTexte}}</div>
+                  </div>
+                </div>
+              </div>
+              <div class="flex justify-center gap-3 flex-wrap pt-2">
+                <button (click)="recommencerQuiz()" class="btn btn-ghost" style="font-size:13px;">🔄 Recommencer</button>
+                <button (click)="fermerRunner()" class="btn"
+                        style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:white;border:none;font-weight:600;font-size:13px;">
+                  Retour aux quiz
+                </button>
+              </div>
+            </div>
+          </ng-container>
+
+          <!-- Historique -->
+          <ng-container *ngIf="showHistorique && !showRunner">
+            <div class="glass rounded-2xl p-5">
+              <h3 class="font-bold text-base mb-4" style="font-family:'Syne',sans-serif;color:var(--text);">📋 Historique de mes tentatives</h3>
+              <div *ngIf="loadingTentatives" class="flex justify-center py-8">
+                <svg class="animate-spin-slow" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:#7c3aed;"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
+              </div>
+              <div *ngIf="!loadingTentatives && mesTentatives.length === 0" class="text-center py-10 text-sm" style="color:var(--text-3);">
+                Aucune tentative de quiz.
+              </div>
+              <div *ngIf="!loadingTentatives && mesTentatives.length > 0" class="space-y-2">
+                <div *ngFor="let t of mesTentatives"
+                     class="flex items-center justify-between p-3 rounded-xl cursor-pointer"
+                     style="background:var(--surface-2);border:1px solid var(--border);"
+                     (click)="voirDetailsTentative(t)">
+                  <div class="flex-1 min-w-0">
+                    <div class="text-sm font-semibold truncate" style="color:var(--text);">{{t.quizTitre || 'Quiz #'+t.quizId}}</div>
+                    <div class="text-xs mt-0.5" style="color:var(--text-3);">
+                      {{formatDate(t.dateTentative)}} · {{t.scoreBrut}}/{{t.nombreQuestions}} bonnes réponses
+                    </div>
+                  </div>
+                  <span class="badge ml-3 font-bold text-sm"
+                        [style.background]="t.scoreSur20 >= 10 ? 'var(--green-dim)' : 'rgba(239,68,68,.1)'"
+                        [style.color]="t.scoreSur20 >= 10 ? 'var(--green)' : 'var(--red)'">
+                    {{t.scoreSur20}}/20
+                  </span>
+                </div>
+              </div>
+            </div>
+          </ng-container>
 
         </div>
       </ng-container>
 
-      <!-- ── Section Notifications ── -->
+
+      <!-- ══ Notifications ══ -->
       <ng-container *ngIf="activeSection==='notifications'">
         <div class="animate-fade-in space-y-4">
-          <div class="rounded-2xl p-5" style="background:linear-gradient(135deg,var(--surface),var(--surface-2));border:1.5px solid var(--border);">
+          <div class="rounded-2xl p-5"
+               style="background:linear-gradient(135deg,var(--surface),var(--surface-2));border:1.5px solid var(--border);">
             <h2 class="text-xl font-bold mb-1" style="font-family:'Syne',sans-serif;color:var(--text);">🔔 Mes notifications</h2>
-            <p class="text-sm" style="color:var(--text-2);">Restez informé des nouveaux cours, validations et interactions en temps réel.</p>
+            <p class="text-sm" style="color:var(--text-2);">Recevez des alertes sur vos cours, inscriptions et mises à jour.</p>
           </div>
           <app-notification-center role="apprenant"></app-notification-center>
         </div>
       </ng-container>
-=======
-
-      <!-- ════════════════════════════════════════════════════════════════════ -->
-      <!-- SECTION : MES QUIZ (Apprenant)                                       -->
-      <!-- ════════════════════════════════════════════════════════════════════ -->
-      <ng-container *ngIf="activeSection==='quiz'">
-        <div class="animate-fade-in space-y-5">
-
-          <!-- En-tête + onglets -->
-          <div class="flex items-center justify-between flex-wrap gap-3">
-            <div>
-              <h2 class="text-xl font-bold" style="font-family:'Syne',sans-serif;color:var(--text);">🎯 Mes Quiz</h2>
-              <p class="text-sm mt-1" style="color:var(--text-3);">Passez vos quiz et suivez votre progression.</p>
-            </div>
-            <div class="flex gap-2">
-              <button (click)="showHistorique=false" class="btn btn-sm"
-                      [style.background]="!showHistorique?'var(--brand)':'var(--surface-2)'"
-                      [style.color]="!showHistorique?'white':'var(--text-2)'"
-                      style="border:1px solid var(--border);">
-                📋 Quiz disponibles
-              </button>
-              <button (click)="showHistorique=true; chargerHistorique()" class="btn btn-sm"
-                      [style.background]="showHistorique?'var(--brand)':'var(--surface-2)'"
-                      [style.color]="showHistorique?'white':'var(--text-2)'"
-                      style="border:1px solid var(--border);">
-                📊 Mon historique
-              </button>
-            </div>
-          </div>
-
-          <!-- Message erreur runner -->
-          <div *ngIf="runnerError" class="alert alert-red">❌ {{ runnerError }}</div>
-
-          <!-- ── Onglet : Quiz disponibles ── -->
-          <ng-container *ngIf="!showHistorique">
-            <div class="grid grid-cols-1 lg:grid-cols-4 gap-5">
-
-              <!-- Liste des cours (sidebar gauche) -->
-              <div class="lg:col-span-1">
-                <div class="glass rounded-2xl overflow-hidden">
-                  <div class="px-4 py-3" style="border-bottom:1px solid var(--border);">
-                    <p class="text-xs font-bold uppercase tracking-wider" style="color:var(--text-3);">Mes Cours</p>
-                  </div>
-                  <div *ngIf="tousCours.length===0" class="p-4 text-center">
-                    <p class="text-xs" style="color:var(--text-3);">Aucun cours disponible.</p>
-                  </div>
-                  <div class="divide-y" style="max-height:400px;overflow-y:auto;">
-                    <button *ngFor="let c of tousCours"
-                            (click)="selectionnerCoursQuiz(c)"
-                            class="w-full text-left px-4 py-3 text-sm transition-all"
-                            [style.background]="coursSelectionne?.idCours===c.idCours?'var(--brand-dim)':'transparent'"
-                            [style.color]="coursSelectionne?.idCours===c.idCours?'var(--brand)':'var(--text-2)'"
-                            [style.fontWeight]="coursSelectionne?.idCours===c.idCours?'700':'400'">
-                      📘 {{ c.titre }}
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Quiz du cours sélectionné -->
-              <div class="lg:col-span-3">
-                <div *ngIf="!coursSelectionne" class="glass rounded-2xl flex flex-col items-center justify-center py-16">
-                  <div class="text-5xl mb-3">👈</div>
-                  <p class="font-semibold" style="color:var(--text);">Sélectionnez un cours</p>
-                  <p class="text-sm mt-1" style="color:var(--text-3);">pour voir les quiz disponibles</p>
-                </div>
-
-                <div *ngIf="coursSelectionne && loadingQuizCours" class="flex justify-center py-12">
-                  <svg class="animate-spin-slow" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--brand);"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
-                </div>
-
-                <div *ngIf="coursSelectionne && !loadingQuizCours && quizDuCours.length===0"
-                     class="glass rounded-2xl flex flex-col items-center justify-center py-16">
-                  <div class="text-5xl mb-3">🎯</div>
-                  <p class="font-semibold" style="color:var(--text);">Aucun quiz disponible</p>
-                  <p class="text-sm mt-1" style="color:var(--text-3);">Ce cours n'a pas encore de quiz actif.</p>
-                </div>
-
-                <div *ngIf="coursSelectionne && !loadingQuizCours && quizDuCours.length>0"
-                     class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div *ngFor="let quiz of quizDuCours"
-                       class="glass glass-hover rounded-2xl overflow-hidden flex flex-col">
-                    <!-- Bannière -->
-                    <div class="h-20 flex items-center justify-center relative"
-                         style="background:linear-gradient(135deg,#ede9fe,#ddd6fe);">
-                      <span class="text-3xl relative z-10">🎯</span>
-                      <div class="absolute top-2 right-2 flex gap-1">
-                        <span *ngIf="quiz.config.correctionInstantanee" title="Correction instantanée"
-                              class="text-xs px-1.5 py-0.5 rounded-full"
-                              style="background:rgba(109,40,217,.2);color:#6d28d9;">⚡</span>
-                        <span *ngIf="quiz.config.tempsLimiteMinutes" title="Temps limité"
-                              class="text-xs px-1.5 py-0.5 rounded-full"
-                              style="background:rgba(109,40,217,.2);color:#6d28d9;">⏱ {{ quiz.config.tempsLimiteMinutes }}min</span>
-                        <span *ngIf="quiz.config.randomiserQuestions" title="Aléatoire"
-                              class="text-xs px-1.5 py-0.5 rounded-full"
-                              style="background:rgba(109,40,217,.2);color:#6d28d9;">🔀</span>
-                      </div>
-                    </div>
-                    <!-- Corps -->
-                    <div class="p-4 flex-1 flex flex-col gap-2">
-                      <h4 class="font-bold text-sm" style="font-family:'Syne',sans-serif;color:var(--text);">{{ quiz.titre }}</h4>
-                      <p class="text-xs clamp-2" style="color:var(--text-3);">{{ quiz.description || 'Aucune description' }}</p>
-                      <div class="flex items-center gap-2 text-xs" style="color:var(--text-3);">
-                        <span>❓ {{ quiz.nombreQuestions ?? quiz.questions?.length ?? 0 }} question(s)</span>
-                      </div>
-                      <button (click)="commencerQuiz(quiz)"
-                              class="btn w-full mt-auto"
-                              style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:white;border:none;font-weight:700; padding:10px 20px;">
-                        🚀 Commencer
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </ng-container>
-
-          <!-- ── Onglet : Historique ── -->
-          <ng-container *ngIf="showHistorique">
-            <div *ngIf="loadingTentatives" class="flex justify-center py-12">
-              <svg class="animate-spin-slow" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--brand);"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
-            </div>
-            <div *ngIf="!loadingTentatives && mesTentatives.length===0"
-                 class="glass rounded-2xl flex flex-col items-center justify-center py-20">
-              <div class="text-5xl mb-3">📊</div>
-              <p class="font-semibold" style="color:var(--text);">Aucune tentative</p>
-              <p class="text-sm mt-1" style="color:var(--text-3);">Passez votre premier quiz !</p>
-            </div>
-            <div *ngIf="!loadingTentatives && mesTentatives.length>0" class="space-y-3">
-              <div *ngFor="let t of mesTentatives"
-                   class="glass glass-hover rounded-2xl px-5 py-4 flex items-center justify-between cursor-pointer"
-                   (click)="voirDetailsTentative(t)">
-                <div class="flex items-center gap-4">
-                  <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-xl"
-                       style="background:linear-gradient(135deg,#ede9fe,#ddd6fe);">🎯</div>
-                  <div>
-                    <p class="font-semibold text-sm" style="color:var(--text);">{{ t.quizTitre }}</p>
-                    <p class="text-xs mt-0.5" style="color:var(--text-3);">{{ formatDate(t.dateTentative) }}</p>
-                  </div>
-                </div>
-                <div class="flex items-baseline gap-1">
-                  <span class="text-2xl font-black" style="font-family:'Syne',sans-serif;"
-                        [style.color]="t.scoreSur20<10?'var(--red)':t.scoreSur20<=15?'var(--orange)':'var(--green)'">
-                    {{ t.scoreSur20 | number:'1.1-1' }}
-                  </span>
-                  <span class="text-sm" style="color:var(--text-3);">/20</span>
-                </div>
-              </div>
-            </div>
-          </ng-container>
-
-        </div>
-      </ng-container>
-      <!-- FIN SECTION : Mes Quiz -->
->>>>>>> 61687d52a2add6f997c3079168121caa8bebfd0c
 
     </main>
   </div>
 </div>
 
-<!-- ════════════════════════ QUIZ RUNNER (plein écran) ════════════════════════ -->
-<div *ngIf="showRunner" class="fixed inset-0 z-50 flex flex-col" style="background:var(--bg);">
-
-  <!-- Header runner -->
-  <div class="flex items-center justify-between px-5 py-3 flex-shrink-0"
-       style="background:var(--surface);border-bottom:1px solid var(--border);">
-    <div class="flex items-center gap-3">
-      <button (click)="fermerRunner()" class="btn btn-ghost btn-sm">✕ Quitter</button>
-      <span class="font-bold text-sm" style="color:var(--text);">{{ quizEnCours?.titre }}</span>
+<!-- Modal : Détails tentative -->
+<div *ngIf="showTentativeDetails && tentativeDetails" class="overlay" (click)="fermerDetailsTentative()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3 class="modal-title">📋 Détails de la tentative</h3>
+      <button class="modal-close" (click)="fermerDetailsTentative()">×</button>
     </div>
-    <div class="flex items-center gap-4">
-      <span class="text-xs" style="color:var(--text-3);">
-        {{ (reponsesSaisies | keyvalue).length }} / {{ questionsRunn.length }} répondu(s)
-      </span>
-      <div *ngIf="timerRestant>0" class="px-3 py-1 rounded-full font-bold text-sm"
-           [style.background]="timerUrgent?'var(--red-dim)':'var(--blue-dim)'"
-           [style.color]="timerUrgent?'var(--red)':'var(--blue)'">
-        ⏱ {{ timerFormate }}
-      </div>
-    </div>
-  </div>
-
-  <!-- Barre progression -->
-  <div style="height:3px;background:var(--surface-2);" class="flex-shrink-0">
-    <div [style.width.%]="progression"
-         style="height:100%;background:linear-gradient(90deg,#7c3aed,#6d28d9);transition:width .3s;"></div>
-  </div>
-
-  <!-- Corps runner -->
-  <div class="flex-1 overflow-y-auto flex flex-col items-center justify-start py-8 px-4">
-    <div class="w-full max-w-2xl space-y-6">
-
-      <!-- ─── RÉSULTATS ─── -->
-      <ng-container *ngIf="quizTermine && resultats">
-        <div class="glass rounded-3xl p-8 text-center">
-          <div class="text-6xl mb-4">{{ resultats.scoreSur20>=14 ? "🎉" : resultats.scoreSur20>=10 ? "👍" : "💪" }}</div>
-          <h2 class="text-3xl font-black mb-2" style="font-family:'Syne',sans-serif;"
-              [style.color]="couleurScore">
-            {{ resultats.scoreSur20 | number:'1.1-1' }} <span class="text-lg font-normal" style="color:var(--text-3);">/20</span>
-          </h2>
-          <p class="text-sm mb-1" style="color:var(--text-3);">{{ resultats.scoreBrut }} / {{ resultats.nombreQuestions }} bonnes réponses</p>
-          <p class="font-semibold mt-3" style="color:var(--text);">{{ messageScore }}</p>
+    <div class="modal-body space-y-4">
+      <div class="text-center p-4 rounded-xl"
+           [style.background]="tentativeDetails.scoreSur20 >= 10 ? 'var(--green-dim)' : 'rgba(239,68,68,.08)'">
+        <div class="text-3xl font-bold mb-1"
+             [style.color]="tentativeDetails.scoreSur20 >= 10 ? 'var(--green)' : 'var(--red)'">
+          {{tentativeDetails.scoreSur20}}/20
         </div>
-
-        <!-- Correction détaillée -->
-        <div *ngIf="!quizEnCours?.config?.correctionInstantanee && resultats.resultats?.length"
-             class="space-y-3">
-          <h3 class="font-bold text-sm px-1" style="color:var(--text);">📋 Correction détaillée</h3>
-          <div *ngFor="let r of resultats.resultats; let ri=index"
-               class="rounded-2xl p-4"
-               [style.background]="r.estCorrecte?'var(--green-dim)':'var(--red-dim)'"
-               [style.border]="r.estCorrecte?'1px solid var(--green)':'1px solid var(--red)'">
-            <div class="flex gap-3">
-              <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 text-white"
-                   [style.background]="r.estCorrecte?'var(--green)':'var(--red)'">{{ ri+1 }}</div>
-              <div class="flex-1 min-w-0">
-                <p class="text-sm font-semibold mb-1" style="color:var(--text);">{{ r.questionTexte }}</p>
-                <p class="text-xs" [style.color]="r.estCorrecte?'var(--green)':'var(--red)'">
-                  {{ r.estCorrecte ? '✅' : '❌' }} Votre réponse : <strong>{{ r.reponseSelectionneeTexte }}</strong>
-                </p>
-                <p *ngIf="!r.estCorrecte" class="text-xs mt-0.5" style="color:var(--green);">
-                  ✅ Bonne réponse : <strong>{{ r.reponseCorrecteTexte }}</strong>
-                </p>
+        <div class="text-sm" style="color:var(--text-3);">
+          {{tentativeDetails.scoreBrut}} / {{tentativeDetails.nombreQuestions}} bonnes réponses
+        </div>
+      </div>
+      <div *ngIf="tentativeDetails.resultats && tentativeDetails.resultats.length > 0" class="space-y-2">
+        <h4 class="font-bold text-sm" style="color:var(--text);">Résultats question par question</h4>
+        <div *ngFor="let r of tentativeDetails.resultats" class="p-3 rounded-xl"
+             [style.background]="r.estCorrecte ? 'var(--green-dim)' : 'rgba(239,68,68,.08)'">
+          <div class="flex items-start gap-2">
+            <span>{{r.estCorrecte ? '✅' : '❌'}}</span>
+            <div class="text-xs flex-1">
+              <div class="font-semibold mb-1" style="color:var(--text);">{{r.questionTexte}}</div>
+              <div style="color:var(--text-2);">Votre réponse : <strong>{{r.reponseSelectionneeTexte}}</strong></div>
+              <div *ngIf="!r.estCorrecte && r.reponseCorrecteTexte" style="color:var(--green);">
+                Bonne réponse : <strong>{{r.reponseCorrecteTexte}}</strong>
               </div>
             </div>
           </div>
         </div>
-
-        <div class="flex gap-3">
-          <button (click)="fermerRunner()" class="btn btn-ghost flex-1">Fermer</button>
-          <button (click)="recommencerQuiz()" class="btn flex-1"
-                  style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:white;border:none;font-weight:700;">
-            🔄 Recommencer
-          </button>
-        </div>
-      </ng-container>
-
-      <!-- ─── QUESTION EN COURS ─── -->
-      <ng-container *ngIf="!quizTermine && questionCourante">
-
-        <!-- Navigation numéros -->
-        <div class="flex flex-wrap gap-2">
-          <button *ngFor="let q of questionsRunn; let qi=index"
-                  (click)="allerQuestion(qi)"
-                  class="w-8 h-8 rounded-lg text-xs font-bold transition-all"
-                  [style.background]="qi===indexQuestion?'var(--brand)':reponsesSaisies[q.id!]!==undefined?'var(--green-dim)':'var(--surface-2)'"
-                  [style.color]="qi===indexQuestion?'white':reponsesSaisies[q.id!]!==undefined?'var(--green)':'var(--text-3)'"
-                  style="border:1px solid var(--border);">
-            {{ qi+1 }}
-          </button>
-        </div>
-
-        <!-- Carte question -->
-        <div class="glass rounded-2xl p-6 space-y-5">
-          <div>
-            <p class="text-xs font-bold uppercase tracking-wider mb-2" style="color:var(--text-3);">
-              Question {{ indexQuestion+1 }} / {{ questionsRunn.length }}
-            </p>
-            <h3 class="text-base font-bold" style="color:var(--text);">{{ questionCourante.texte }}</h3>
-            <span class="badge text-xs mt-2 inline-block"
-                  [style.background]="questionCourante.type==='QCM'?'var(--blue-dim)':'var(--orange-dim)'"
-                  [style.color]="questionCourante.type==='QCM'?'var(--blue)':'var(--orange)'">
-              {{ questionCourante.type==='QCM'?'QCM':'Vrai / Faux' }}
-            </span>
-          </div>
-
-          <!-- Réponses -->
-          <div class="space-y-2">
-            <button *ngFor="let rep of questionCourante.reponses"
-                    (click)="selectionnerReponse(questionCourante.id!, rep.id!)"
-                    class="w-full text-left rounded-xl px-4 py-3 flex items-center gap-3 transition-all"
-                    [style.border]="getStatutReponse(questionCourante.id!,rep.id!,rep.estCorrecte)==='correcte'?'2px solid var(--green)':getStatutReponse(questionCourante.id!,rep.id!,rep.estCorrecte)==='incorrecte'?'2px solid var(--red)':reponseSelectionnee(questionCourante.id!,rep.id!)?'2px solid var(--brand)':'1px solid var(--border)'"
-                    [style.background]="getStatutReponse(questionCourante.id!,rep.id!,rep.estCorrecte)==='correcte'?'var(--green-dim)':getStatutReponse(questionCourante.id!,rep.id!,rep.estCorrecte)==='incorrecte'?'var(--red-dim)':reponseSelectionnee(questionCourante.id!,rep.id!)?'var(--brand-dim)':'var(--surface-2)'">
-              <div class="w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center"
-                   [style.border-color]="reponseSelectionnee(questionCourante.id!,rep.id!)?'var(--brand)':'var(--border)'">
-                <div *ngIf="reponseSelectionnee(questionCourante.id!,rep.id!)"
-                     class="w-2.5 h-2.5 rounded-full" style="background:var(--brand);"></div>
-              </div>
-              <span class="text-sm" style="color:var(--text);">{{ rep.texte }}</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Navigation -->
-        <div class="flex items-center justify-between">
-          <button (click)="questionPrecedente()" [disabled]="indexQuestion===0"
-                  class="btn btn-ghost" [class.opacity-40]="indexQuestion===0">← Précédent</button>
-          <button *ngIf="indexQuestion<questionsRunn.length-1"
-                  (click)="questionSuivante()" class="btn btn-ghost">Suivant →</button>
-          <button *ngIf="indexQuestion===questionsRunn.length-1"
-                  (click)="soumettrQuiz()" [disabled]="submitting"
-                  class="btn" style="background:linear-gradient(135deg,#059669,#10b981);color:white;border:none;font-weight:700;">
-            <svg *ngIf="submitting" class="animate-spin-slow mr-1" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-dasharray="20 60"/></svg>
-            🏁 Soumettre
-          </button>
-        </div>
-
-      </ng-container>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" (click)="fermerDetailsTentative()">Fermer</button>
     </div>
   </div>
 </div>
-
-<!-- ════════════════════════ MODAL : Détails tentative ════════════════════════ -->
-<div *ngIf="showTentativeDetails" class="overlay" (click)="fermerDetailsTentative()">
-  <div class="modal" style="max-width:560px;" (click)="$event.stopPropagation()">
-    <div class="flex items-center justify-between mb-4">
-      <h3 class="font-bold text-base" style="font-family:'Syne',sans-serif;color:var(--text);">📊 Détails de la tentative</h3>
-      <button (click)="fermerDetailsTentative()" style="background:none;border:none;cursor:pointer;color:var(--text-3);font-size:22px;">✕</button>
-    </div>
-    <div *ngIf="tentativeDetails" class="space-y-4">
-      <div class="text-center p-4 rounded-2xl"
-           [style.background]="tentativeDetails.scoreSur20<10?'var(--red-dim)':tentativeDetails.scoreSur20<=15?'var(--orange-dim)':'var(--green-dim)'"
-           [style.border]="tentativeDetails.scoreSur20<10?'1px solid var(--red)':tentativeDetails.scoreSur20<=15?'1px solid var(--orange)':'1px solid var(--green)'">
-        <div class="flex items-baseline justify-center gap-1">
-          <span class="text-5xl font-black" style="font-family:'Syne',sans-serif;"
-                [style.color]="tentativeDetails.scoreSur20<10?'var(--red)':tentativeDetails.scoreSur20<=15?'var(--orange)':'var(--green)'">
-            {{ tentativeDetails.scoreSur20 | number:'1.1-1' }}
-          </span>
-          <span style="color:var(--text-3);">/20</span>
-        </div>
-        <p class="text-sm mt-1" style="color:var(--text-3);">{{ tentativeDetails.scoreBrut }}/{{ tentativeDetails.nombreQuestions }} bonnes réponses</p>
-      </div>
-      <div *ngIf="tentativeDetails.resultats?.length" class="space-y-2 max-h-80 overflow-y-auto">
-        <div *ngFor="let r of tentativeDetails.resultats; let ri=index"
-             class="rounded-xl p-3"
-             [style.background]="r.estCorrecte?'var(--green-dim)':'var(--red-dim)'">
-          <p class="text-xs font-bold mb-1" [style.color]="r.estCorrecte?'var(--green)':'var(--red)'">
-            Q{{ ri+1 }}. {{ r.estCorrecte ? '✅' : '❌' }} {{ r.questionTexte }}
-          </p>
-          <p class="text-xs" style="color:var(--text-2);">Votre réponse : <strong>{{ r.reponseSelectionneeTexte }}</strong></p>
-          <p *ngIf="!r.estCorrecte" class="text-xs" style="color:var(--green);">Bonne réponse : <strong>{{ r.reponseCorrecteTexte }}</strong></p>
-        </div>
-      </div>
-    </div>
-    <div class="flex justify-end mt-4">
-      <button (click)="fermerDetailsTentative()" class="btn btn-ghost">Fermer</button>
-    </div>
-  </div>
-</div>
-

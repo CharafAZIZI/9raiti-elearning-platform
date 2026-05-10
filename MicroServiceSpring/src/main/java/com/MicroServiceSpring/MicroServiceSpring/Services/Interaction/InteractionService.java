@@ -8,6 +8,7 @@ import com.MicroServiceSpring.MicroServiceSpring.Models.Interaction.Commentaire;
 import com.MicroServiceSpring.MicroServiceSpring.Models.Interaction.Like;
 import com.MicroServiceSpring.MicroServiceSpring.Models.Interaction.Note;
 import com.MicroServiceSpring.MicroServiceSpring.Repository.*;
+import com.MicroServiceSpring.MicroServiceSpring.Repository.Cours.CoursRepository;
 import com.MicroServiceSpring.MicroServiceSpring.Security.JwtUtil;
 import com.MicroServiceSpring.MicroServiceSpring.kafka.producer.EventProducer;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +24,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class InteractionService {
 
-    private final CoursRepository       coursRepository;
+    private final CoursRepository coursRepository;
     private final LikeRepository        likeRepository;
     private final CommentaireRepository commentaireRepository;
     private final NoteRepository        noteRepository;

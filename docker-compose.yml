@@ -1,7 +1,6 @@
 version: "3.9"
 services:
 
-  # ── Frontend Angular ────────────────────────────────────────────────────────
   angular:
     build:
       context: ./9raiti
@@ -15,7 +14,6 @@ services:
     networks:
       - elearning-net
 
-  # ── API Gateway ─────────────────────────────────────────────────────────────
   api-gateway:
     build:
       context: ./ApiGateway/ApiGateway
@@ -31,7 +29,6 @@ services:
     networks:
       - elearning-net
 
-  # ── Microservice .NET (Utilisateurs) ────────────────────────────────────────
   dotnet-service:
     build:
       context: ./MicroServiceDotNet/MicroServiceDotNet
@@ -47,7 +44,6 @@ services:
     networks:
       - elearning-net
 
-  # ── Microservice Spring Boot (Cours + Quiz AI) ──────────────────────────────
   spring-service:
     build:
       context: ./MicroServiceSpring
@@ -60,9 +56,7 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/GestionCours
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=REMOVED_PASSWORD
-      # Kafka : pointe vers le broker Docker (Bug #5 fix)
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-      # MinIO : surcharge l'application.properties
       - MINIO_URL=http://minio-service:9000
       - MINIO_ACCESS_KEY=minioadmin
       - MINIO_SECRET_KEY=REMOVED_PASSWORD
@@ -79,7 +73,6 @@ services:
     networks:
       - elearning-net
 
-  # ── Microservice Notification (Spring Boot) ─────────────────────────────────
   notification-service:
     build:
       context: ./MicroServiceNotification
@@ -87,36 +80,35 @@ services:
     container_name: notification-service
     restart: on-failure
     ports:
-      - "8083:8083"    # Exposé directement pour les SSE (bypass Ocelot)
+      - "8083:8083"
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://notification-postgres:5432/GestionNotification
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=REMOVED_PASSWORD
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
     depends_on:
-      notification-postgres:
-        condition: service_healthy
-      kafka:
-        condition: service_started
+      - notification-postgres
+      - kafka
     networks:
       - elearning-net
 
-  
   ai-service:
     build:
       context: ./MicroServiceIA
     container_name: ai-service
     ports:
       - "8000:8000"
+    volumes:
+      - ai-model-data:/app
     networks:
       - elearning-net
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 30s
 
-  # ── MinIO (Object Storage) ───────────────────────────────────────────────────
   minio-service:
     image: minio/minio:latest
     container_name: minio-service
@@ -156,14 +148,18 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      # Important pour Docker
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     networks:
       - elearning-net
+    healthcheck:
+      test: ["CMD", "kafka-topics", "--bootstrap-server", "localhost:9092", "--list"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
-  # ── SQL Server (Utilisateurs) ────────────────────────────────────────────────
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: sqlserver
@@ -185,7 +181,6 @@ services:
       retries: 10
       start_period: 30s
 
-  # ── PostgreSQL (Cours) ───────────────────────────────────────────────────────
   postgres:
     image: postgres:15
     container_name: postgres
@@ -206,7 +201,6 @@ services:
       retries: 5
       start_period: 10s
 
-  # ── PostgreSQL (Notifications) ───────────────────────────────────────────────
   notification-postgres:
     image: postgres:15
     container_name: notification-postgres
@@ -215,7 +209,7 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=REMOVED_PASSWORD
     ports:
-      - "5434:5432"    # Bug #3 fix : port hôte 5434 (5433 était deja pris par postgres)
+      - "5434:5432"
     volumes:
       - notification-postgres-data:/var/lib/postgresql/data
     networks:
@@ -236,3 +230,4 @@ volumes:
   postgres-data:
   notification-postgres-data:
   minio-data:
+  ai-model-data:
