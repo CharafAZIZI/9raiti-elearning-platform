@@ -36,8 +36,14 @@ services:
     container_name: dotnet-service
     restart: on-failure
     environment:
+      environment:
       - ASPNETCORE_URLS=http://+:5000
-      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=GestionUtilisateurs;User Id=sa;Password=REMOVED_PASSWORD;TrustServerCertificate=True;
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=GestionUtilisateurs;User Id=sa;Password=${SQLSERVER_PASSWORD};TrustServerCertificate=True;
+      - Jwt__Key=${JWT_SECRET}
+      - SmtpSettings__Username=${SMTP_USERNAME}
+      - SmtpSettings__From=${SMTP_USERNAME}
+      - SmtpSettings__SenderEmail=${SMTP_USERNAME}
+      - SmtpSettings__Password=${SMTP_PASSWORD}
     depends_on:
       sqlserver:
         condition: service_healthy
@@ -55,14 +61,16 @@ services:
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/GestionCours
       - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=REMOVED_PASSWORD
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
       - MINIO_URL=http://minio-service:9000
       - MINIO_ACCESS_KEY=minioadmin
-      - MINIO_SECRET_KEY=REMOVED_PASSWORD
+      - MINIO_SECRET_KEY=${MINIO_PASSWORD}
       - MINIO_BUCKET=cours
       - MINIO_PUBLIC_URL=http://localhost:9002
-      - GROQ_API_KEY=REMOVED_GROQ_KEY
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
     depends_on:
       postgres:
         condition: service_healthy
@@ -86,6 +94,8 @@ services:
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=REMOVED_PASSWORD
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - DB_PASSWORD=${DB_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
     depends_on:
       notification-postgres:
         condition: service_healthy
